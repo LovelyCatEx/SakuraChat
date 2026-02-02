@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="LICENSE" pattern="src:*..*||test:com.lovelycatv.sakurachat.*" />
+</component>

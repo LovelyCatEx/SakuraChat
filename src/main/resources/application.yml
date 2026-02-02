@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: SakuraChat
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/sakurachat?serverTimezone=${MYSQL_TIMEZONE:Asia/Shanghai}&useUnicode=true&characterEncoding=UTF-8&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+    database-platform: org.hibernate.dialect.MySQLDialect
+    database: mysql
+    open-in-view: false
+shiro:
+  ws:
+    server:
+      enable: true
+      url: '/ws/v1/napcat'
+  plugin-list: com.lovelycatv.sakurachat.napcat.NapCatBotPlugin
+server:
+  port: 8080
