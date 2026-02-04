@@ -14,4 +14,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface ThirdPartyAccountRepository : JpaRepository<ThirdPartyAccountEntity, Long> {
+    fun getByAccountIdAndPlatform(accountId: String, platformId: Int): ThirdPartyAccountEntity?
 }

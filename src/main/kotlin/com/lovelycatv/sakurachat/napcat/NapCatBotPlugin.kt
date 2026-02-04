@@ -8,10 +8,16 @@
 
 package com.lovelycatv.sakurachat.napcat
 
+import com.lovelycatv.sakurachat.entity.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.entity.napcat.NapCatGroupMessageEntity
 import com.lovelycatv.sakurachat.entity.napcat.NapCatPrivateMessageEntity
+import com.lovelycatv.sakurachat.repository.AgentThirdPartyAccountRelationRepository
 import com.lovelycatv.sakurachat.repository.NapCatGroupMessageRepository
 import com.lovelycatv.sakurachat.repository.NapCatPrivateMessageRepository
+import com.lovelycatv.sakurachat.repository.ThirdPartyAccountRepository
+import com.lovelycatv.sakurachat.service.AgentService
+import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
+import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import com.lovelycatv.sakurachat.utils.EncryptUtils
 import com.lovelycatv.sakurachat.utils.SnowIdGenerator
 import com.lovelycatv.vertex.log.logger
@@ -25,7 +31,9 @@ import org.springframework.stereotype.Component
 class NapCatBotPlugin(
     private val napcatPrivateMessageRepository: NapCatPrivateMessageRepository,
     private val napCatGroupMessageRepository: NapCatGroupMessageRepository,
-    private val snowIdGenerator: SnowIdGenerator
+    private val snowIdGenerator: SnowIdGenerator,
+    private val thirdPartyAccountService: ThirdPartyAccountService,
+    private val agentService: AgentService
 ) : BotPlugin() {
     private val logger = logger()
 
@@ -43,6 +51,29 @@ class NapCatBotPlugin(
         )
 
         logger.info("Private message sent to bot ${bot.selfId} has been received and saved, message: $event")
+
+        // Make sure the bot has been registered to 3rd party account table
+        thirdPartyAccountService.getOrAddAccount(
+            ThirdPartyPlatform.OICQ,
+            bot
+        )
+
+        // Make sure the message sender has been registered to 3rd party account table
+        thirdPartyAccountService.getOrAddAccount(
+            ThirdPartyPlatform.OICQ,
+            event.privateSender
+        )
+
+        val relatedAgent = agentService.getAgentByThirdPartyAccount(
+            ThirdPartyPlatform.OICQ,
+            bot.selfId.toString()
+        )
+
+        if (relatedAgent == null) {
+            logger.warn("Cannot find related agent for OICQ Bot Account: ${bot.selfId}")
+        } else {
+            // MESSAGE CHANNEL
+        }
 
         return super.onPrivateMessage(bot, event)
     }

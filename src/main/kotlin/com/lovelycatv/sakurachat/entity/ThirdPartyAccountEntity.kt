@@ -8,6 +8,7 @@
 
 package com.lovelycatv.sakurachat.entity
 
+import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
@@ -18,17 +19,20 @@ import jakarta.persistence.Table
 data class ThirdPartyAccountEntity(
     @Id
     @Column(name = "id", nullable = false)
-    val id: Long,
+    var id: Long = 0,
     @Column(name = "account_id", nullable = false, length = 64)
-    var accountId: String? = null,
+    var accountId: String = "",
     @Column(name = "nickname", nullable = false, length = 256)
-    var nickname: String? = null,
+    var nickname: String = "",
     @Column(name = "platform", nullable = false)
-    var platform: Int? = null,
+    var platform: Int = 0,
     @Column(name = "created_time", nullable = false)
-    var createdTime: Long? = null,
+    var createdTime: Long = System.currentTimeMillis(),
     @Column(name = "modified_time", nullable = false)
-    var modifiedTime: Long? = null,
+    var modifiedTime: Long = System.currentTimeMillis(),
     @Column(name = "deleted_time")
     var deletedTime: Long? = null,
-)
+) {
+    fun getPlatformType() = ThirdPartyPlatform.getByPlatformId(this.platform)
+        ?: throw IllegalArgumentException("Third Party Platform ${this.platform} Not Found")
+}

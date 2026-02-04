@@ -1,0 +1,32 @@
+/*
+ * Copyright 2026 lovelycat
+ *
+ * Use of this source code is governed by the Apache License, Version 2.0,
+ * that can be found in the LICENSE file.
+ *
+ */
+
+package com.lovelycatv.sakurachat.adapters
+
+import com.lovelycatv.sakurachat.entity.ThirdPartyAccountEntity
+import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
+import com.mikuac.shiro.core.Bot
+import org.springframework.stereotype.Component
+
+@Component
+class OICQAccountAdapter : ThirdPartyAccountAdapter<Bot> {
+    override fun getPlatform(): ThirdPartyPlatform {
+        return ThirdPartyPlatform.OICQ
+    }
+
+    override fun getThirdPartyAccountClass(): Class<Bot> {
+        return Bot::class.java
+    }
+
+    override fun transform(thirdPartyAccount: Bot): ThirdPartyAccountEntity {
+        return ThirdPartyAccountEntity(
+            accountId = thirdPartyAccount.selfId.toString(),
+            nickname = thirdPartyAccount.selfId.toString(),
+        )
+    }
+}
