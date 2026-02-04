@@ -17,6 +17,9 @@ target/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
+.idea/runConfigurations/
+.idea/dictionaries/
+.idea/db-forest-config.xml
 .run
 *.iws
 *.iml

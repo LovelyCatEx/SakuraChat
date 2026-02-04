@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 lovelycat
+ * Copyright 2026 lovelycat
  *
  * Use of this source code is governed by the Apache License, Version 2.0,
  * that can be found in the LICENSE file.
@@ -14,21 +14,11 @@ import jakarta.persistence.Id
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "agents")
-data class AgentEntity(
+@Table(name = "im_channels")
+data class IMChannelEntity(
     @Id
     @Column(name = "id", nullable = false)
     val id: Long? = null,
-    @Column(name = "name", length = 32, nullable = false, unique = true)
-    val name: String = "",
-    @Column(name = "description", length = 512, nullable = true)
-    val description: String? = null,
-    @Column(name = "prompt", nullable = false)
-    val prompt: String = "",
-    @Column(name = "user_id", nullable = false)
-    val userId: Long = 0,
-    @Column(name = "chat_model_id", nullable = false)
-    val chatModelId: Long = 0,
     @Column(name = "created_time", nullable = false)
     val createdTime: Long = System.currentTimeMillis(),
     @Column(name = "modified_time", nullable = false)
