@@ -20,9 +20,9 @@ data class ChatModelEntity(
     @Column(name = "id", nullable = false)
     val id: Long? = null,
     @Column(name = "name", length = 64, nullable = false, unique = true)
-    private val name: String = "",
+    val name: String = "",
     @Column(name = "description", length = 512, nullable = true)
-    private val description: String? = null,
+    val description: String? = null,
     @Column(name = "provider_id", nullable = false)
     val providerId: Long = 0,
     @Column(name = "qualified_name", length = 256, nullable = false)

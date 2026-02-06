@@ -10,9 +10,11 @@ package com.lovelycatv.sakurachat.service.impl
 
 import com.lovelycatv.sakurachat.entity.AgentEntity
 import com.lovelycatv.sakurachat.entity.ThirdPartyAccountEntity
+import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.repository.AgentRepository
 import com.lovelycatv.sakurachat.repository.AgentThirdPartyAccountRelationRepository
 import com.lovelycatv.sakurachat.service.AgentService
+import com.lovelycatv.sakurachat.service.ChatModelService
 import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import com.lovelycatv.vertex.log.logger
@@ -22,7 +24,8 @@ import org.springframework.stereotype.Service
 class AgentServiceImpl(
     private val agentRepository: AgentRepository,
     private val thirdPartyAccountService: ThirdPartyAccountService,
-    private val agentThirdPartyAccountRelationRepository: AgentThirdPartyAccountRelationRepository
+    private val agentThirdPartyAccountRelationRepository: AgentThirdPartyAccountRelationRepository,
+    private val chatModelService: ChatModelService
 ) : AgentService {
     private val logger = logger()
 
@@ -64,5 +67,12 @@ class AgentServiceImpl(
             .findAllById(relatedThirdPartyAccountEntityIds)
 
         return accounts.groupBy { it.getPlatformType() }
+    }
+
+    override fun toAggregatedAgentEntity(agent: AgentEntity): AggregatedAgentEntity {
+        return AggregatedAgentEntity(
+            agent = agent,
+            chatModel = chatModelService.getAggregatedChatModelEntityById(agent.chatModelId)
+        )
     }
 }

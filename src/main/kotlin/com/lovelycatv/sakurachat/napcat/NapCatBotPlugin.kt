@@ -20,12 +20,14 @@ import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import com.lovelycatv.sakurachat.utils.EncryptUtils
 import com.lovelycatv.sakurachat.utils.SnowIdGenerator
+import com.lovelycatv.sakurachat.utils.toJSONString
 import com.lovelycatv.vertex.log.logger
 import com.mikuac.shiro.core.Bot
 import com.mikuac.shiro.core.BotPlugin
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent
 import com.mikuac.shiro.dto.event.message.PrivateMessageEvent
 import org.springframework.stereotype.Component
+import kotlin.math.log
 
 @Component
 class NapCatBotPlugin(
@@ -72,6 +74,9 @@ class NapCatBotPlugin(
         if (relatedAgent == null) {
             logger.warn("Cannot find related agent for OICQ Bot Account: ${bot.selfId}")
         } else {
+            val agent = agentService.toAggregatedAgentEntity(relatedAgent)
+            logger.info("Agent ${agent.agent.name} found for handling this private message: ${event.message}")
+            logger.info("Agent: ${agent.toJSONString()}")
             // MESSAGE CHANNEL
         }
 
