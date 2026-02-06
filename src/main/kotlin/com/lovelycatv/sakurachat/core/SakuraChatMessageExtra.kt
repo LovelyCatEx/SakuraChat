@@ -12,25 +12,30 @@ import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
-class SakuraChatMessageExtra(platform: ThirdPartyPlatform) : ExtraBody() {
+data class SakuraChatMessageExtra(
+    val platform: ThirdPartyPlatform,
+    val platformAccountId: String
+) : ExtraBody() {
     companion object {
         const val KEY_PLATFORM = "platform"
+        const val KEY_PLATFORM_ACCOUNT_ID = "platform_account_id"
 
         @OptIn(ExperimentalContracts::class)
-        fun isCapable(body: ExtraBody): Boolean {
+        fun isCapable(body: ExtraBody?): Boolean {
             contract {
                 returns(true) implies (body is SakuraChatMessageExtra)
             }
 
-            return body.contains(KEY_PLATFORM) && body.getInt(KEY_PLATFORM)!! >= 0
+            return body != null && body.contains(KEY_PLATFORM) && body.getInt(KEY_PLATFORM)!! >= 0
         }
     }
 
     init {
         this[KEY_PLATFORM] = platform.platformId
+        this[KEY_PLATFORM_ACCOUNT_ID] = platformAccountId
     }
 
-    fun getPlatform(): ThirdPartyPlatform {
+    fun getPlatformType(): ThirdPartyPlatform {
         return ThirdPartyPlatform.getByPlatformId(this.getInt(KEY_PLATFORM)!!)!!
     }
 }

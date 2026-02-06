@@ -12,6 +12,11 @@ import com.lovelycatv.sakurachat.core.SakuraChatAgentInstanceManager
 import com.lovelycatv.sakurachat.core.SakuraChatMessageExtra
 import com.lovelycatv.sakurachat.core.SakuraChatUser
 import com.lovelycatv.sakurachat.core.SakuraChatUserInstanceManager
+import com.lovelycatv.sakurachat.core.im.channel.IMessageChannel
+import com.lovelycatv.sakurachat.core.im.channel.IMessageChannelMember
+import com.lovelycatv.sakurachat.core.im.channel.MessageChannelListener
+import com.lovelycatv.sakurachat.core.im.channel.SakuraChatMessageChannel
+import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
 import com.lovelycatv.sakurachat.core.im.message.TextMessage
 import com.lovelycatv.sakurachat.daemon.SakuraChatAgentDaemon
 import com.lovelycatv.sakurachat.entity.napcat.NapCatGroupMessageEntity
@@ -101,25 +106,80 @@ class NapCatBotPlugin(
 
                     // Find the private message channel
                     val privateMessageChannel = sakuraChatAgentDaemon.getPrivateMessageChannel(
-                        agent.agent.id!!,
-                        relatedUser.id!!,
-                        with(sakuraChatAgentInstanceManager) {
-                            getAgent(agent.agent.id!!) ?: addAgent(agent)
+                        agent,
+                        relatedUser,
+                        object : MessageChannelListener {
+                            override fun onPrivateMessage(
+                                channel: IMessageChannel,
+                                sender: IMessageChannelMember,
+                                message: AbstractMessage
+                            ) {
+                                println("Agent ${agent.agent.id} received message: ${message.toJSONString()}")
+
+                                coroutineScope.launch {
+                                    channel.sendPrivateMessage(
+                                        if (channel is SakuraChatMessageChannel)
+                                            channel.getAgentMember(agent.agent.id!!)!!
+                                        else
+                                            channel.getMemberById("agent_" + agent.agent.id!!)!!,
+                                        sender,
+                                        message
+                                    )
+                                }
+                            }
+
+                            override fun onGroupMessage(
+                                channel: IMessageChannel,
+                                sender: IMessageChannelMember,
+                                message: AbstractMessage
+                            ) {
+
+                            }
                         },
-                        with(sakuraChatUserInstanceManager) {
-                            getUser(relatedUser.id!!) ?: addUser(relatedUser)
+                        object : MessageChannelListener {
+                            override fun onPrivateMessage(
+                                channel: IMessageChannel,
+                                sender: IMessageChannelMember,
+                                message: AbstractMessage
+                            ) {
+                                println("User ${relatedUser.id} received message from sender ${sender.memberId}: ${message.toJSONString()}")
+                                if (SakuraChatMessageExtra.isCapable(message.extraBody)) {
+                                    when (message.extraBody.getPlatformType()) {
+                                        ThirdPartyPlatform.OICQ -> {
+                                            if (message is TextMessage) {
+                                                bot.sendPrivateMsg(message.extraBody.platformAccountId.toLong(), message.message, true)
+                                            } else {
+                                                bot.sendPrivateMsg(message.extraBody.platformAccountId.toLong(), message.toJSONString(), true)
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    logger.warn("User ${relatedUser.id} received a message but not seem like a valid SakuraChat Message, data: ${message.toJSONString()}")
+                                }
+                            }
+
+                            override fun onGroupMessage(
+                                channel: IMessageChannel,
+                                sender: IMessageChannelMember,
+                                message: AbstractMessage
+                            ) {
+
+                            }
                         }
                     )
 
                     privateMessageChannel.sendPrivateMessage(
-                        sender = privateMessageChannel.getMemberById(agent.agent.id!!)
-                            ?: throw IllegalArgumentException("Member agent: ${agent.agent.id} is not in channel ${privateMessageChannel.getChannelIdentifier()}"),
-                        receiver = privateMessageChannel.getMemberById(relatedUser.id!!)
+                        sender = privateMessageChannel.getUserMember(relatedUser.id!!)
                             ?: throw IllegalArgumentException("Member user: ${relatedUser.id} is not in channel ${privateMessageChannel.getChannelIdentifier()}"),
-                        TextMessage(
-                            sequence = System.currentTimeMillis(),
-                            message = event.message,
-                            extraBody = SakuraChatMessageExtra(ThirdPartyPlatform.OICQ)
+                        receiver = privateMessageChannel.getAgentMember(agent.agent.id!!)
+                            ?: throw IllegalArgumentException("Member agent: ${agent.agent.id} is not in channel ${privateMessageChannel.getChannelIdentifier()}"),
+                        message = TextMessage(
+                             sequence = System.currentTimeMillis(),
+                             message = event.message,
+                             extraBody = SakuraChatMessageExtra(
+                                 ThirdPartyPlatform.OICQ,
+                                 event.privateSender.userId.toString()
+                             )
                         )
                     )
                 }

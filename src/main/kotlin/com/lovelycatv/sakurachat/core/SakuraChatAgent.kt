@@ -14,7 +14,7 @@ import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 class SakuraChatAgent(
     val agent: AggregatedAgentEntity
 ) : IMessageChannelMember {
-    override val memberId: Long get() = this.agent.agent.id!!
+    override val memberId: String get() = "agent_" + this.agent.agent.id!!
 
 
 }

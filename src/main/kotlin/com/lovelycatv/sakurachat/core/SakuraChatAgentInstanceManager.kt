@@ -13,10 +13,10 @@ import org.springframework.stereotype.Component
 
 @Component
 class SakuraChatAgentInstanceManager {
-    private val instances = mutableMapOf<Long, SakuraChatAgent>()
+    private val instances = mutableMapOf<String, SakuraChatAgent>()
 
     fun getAgent(agentId: Long): SakuraChatAgent? {
-        return instances[agentId]
+        return instances["agent_$agentId"]
     }
 
     fun addAgent(agent: SakuraChatAgent): SakuraChatAgent {

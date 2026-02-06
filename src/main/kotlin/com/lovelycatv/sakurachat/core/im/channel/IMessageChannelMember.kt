@@ -9,5 +9,5 @@
 package com.lovelycatv.sakurachat.core.im.channel
 
 interface IMessageChannelMember {
-    val memberId: Long
+    val memberId: String
 }

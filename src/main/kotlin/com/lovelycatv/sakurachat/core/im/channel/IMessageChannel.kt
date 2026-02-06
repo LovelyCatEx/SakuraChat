@@ -13,13 +13,13 @@ import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
 interface IMessageChannel {
     fun getChannelIdentifier(): Long
 
-    fun addMember(member: IMessageChannelMember)
+    fun addMember(member: IMessageChannelMember): IMessageChannelMember
 
-    fun removeMember(member: IMessageChannelMember)
+    fun removeMember(member: IMessageChannelMember): Boolean
 
     fun listMembers(): List<IMessageChannelMember>
 
-    fun getMemberById(id: Long): IMessageChannelMember?
+    fun getMemberById(id: String): IMessageChannelMember?
 
     suspend fun sendPrivateMessage(
         sender: IMessageChannelMember,

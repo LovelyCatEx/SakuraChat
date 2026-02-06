@@ -20,21 +20,23 @@ abstract class AbstractMessageChannel(
 
     override fun getChannelIdentifier(): Long = this.channelId
 
-    override fun addMember(member: IMessageChannelMember) {
+    override fun addMember(member: IMessageChannelMember): IMessageChannelMember {
         if (this.getMemberById(member.memberId) == null) {
             this.members.add(member)
         }
+
+        return member
     }
 
-    override fun removeMember(member: IMessageChannelMember) {
-        this.members.remove(member)
+    override fun removeMember(member: IMessageChannelMember): Boolean {
+        return this.members.remove(member)
     }
 
     override fun listMembers(): List<IMessageChannelMember> {
         return this.members
     }
 
-    override fun getMemberById(id: Long): IMessageChannelMember? {
+    override fun getMemberById(id: String): IMessageChannelMember? {
         return this.listMembers().find { it.memberId == id }
     }
 
@@ -43,6 +45,9 @@ abstract class AbstractMessageChannel(
         receiver: IMessageChannelMember,
         message: AbstractMessage
     ): Boolean {
+        if (sender == receiver) {
+            throw IllegalArgumentException("Sender and receiver cannot be the same, senderMemberId: ${sender.memberId}")
+        }
         return try {
             this.getListeners(receiver).forEach {
                 it.onPrivateMessage(this, sender, message)

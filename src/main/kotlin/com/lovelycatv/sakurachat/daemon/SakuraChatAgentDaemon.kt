@@ -8,15 +8,17 @@
 
 package com.lovelycatv.sakurachat.daemon
 
+import com.lovelycatv.sakurachat.core.SakuraChatAgentInstanceManager
+import com.lovelycatv.sakurachat.core.SakuraChatUserInstanceManager
 import com.lovelycatv.sakurachat.core.im.channel.IMessageChannel
 import com.lovelycatv.sakurachat.core.im.channel.IMessageChannelMember
 import com.lovelycatv.sakurachat.core.im.channel.MessageChannelListener
-import com.lovelycatv.sakurachat.core.im.channel.SimpleMessageChannel
+import com.lovelycatv.sakurachat.core.im.channel.SakuraChatMessageChannel
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
-import com.lovelycatv.sakurachat.repository.AgentChannelRelationRepository
+import com.lovelycatv.sakurachat.entity.UserEntity
+import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.repository.AgentRepository
 import com.lovelycatv.sakurachat.service.IMChannelService
-import com.lovelycatv.sakurachat.utils.toJSONString
 import com.lovelycatv.vertex.log.logger
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -24,62 +26,73 @@ import org.springframework.stereotype.Component
 @Component
 class SakuraChatAgentDaemon(
     private val agentRepository: AgentRepository,
-    private val imChannelService: IMChannelService
+    private val imChannelService: IMChannelService,
+    private val sakuraChatAgentInstanceManager: SakuraChatAgentInstanceManager,
+    private val sakuraChatUserInstanceManager: SakuraChatUserInstanceManager
 ) {
     private val logger = logger()
 
-    private val privateChannels: MutableMap<Long, MutableMap<Long, IMessageChannel>> = mutableMapOf()
+    private val privateChannels: MutableMap<Long, MutableMap<Long, SakuraChatMessageChannel>> = mutableMapOf()
 
     suspend fun getPrivateMessageChannel(
-        agentId: Long,
-        userId: Long,
-        agentMember: IMessageChannelMember,
-        userMember: IMessageChannelMember
-    ): IMessageChannel {
+        agent: AggregatedAgentEntity,
+        user: UserEntity,
+        agentListener: MessageChannelListener = object : MessageChannelListener {
+            override fun onPrivateMessage(
+                channel: IMessageChannel,
+                sender: IMessageChannelMember,
+                message: AbstractMessage
+            ) {
+                logger.warn("Agent ${agent.agent.id} is not listening the channel ${channel.getChannelIdentifier()} on private messages")
+            }
+            override fun onGroupMessage(
+                channel: IMessageChannel,
+                sender: IMessageChannelMember,
+                message: AbstractMessage
+            ) {
+                logger.warn("Agent ${agent.agent.id} is not listening the channel ${channel.getChannelIdentifier()} on group messages")
+            }
+        },
+        userListener: MessageChannelListener = object : MessageChannelListener {
+            override fun onPrivateMessage(
+                channel: IMessageChannel,
+                sender: IMessageChannelMember,
+                message: AbstractMessage
+            ) {
+                logger.warn("User ${agent.agent.id} is not listening the channel ${channel.getChannelIdentifier()} on private messages")
+            }
+            override fun onGroupMessage(
+                channel: IMessageChannel,
+                sender: IMessageChannelMember,
+                message: AbstractMessage
+            ) {
+                logger.warn("User ${agent.agent.id} is not listening the channel ${channel.getChannelIdentifier()} on group messages")
+            }
+        }
+    ): SakuraChatMessageChannel {
+        val agentId = agent.agent.id!!
+        val userId = user.id!!
         return privateChannels[agentId]?.get(userId) ?: run {
             val channel = imChannelService.getOrCreateChannelByUserIdAndAgentId(userId, agentId)
 
-            SimpleMessageChannel(
+            SakuraChatMessageChannel(
                 channelId = channel.id
             ).also {
-                it.addMember(agentMember)
-                it.addMember(userMember)
-
-                it.registerListener(agentMember, object : MessageChannelListener {
-                    override fun onPrivateMessage(
-                        channel: IMessageChannel,
-                        sender: IMessageChannelMember,
-                        message: AbstractMessage
-                    ) {
-                        println("Agent $agentId received message: ${message.toJSONString()}")
+                val agentMember = it.addMember(
+                    with(sakuraChatAgentInstanceManager) {
+                        getAgent(agentId) ?: addAgent(agent)
                     }
+                )
 
-                    override fun onGroupMessage(
-                        channel: IMessageChannel,
-                        sender: IMessageChannelMember,
-                        message: AbstractMessage
-                    ) {
-
+                val userMember = it.addMember(
+                    with(sakuraChatUserInstanceManager) {
+                        getUser(userId) ?: addUser(user)
                     }
-                })
+                )
 
-                it.registerListener(userMember, object : MessageChannelListener {
-                    override fun onPrivateMessage(
-                        channel: IMessageChannel,
-                        sender: IMessageChannelMember,
-                        message: AbstractMessage
-                    ) {
-                        println("User $userId received message: ${message.toJSONString()}")
-                    }
+                it.registerListener(agentMember, agentListener)
 
-                    override fun onGroupMessage(
-                        channel: IMessageChannel,
-                        sender: IMessageChannelMember,
-                        message: AbstractMessage
-                    ) {
-
-                    }
-                })
+                it.registerListener(userMember, userListener)
 
                 privateChannels.getOrPut(agentId) {
                     mutableMapOf()

@@ -14,6 +14,6 @@ import com.lovelycatv.sakurachat.entity.UserEntity
 class SakuraChatUser(
     val user: UserEntity
 ) : IMessageChannelMember {
-    override val memberId: Long
-        get() = this.user.id!!
+    override val memberId: String
+        get() = "user_" + this.user.id!!
 }
