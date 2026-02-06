@@ -8,7 +8,7 @@
 
 package com.lovelycatv.sakurachat.repository
 
-import com.lovelycatv.sakurachat.entity.ThirdPartyAccountEntity
+import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 

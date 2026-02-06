@@ -6,23 +6,36 @@
  *
  */
 
-package com.lovelycatv.sakurachat.entity
+package com.lovelycatv.sakurachat.entity.channel
 
+import com.lovelycatv.sakurachat.types.ChannelType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Size
+import org.hibernate.annotations.ColumnDefault
 
 @Entity
 @Table(name = "im_channels")
 data class IMChannelEntity(
     @Id
     @Column(name = "id", nullable = false)
-    val id: Long? = null,
+    val id: Long = 0,
+    @Column(name = "channel_name", nullable = false, length = 64)
+    var channelName: String = "",
+    @ColumnDefault("0")
+    @Column(name = "channel_type", nullable = false)
+    var channelType: Int = ChannelType.PRIVATE.channelTypeId,
     @Column(name = "created_time", nullable = false)
     val createdTime: Long = System.currentTimeMillis(),
     @Column(name = "modified_time", nullable = false)
     val modifiedTime: Long = System.currentTimeMillis(),
     @Column(name = "deleted_time", nullable = true)
     val deletedTime: Long? = null
-)
+) {
+    fun getRealChannelType(): ChannelType {
+        return ChannelType.getByChannelTypeId(this.channelType)!!
+    }
+}

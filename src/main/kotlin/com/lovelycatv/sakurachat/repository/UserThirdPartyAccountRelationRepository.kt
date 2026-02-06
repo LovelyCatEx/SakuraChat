@@ -8,11 +8,13 @@
 
 package com.lovelycatv.sakurachat.repository
 
-import com.lovelycatv.sakurachat.entity.UserThirdPartyAccountRelationEntity
+import com.lovelycatv.sakurachat.entity.thirdparty.UserThirdPartyAccountRelationEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
+import org.springframework.stereotype.Repository
 
+@Repository
 interface UserThirdPartyAccountRelationRepository : JpaRepository<UserThirdPartyAccountRelationEntity, UserThirdPartyAccountRelationEntity.PrimaryKey> {
     @Query("SELECT r FROM UserThirdPartyAccountRelationEntity r WHERE r.primaryKey.userId = :userId")
     fun findByAgentId(@Param("userId") userId: Long): List<UserThirdPartyAccountRelationEntity>

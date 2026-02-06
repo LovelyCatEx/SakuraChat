@@ -9,12 +9,11 @@
 package com.lovelycatv.sakurachat.core
 
 import com.lovelycatv.sakurachat.core.im.channel.IMessageChannelMember
-import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
+import com.lovelycatv.sakurachat.entity.UserEntity
 
-class SakuraChatAgent(
-    val agent: AggregatedAgentEntity
+class SakuraChatUser(
+    val user: UserEntity
 ) : IMessageChannelMember {
-    override val memberId: Long get() = this.agent.agent.id!!
-
-
+    override val memberId: Long
+        get() = this.user.id!!
 }

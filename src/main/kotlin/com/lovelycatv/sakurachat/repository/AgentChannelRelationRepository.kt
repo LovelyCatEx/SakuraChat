@@ -8,11 +8,13 @@
 
 package com.lovelycatv.sakurachat.repository
 
-import com.lovelycatv.sakurachat.entity.AgentChannelRelationEntity
+import com.lovelycatv.sakurachat.entity.channel.AgentChannelRelationEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
+import org.springframework.stereotype.Repository
 
+@Repository
 interface AgentChannelRelationRepository : JpaRepository<AgentChannelRelationEntity, AgentChannelRelationEntity.PrimaryKey> {
     @Query("SELECT r FROM AgentChannelRelationEntity r WHERE r.primaryKey.agentId = :agentId")
     fun findByAgentId(@Param("agentId") agentId: Long): List<AgentChannelRelationEntity>

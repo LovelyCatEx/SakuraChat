@@ -8,7 +8,7 @@
 
 package com.lovelycatv.sakurachat.repository
 
-import com.lovelycatv.sakurachat.entity.IMChannelEntity
+import com.lovelycatv.sakurachat.entity.channel.IMChannelEntity
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface IMChannelRepository : JpaRepository<IMChannelEntity, Long> {

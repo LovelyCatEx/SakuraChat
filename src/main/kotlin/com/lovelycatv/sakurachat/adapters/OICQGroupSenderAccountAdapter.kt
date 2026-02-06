@@ -8,11 +8,9 @@
 
 package com.lovelycatv.sakurachat.adapters
 
-import com.lovelycatv.sakurachat.entity.ThirdPartyAccountEntity
+import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
-import com.mikuac.shiro.core.Bot
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent
-import com.mikuac.shiro.dto.event.message.PrivateMessageEvent
 import org.springframework.stereotype.Component
 
 @Component

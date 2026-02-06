@@ -8,7 +8,7 @@
 
 package com.lovelycatv.sakurachat.core
 
-class ExtraBody(
+open class ExtraBody(
     from: Map<String, Any?> = mapOf()
 ) : MutableMap<String, Any?> by from.toMutableMap() {
     fun getExtraBody(key: String): ExtraBody? {

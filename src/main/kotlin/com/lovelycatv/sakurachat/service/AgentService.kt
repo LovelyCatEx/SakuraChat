@@ -9,7 +9,7 @@
 package com.lovelycatv.sakurachat.service
 
 import com.lovelycatv.sakurachat.entity.AgentEntity
-import com.lovelycatv.sakurachat.entity.ThirdPartyAccountEntity
+import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.repository.AgentRepository
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform

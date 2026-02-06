@@ -6,7 +6,7 @@
  *
  */
 
-package com.lovelycatv.sakurachat.entity
+package com.lovelycatv.sakurachat.entity.thirdparty
 
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import jakarta.persistence.Column

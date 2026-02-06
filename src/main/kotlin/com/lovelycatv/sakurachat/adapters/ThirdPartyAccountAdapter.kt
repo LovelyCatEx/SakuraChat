@@ -8,7 +8,7 @@
 
 package com.lovelycatv.sakurachat.adapters
 
-import com.lovelycatv.sakurachat.entity.ThirdPartyAccountEntity
+import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 
 interface ThirdPartyAccountAdapter<I: Any> {

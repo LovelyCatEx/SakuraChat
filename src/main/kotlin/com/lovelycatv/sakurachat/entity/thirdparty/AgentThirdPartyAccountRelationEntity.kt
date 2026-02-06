@@ -6,20 +6,20 @@
  *
  */
 
-package com.lovelycatv.sakurachat.entity
+package com.lovelycatv.sakurachat.entity.thirdparty
 
 import jakarta.persistence.*
 
 @Entity
-@Table(name = "user_third_party_account_relations")
-data class UserThirdPartyAccountRelationEntity(
+@Table(name = "agent_third_party_account_relations")
+data class AgentThirdPartyAccountRelationEntity(
     @EmbeddedId
     val primaryKey: PrimaryKey
 ) {
     @Embeddable
     data class PrimaryKey(
-        @Column(name = "user_id", nullable = false)
-        val userId: Long,
+        @Column(name = "agent_id", nullable = false)
+        val agentId: Long,
         @Column(name = "third_party_account_id", nullable = false)
         val thirdPartyAccountId: Long
     )

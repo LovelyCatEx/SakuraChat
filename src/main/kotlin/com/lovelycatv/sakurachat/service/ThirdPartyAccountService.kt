@@ -8,7 +8,7 @@
 
 package com.lovelycatv.sakurachat.service
 
-import com.lovelycatv.sakurachat.entity.ThirdPartyAccountEntity
+import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.repository.ThirdPartyAccountRepository
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 

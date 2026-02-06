@@ -8,15 +8,19 @@
 
 package com.lovelycatv.sakurachat.napcat
 
-import com.lovelycatv.sakurachat.entity.ThirdPartyAccountEntity
+import com.lovelycatv.sakurachat.core.SakuraChatAgentInstanceManager
+import com.lovelycatv.sakurachat.core.SakuraChatMessageExtra
+import com.lovelycatv.sakurachat.core.SakuraChatUser
+import com.lovelycatv.sakurachat.core.SakuraChatUserInstanceManager
+import com.lovelycatv.sakurachat.core.im.message.TextMessage
+import com.lovelycatv.sakurachat.daemon.SakuraChatAgentDaemon
 import com.lovelycatv.sakurachat.entity.napcat.NapCatGroupMessageEntity
 import com.lovelycatv.sakurachat.entity.napcat.NapCatPrivateMessageEntity
-import com.lovelycatv.sakurachat.repository.AgentThirdPartyAccountRelationRepository
 import com.lovelycatv.sakurachat.repository.NapCatGroupMessageRepository
 import com.lovelycatv.sakurachat.repository.NapCatPrivateMessageRepository
-import com.lovelycatv.sakurachat.repository.ThirdPartyAccountRepository
 import com.lovelycatv.sakurachat.service.AgentService
 import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
+import com.lovelycatv.sakurachat.service.UserService
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import com.lovelycatv.sakurachat.utils.EncryptUtils
 import com.lovelycatv.sakurachat.utils.SnowIdGenerator
@@ -26,8 +30,10 @@ import com.mikuac.shiro.core.Bot
 import com.mikuac.shiro.core.BotPlugin
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent
 import com.mikuac.shiro.dto.event.message.PrivateMessageEvent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.springframework.stereotype.Component
-import kotlin.math.log
 
 @Component
 class NapCatBotPlugin(
@@ -35,49 +41,89 @@ class NapCatBotPlugin(
     private val napCatGroupMessageRepository: NapCatGroupMessageRepository,
     private val snowIdGenerator: SnowIdGenerator,
     private val thirdPartyAccountService: ThirdPartyAccountService,
-    private val agentService: AgentService
+    private val agentService: AgentService,
+    private val userService: UserService,
+    private val sakuraChatAgentDaemon: SakuraChatAgentDaemon,
+    private val sakuraChatAgentInstanceManager: SakuraChatAgentInstanceManager,
+    private val sakuraChatUserInstanceManager: SakuraChatUserInstanceManager
 ) : BotPlugin() {
     private val logger = logger()
 
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+
     override fun onPrivateMessage(bot: Bot, event: PrivateMessageEvent): Int {
-        napcatPrivateMessageRepository.save(
-            NapCatPrivateMessageEntity(
-                id = snowIdGenerator.nextId(),
-                messageId = event.messageId,
-                botId = bot.selfId,
-                senderId = event.privateSender.userId,
-                senderNickname = event.privateSender.nickname,
-                message = event.arrayMsg.joinToString(),
-                createdTime = event.time
+        coroutineScope.launch(Dispatchers.IO) {
+            napcatPrivateMessageRepository.save(
+                NapCatPrivateMessageEntity(
+                    id = snowIdGenerator.nextId(),
+                    messageId = event.messageId,
+                    botId = bot.selfId,
+                    senderId = event.privateSender.userId,
+                    senderNickname = event.privateSender.nickname,
+                    message = event.arrayMsg.joinToString(),
+                    createdTime = event.time
+                )
             )
-        )
 
-        logger.info("Private message sent to bot ${bot.selfId} has been received and saved, message: $event")
+            logger.info("Private message sent to bot ${bot.selfId} has been received and saved, message: $event")
 
-        // Make sure the bot has been registered to 3rd party account table
-        thirdPartyAccountService.getOrAddAccount(
-            ThirdPartyPlatform.OICQ,
-            bot
-        )
+            // Make sure the bot has been registered to 3rd party account table
+            thirdPartyAccountService.getOrAddAccount(
+                ThirdPartyPlatform.OICQ,
+                bot
+            )
 
-        // Make sure the message sender has been registered to 3rd party account table
-        thirdPartyAccountService.getOrAddAccount(
-            ThirdPartyPlatform.OICQ,
-            event.privateSender
-        )
+            // Make sure the message sender has been registered to 3rd party account table
+            thirdPartyAccountService.getOrAddAccount(
+                ThirdPartyPlatform.OICQ,
+                event.privateSender
+            )
 
-        val relatedAgent = agentService.getAgentByThirdPartyAccount(
-            ThirdPartyPlatform.OICQ,
-            bot.selfId.toString()
-        )
+            val relatedAgent = agentService.getAgentByThirdPartyAccount(
+                ThirdPartyPlatform.OICQ,
+                bot.selfId.toString()
+            )
 
-        if (relatedAgent == null) {
-            logger.warn("Cannot find related agent for OICQ Bot Account: ${bot.selfId}")
-        } else {
-            val agent = agentService.toAggregatedAgentEntity(relatedAgent)
-            logger.info("Agent ${agent.agent.name} found for handling this private message: ${event.message}")
-            logger.info("Agent: ${agent.toJSONString()}")
-            // MESSAGE CHANNEL
+            if (relatedAgent == null) {
+                logger.warn("Cannot find related agent for OICQ Bot Account: ${bot.selfId}")
+            } else {
+                val relatedUser = userService.getUserByThirdPartyAccount(
+                    ThirdPartyPlatform.OICQ,
+                    event.privateSender.userId.toString()
+                )
+
+                if (relatedUser == null) {
+                    logger.warn("Cannot find related user for OICQ User Account: ${event.privateSender.userId}")
+                } else {
+                    val agent = agentService.toAggregatedAgentEntity(relatedAgent)
+                    logger.info("Agent ${agent.agent.name} found for handling this private message: ${event.message}")
+                    logger.info("Agent: ${agent.copy(agent = agent.agent.copy(prompt = "<...>")).toJSONString()}")
+
+                    // Find the private message channel
+                    val privateMessageChannel = sakuraChatAgentDaemon.getPrivateMessageChannel(
+                        agent.agent.id!!,
+                        relatedUser.id!!,
+                        with(sakuraChatAgentInstanceManager) {
+                            getAgent(agent.agent.id!!) ?: addAgent(agent)
+                        },
+                        with(sakuraChatUserInstanceManager) {
+                            getUser(relatedUser.id!!) ?: addUser(relatedUser)
+                        }
+                    )
+
+                    privateMessageChannel.sendPrivateMessage(
+                        sender = privateMessageChannel.getMemberById(agent.agent.id!!)
+                            ?: throw IllegalArgumentException("Member agent: ${agent.agent.id} is not in channel ${privateMessageChannel.getChannelIdentifier()}"),
+                        receiver = privateMessageChannel.getMemberById(relatedUser.id!!)
+                            ?: throw IllegalArgumentException("Member user: ${relatedUser.id} is not in channel ${privateMessageChannel.getChannelIdentifier()}"),
+                        TextMessage(
+                            sequence = System.currentTimeMillis(),
+                            message = event.message,
+                            extraBody = SakuraChatMessageExtra(ThirdPartyPlatform.OICQ)
+                        )
+                    )
+                }
+            }
         }
 
         return super.onPrivateMessage(bot, event)
