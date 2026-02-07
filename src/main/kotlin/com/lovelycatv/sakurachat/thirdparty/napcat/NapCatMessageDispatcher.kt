@@ -10,7 +10,6 @@ package com.lovelycatv.sakurachat.thirdparty.napcat
 
 import com.lovelycatv.sakurachat.adapters.thirdparty.message.MessageAdapterManager
 import com.lovelycatv.sakurachat.core.SakuraChatMessageExtra
-import com.lovelycatv.sakurachat.core.im.message.TextMessage
 import com.lovelycatv.sakurachat.daemon.SakuraChatMessageChannelDaemon
 import com.lovelycatv.sakurachat.entity.napcat.NapCatGroupMessageEntity
 import com.lovelycatv.sakurachat.entity.napcat.NapCatPrivateMessageEntity
