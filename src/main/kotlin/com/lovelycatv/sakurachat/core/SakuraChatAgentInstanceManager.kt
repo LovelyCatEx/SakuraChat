@@ -9,10 +9,13 @@
 package com.lovelycatv.sakurachat.core
 
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
+import com.lovelycatv.sakurachat.service.UserService
 import org.springframework.stereotype.Component
 
 @Component
-class SakuraChatAgentInstanceManager {
+class SakuraChatAgentInstanceManager(
+    private val userService: UserService
+) {
     private val instances = mutableMapOf<String, SakuraChatAgent>()
 
     fun getAgent(agentId: Long): SakuraChatAgent? {
@@ -27,7 +30,8 @@ class SakuraChatAgentInstanceManager {
     fun addAgent(agent: AggregatedAgentEntity): SakuraChatAgent {
         return this.addAgent(
             SakuraChatAgent(
-                agent = agent
+                agent = agent,
+                userService = userService
             )
         )
     }

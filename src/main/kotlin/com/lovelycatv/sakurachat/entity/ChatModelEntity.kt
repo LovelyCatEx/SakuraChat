@@ -45,4 +45,12 @@ data class ChatModelEntity(
     val modifiedTime: Long = System.currentTimeMillis(),
     @Column(name = "deleted_time", nullable = true)
     val deletedTime: Long? = null
-)
+) {
+    fun getQualifiedTemperature(): Float? = this.temperature.run {
+        if (this > 0) this / 100f else null
+    }
+
+    fun getQualifiedTokenPointRate(): Float = this.tokenPointRate.run {
+        this / 10000f
+    }
+}

@@ -19,23 +19,23 @@ import org.springframework.security.core.userdetails.UserDetails
 data class UserEntity (
     @Id
     @Column(name = "id", nullable = false)
-    val id: Long? = null,
+    var id: Long? = null,
     @Column(name = "username", length = 64, nullable = false, unique = true)
     private val username: String = "",
     @Column(name = "password", length = 128, nullable = false)
     private val password: String = "",
     @Column(name = "nickname", length = 64, nullable = false)
-    val nickname: String = "",
+    var nickname: String = "",
     @Column(name = "email", length = 256, nullable = false, unique = true)
-    val email: String = "",
+    var email: String = "",
     @Column(name = "points", nullable = false)
-    val points: Long = 0,
+    var points: Long = 0,
     @Column(name = "created_time", nullable = false)
     val createdTime: Long = System.currentTimeMillis(),
     @Column(name = "modified_time", nullable = false)
-    val modifiedTime: Long = System.currentTimeMillis(),
+    var modifiedTime: Long = System.currentTimeMillis(),
     @Column(name = "deleted_time", nullable = true)
-    val deletedTime: Long? = null
+    var deletedTime: Long? = null
 ) : UserDetails {
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
         return mutableListOf()

@@ -22,6 +22,9 @@ import kotlinx.coroutines.withContext
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
+import kotlin.jvm.optionals.getOrNull
 
 @Service
 class UserServiceImpl : UserService {
@@ -87,6 +90,36 @@ class UserServiceImpl : UserService {
         }.orElse(null)
     }
 
+    override suspend fun hasPoints(userId: Long, minimum: Long): Boolean {
+        val user = withContext(Dispatchers.IO) {
+            userRepository.findById(userId).getOrNull()
+        } ?: return false
+
+        return user.points > minimum
+    }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    override suspend fun consumePoints(userId: Long, points: Long): UserEntity {
+        val user = withContext(Dispatchers.IO) {
+            userRepository.findById(userId).getOrNull()
+        } ?: throw BusinessException("User $userId not found")
+
+        val pointsAfterConsumed = user.points - points
+
+        if (pointsAfterConsumed < 0) {
+            throw BusinessException("Insufficient points to consume, expect $points points but ${user.points} last")
+        }
+
+        return withContext(Dispatchers.IO) {
+            getRepository().save(
+                user.apply {
+                    this.points = pointsAfterConsumed
+                    this.modifiedTime = System.currentTimeMillis()
+                }
+            )
+        }
+    }
+
     override fun loadUserByUsername(username: String?): UserDetails {
         if (username == null) {
             throw BusinessException("Username could not be null")
@@ -97,5 +130,9 @@ class UserServiceImpl : UserService {
             ?: throw BusinessException("User $username not found")
 
         return user
+    }
+
+    override fun getRepository(): UserRepository {
+        return this.userRepository
     }
 }

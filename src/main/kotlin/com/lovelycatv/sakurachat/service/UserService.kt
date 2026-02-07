@@ -8,14 +8,29 @@
 package com.lovelycatv.sakurachat.service
 
 import com.lovelycatv.sakurachat.entity.UserEntity
+import com.lovelycatv.sakurachat.repository.UserRepository
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 
-interface UserService : UserDetailsService {
+interface UserService : UserDetailsService, BaseService<UserRepository> {
     suspend fun register(username: String, password: String, email: String, emailCode: String)
 
     suspend fun getUserByThirdPartyAccount(
         platform: ThirdPartyPlatform,
         accountId: String
     ): UserEntity?
+
+    /**
+     * Check whether the user's points is positive.
+     *
+     * @param userId UserId
+     * @param minimum Points at least
+     * @return The user's points > 0
+     */
+    suspend fun hasPoints(userId: Long, minimum: Long): Boolean
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    suspend fun consumePoints(userId: Long, points: Long): UserEntity
 }
