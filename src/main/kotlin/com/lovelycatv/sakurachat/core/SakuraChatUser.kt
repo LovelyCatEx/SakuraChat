@@ -10,6 +10,8 @@ package com.lovelycatv.sakurachat.core
 
 import com.lovelycatv.sakurachat.adapters.thirdparty.im.ThirdPartyIMAccessorManager
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
+import com.lovelycatv.sakurachat.core.im.message.TextMessage
+import com.lovelycatv.sakurachat.core.im.thirdparty.IThirdPartyIMAccessor
 import com.lovelycatv.sakurachat.entity.UserEntity
 import com.lovelycatv.sakurachat.utils.toJSONString
 import com.lovelycatv.vertex.log.logger
@@ -41,21 +43,13 @@ class SakuraChatUser(
         sender: ISakuraChatMessageChannelMember,
         message: AbstractMessage
     ) {
-        println("User ${user.id} received message from sender ${sender.memberId}: ${message.toJSONString()}")
-        if (SakuraChatMessageExtra.isCapable(message.extraBody)) {
-            val imAccessor = thirdPartyIMAccessorManager.getAccessor(message.extraBody.getPlatformType())
-                ?: throw IllegalArgumentException("No IM Accessor for ${message.extraBody.getPlatformType()}")
-
-            coroutineScope.launch {
-                imAccessor.sendPrivateMessage(
-                    invoker = message.extraBody.platformInvoker,
-                    target = imAccessor.resolveTargetByPlatformAccountId(message.extraBody.platformAccountId)
-                        ?: throw IllegalArgumentException("Could not resolve im accessor target ${message.extraBody.platformAccountId} for platform ${message.extraBody.getPlatformType()}"),
-                    message = message
-                )
-            }
-        } else {
-            logger.warn("User ${user.id} received a message but not seem like a valid SakuraChat Message, data: ${message.toJSONString()}")
+        handleMessage(sender, message) { extra ->
+            sendPrivateMessage(
+                invoker = extra.platformInvoker,
+                target = resolveTargetByPlatformAccountId(extra.platformAccountId)
+                    ?: throw IllegalArgumentException("Could not resolve im accessor target ${extra.platformAccountId} for platform ${extra.getPlatformType()}"),
+                message = message
+            )
         }
     }
 
@@ -64,6 +58,35 @@ class SakuraChatUser(
         sender: ISakuraChatMessageChannelMember,
         message: AbstractMessage
     ) {
-        TODO("Not yet implemented")
+        handleMessage(sender, message) { extra ->
+            sendPrivateMessage(
+                invoker = extra.platformInvoker,
+                target = resolveTargetByPlatformAccountId(extra.platformAccountId)
+                    ?: throw IllegalArgumentException("Could not resolve im accessor target ${extra.platformAccountId} for platform ${extra.getPlatformType()}"),
+                message = TextMessage(
+                    sequence = message.sequence,
+                    message = "Group message reply is not supported yet.",
+                    extraBody = extra
+                )
+            )
+        }
+    }
+
+    private fun handleMessage(
+        sender: ISakuraChatMessageChannelMember,
+        message: AbstractMessage,
+        accessorActions: suspend IThirdPartyIMAccessor<Any, Any>.(SakuraChatMessageExtra) -> Unit
+    ) {
+        println("User ${user.id} received message from sender ${sender.memberId}: ${message.toJSONString()}")
+        if (SakuraChatMessageExtra.isCapable(message.extraBody)) {
+            val imAccessor = thirdPartyIMAccessorManager.getAccessor(message.extraBody.getPlatformType())
+                ?: throw IllegalArgumentException("No IM Accessor for ${message.extraBody.getPlatformType()}")
+
+            coroutineScope.launch {
+                accessorActions.invoke(imAccessor, message.extraBody)
+            }
+        } else {
+            logger.warn("User ${user.id} received a message but not seem like a valid SakuraChat Message, data: ${message.toJSONString()}")
+        }
     }
 }

@@ -11,6 +11,7 @@ package com.lovelycatv.sakurachat.thirdparty.lark
 import com.lark.oapi.service.im.v1.model.P2MessageReadV1
 import com.lark.oapi.service.im.v1.model.P2MessageReceiveV1
 import com.lovelycatv.lark.LarkRestClient
+import com.lovelycatv.lark.type.LarkChatMessageType
 import com.lovelycatv.lark.type.LarkIdType
 import com.lovelycatv.sakurachat.adapters.thirdparty.message.MessageAdapterManager
 import com.lovelycatv.sakurachat.core.SakuraChatMessageExtra
@@ -95,6 +96,7 @@ class LarkMessageDispatcher(
 
         if (relatedUser == null) {
             logger.warn("Cannot find related user for Lark User Account: ${userPlatformAccountId.senderId.toJSONString()}")
+
             client.sendMessage(
                 LarkIdType.UNION_ID,
                 userPlatformAccountId.senderId.unionId,
@@ -104,16 +106,45 @@ class LarkMessageDispatcher(
             return false
         }
 
-        // 6. Find the private message channel
+        // 6. Find the message channel
         val agent = agentService.toAggregatedAgentEntity(relatedAgent)
 
-        logger.info("Agent ${agent.agent.name} found for handling this private message: ${event.event.message.toJSONString()}")
+        logger.info("Agent ${agent.agent.name} found for handling this message: ${event.event.message.toJSONString()}")
         logger.info("Agent: ${agent.copy(agent = agent.agent.copy(prompt = "<...>")).toJSONString()}")
 
-        val privateMessageChannel = sakuraChatMessageChannelDaemon.getPrivateMessageChannel(
-            agent,
-            relatedUser
-        )
+        val messageType = LarkChatMessageType.getByTypeName(event.event.message.chatType)
+
+        val messageChannel = when (messageType) {
+            LarkChatMessageType.P2P -> {
+                sakuraChatMessageChannelDaemon.getPrivateMessageChannel(
+                    agent,
+                    relatedUser
+                )
+            }
+
+            LarkChatMessageType.GROUP -> {
+                sakuraChatMessageChannelDaemon.getGroupMessageChannel(
+                    groupIdentifier = sakuraChatMessageChannelDaemon.buildGroupChannelIdentifier(
+                        ThirdPartyPlatform.LARK,
+                        event.event.message.chatId.toString()
+                    ),
+                    agent = agent,
+                    user = relatedUser
+                )
+            }
+
+            else -> {
+                logger.warn("Could not get message channel for platform ${platform.name} event ${event::class.qualifiedName}")
+
+                client.sendMessage(
+                    LarkIdType.UNION_ID,
+                    userPlatformAccountId.senderId.unionId,
+                    "Could not get message channel for platform ${platform.name} event ${event::class.qualifiedName}"
+                )
+
+                return false
+            }
+        }
 
         // 7. Prepare message
         val messageToSend = messageAdapterManager
@@ -140,13 +171,30 @@ class LarkMessageDispatcher(
         }
 
         // 8. Send message through the message channel
-        return privateMessageChannel.sendPrivateMessage(
-            sender = privateMessageChannel.getUserMember(relatedUser.id!!)
-                ?: throw IllegalArgumentException("Member user: ${relatedUser.id} is not in channel ${privateMessageChannel.getChannelIdentifier()}"),
-            receiver = privateMessageChannel.getAgentMember(agent.agent.id!!)
-                ?: throw IllegalArgumentException("Member agent: ${agent.agent.id} is not in channel ${privateMessageChannel.getChannelIdentifier()}"),
-            message = messageToSend
-        )
+        return when (messageType) {
+            LarkChatMessageType.P2P -> {
+                messageChannel.sendPrivateMessage(
+                    sender = messageChannel.getUserMember(relatedUser.id!!)
+                        ?: throw IllegalArgumentException("Member user: ${relatedUser.id} is not in channel ${messageChannel.getChannelIdentifier()}"),
+                    receiver = messageChannel.getAgentMember(agent.agent.id!!)
+                        ?: throw IllegalArgumentException("Member agent: ${agent.agent.id} is not in channel ${messageChannel.getChannelIdentifier()}"),
+                    message = messageToSend
+                )
+            }
+
+            LarkChatMessageType.GROUP -> {
+                messageChannel.sendGroupMessage(
+                    sender = messageChannel.getUserMember(relatedUser.id!!)
+                        ?: throw IllegalArgumentException("Member user: ${relatedUser.id} is not in channel ${messageChannel.getChannelIdentifier()}"),
+                    message = messageToSend
+                )
+            }
+
+            else -> {
+                logger.warn("Unsupported lark message type $messageType")
+                false
+            }
+        }
     }
 
     private suspend fun handleMessageReadEvent(client: LarkRestClient, event: P2MessageReadV1): Boolean {

@@ -15,6 +15,7 @@ import com.lovelycatv.sakurachat.entity.UserEntity
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.repository.AgentRepository
 import com.lovelycatv.sakurachat.service.IMChannelService
+import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import com.lovelycatv.vertex.log.logger
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -29,6 +30,11 @@ class SakuraChatMessageChannelDaemon(
     private val logger = logger()
 
     private val privateChannels: MutableMap<Long, MutableMap<Long, SakuraChatMessageChannel>> = mutableMapOf()
+    private val groupChannels: MutableMap<String, SakuraChatMessageChannel> = mutableMapOf()
+
+    fun buildGroupChannelIdentifier(platform: ThirdPartyPlatform, id: String): String {
+        return "${platform.name}#$id"
+    }
 
     suspend fun getPrivateMessageChannel(
         agent: AggregatedAgentEntity,
@@ -37,7 +43,7 @@ class SakuraChatMessageChannelDaemon(
         val agentId = agent.agent.id!!
         val userId = user.id!!
         return privateChannels[agentId]?.get(userId) ?: run {
-            val channel = imChannelService.getOrCreateChannelByUserIdAndAgentId(userId, agentId)
+            val channel = imChannelService.getOrCreatePrivateChannelByUserIdAndAgentId(userId, agentId)
 
             SakuraChatMessageChannel(
                 channelId = channel.id
@@ -63,6 +69,50 @@ class SakuraChatMessageChannelDaemon(
                 }[userId] = it
             }
         }
+    }
+
+    suspend fun getGroupMessageChannel(
+        groupIdentifier: String,
+        agent: AggregatedAgentEntity,
+        user: UserEntity
+    ): SakuraChatMessageChannel {
+        val agentId = agent.agent.id!!
+        val userId = user.id!!
+
+        val channel = groupChannels[groupIdentifier] ?: run {
+            val channel = imChannelService.getOrCreateGroupChannelByUserIdAndAgentId(
+                groupIdentifier,
+                userId,
+                agentId
+            )
+
+            SakuraChatMessageChannel(
+                channelId = channel.id
+            ).also {
+                val agentMember = it.addMember(
+                    with(sakuraChatAgentInstanceManager) {
+                        getAgent(agentId) ?: addAgent(agent)
+                    }
+                )
+                it.registerListener(agentMember, agentMember)
+
+                groupChannels.getOrPut(groupIdentifier) { it }
+            }
+        }
+
+        // Even though the channel is existed (created by other user),
+        // the user may not be in this channel
+        if (channel.getUserMember(userId) == null) {
+            val userMember = channel.addMember(
+                with(sakuraChatUserInstanceManager) {
+                    getUser(userId) ?: addUser(user)
+                }
+            )
+
+            channel.registerListener(userMember, userMember)
+        }
+
+        return channel
     }
 
     @Scheduled(cron = "0 */5 * * * *")

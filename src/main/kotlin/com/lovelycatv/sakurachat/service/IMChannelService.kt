@@ -14,7 +14,14 @@ import org.springframework.transaction.annotation.Transactional
 
 interface IMChannelService : BaseService<IMChannelRepository> {
     @Transactional
-    suspend fun getOrCreateChannelByUserIdAndAgentId(
+    suspend fun getOrCreatePrivateChannelByUserIdAndAgentId(
+        userId: Long,
+        agentId: Long
+    ): IMChannelEntity
+
+    @Transactional
+    suspend fun getOrCreateGroupChannelByUserIdAndAgentId(
+        groupId: String,
         userId: Long,
         agentId: Long
     ): IMChannelEntity

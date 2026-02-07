@@ -37,7 +37,7 @@ class IMChannelServiceImpl(
     }
 
     @Transactional
-    override suspend fun getOrCreateChannelByUserIdAndAgentId(
+    override suspend fun getOrCreatePrivateChannelByUserIdAndAgentId(
         userId: Long,
         agentId: Long
     ): IMChannelEntity {
@@ -67,7 +67,8 @@ class IMChannelServiceImpl(
                     IMChannelEntity(
                         id = snowIdGenerator.nextId(),
                         channelName = "private:${userId}:${agentId}",
-                        channelType = ChannelType.PRIVATE.channelTypeId
+                        channelIdentifier = "private:${userId}:${agentId}",
+                        channelType = ChannelType.PRIVATE.channelTypeId,
                     )
                 ).also {
                     userChannelRelationRepository.save(
@@ -90,6 +91,77 @@ class IMChannelServiceImpl(
 
                     logger.info("A private IM Channel created for user: $userId and agent: $agentId")
                 }
-            }
+        }
+    }
+
+    override suspend fun getOrCreateGroupChannelByUserIdAndAgentId(
+        groupId: String,
+        userId: Long,
+        agentId: Long
+    ): IMChannelEntity {
+        val expectChannelIdentifier = "group:${groupId}"
+
+        return withContext(Dispatchers.IO) {
+            getRepository()
+                .findByChannelIdentifier(expectChannelIdentifier)
+                .firstOrNull {
+                    it.getRealChannelType() == ChannelType.GROUP
+                }
+                .also { foundChannel ->
+                    if (foundChannel == null) {
+                        return@also
+                    }
+
+                    // Even though the channel is existed (created by other user),
+                    // the user may not be in this channel
+                    val userIdsInThisChannel = userChannelRelationRepository
+                        .findByChannelId(foundChannel.id)
+                        .map { it.primaryKey.userId }
+                        .toSet()
+
+                    if (userId !in userIdsInThisChannel) {
+                        userChannelRelationRepository.save(
+                            UserChannelRelationEntity(
+                                primaryKey = UserChannelRelationEntity.PrimaryKey(
+                                    channelId = foundChannel.id,
+                                    userId = userId
+                                )
+                            )
+                        )
+
+                        logger.info("New user $userId joined group channel: ${foundChannel.id}")
+                    }
+                }
+                ?:
+                getRepository().save(
+                    IMChannelEntity(
+                        id = snowIdGenerator.nextId(),
+                        channelName = expectChannelIdentifier,
+                        channelIdentifier = expectChannelIdentifier,
+                        channelType = ChannelType.GROUP.channelTypeId,
+                    )
+                ).also {
+                    userChannelRelationRepository.save(
+                        UserChannelRelationEntity(
+                            primaryKey = UserChannelRelationEntity.PrimaryKey(
+                                channelId = it.id,
+                                userId = userId
+                            )
+                        )
+                    )
+
+                    agentChannelRelationRepository.save(
+                        AgentChannelRelationEntity(
+                            primaryKey = AgentChannelRelationEntity.PrimaryKey(
+                                channelId = it.id,
+                                agentId = agentId
+                            )
+                        )
+                    )
+
+                    logger.info("A group IM Channel created for user: $userId and agent: $agentId")
+                }
+
+        }
     }
 }

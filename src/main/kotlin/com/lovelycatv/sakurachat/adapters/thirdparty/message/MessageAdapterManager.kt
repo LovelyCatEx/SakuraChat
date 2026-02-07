@@ -22,9 +22,7 @@ class MessageAdapterManager(
         return applicationContext
             .getBeansOfType<IMessageAdapter<Any>>()
             .values.firstOrNull {
-                it.getPlatform() == platform
-                        && it.getInputMessageClass().simpleName == inputClazz.simpleName
-                        && it.getInputMessageClass().canonicalName == inputClazz.canonicalName
+                it.getPlatform() == platform && it.getInputMessageClass().isAssignableFrom(inputClazz)
             }
     }
 }

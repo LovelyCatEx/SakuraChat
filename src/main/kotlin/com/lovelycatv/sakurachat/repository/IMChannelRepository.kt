@@ -12,4 +12,5 @@ import com.lovelycatv.sakurachat.entity.channel.IMChannelEntity
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface IMChannelRepository : JpaRepository<IMChannelEntity, Long> {
+    fun findByChannelIdentifier(channelIdentifier: String): MutableList<IMChannelEntity>
 }

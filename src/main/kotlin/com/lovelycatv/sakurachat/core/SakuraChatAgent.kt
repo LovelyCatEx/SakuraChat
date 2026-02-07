@@ -39,7 +39,7 @@ class SakuraChatAgent(
         sender: ISakuraChatMessageChannelMember,
         message: AbstractMessage
     ) {
-        println("Agent ${agent.agent.id} received message: ${message.toJSONString()}")
+        println("Agent ${agent.agent.id} received a private message: ${message.toJSONString()}")
 
         coroutineScope.launch {
             channel.sendPrivateMessage(
@@ -55,6 +55,13 @@ class SakuraChatAgent(
         sender: ISakuraChatMessageChannelMember,
         message: AbstractMessage
     ) {
+        println("Agent ${agent.agent.id} received a group message: ${message.toJSONString()}")
 
+        coroutineScope.launch {
+            channel.sendGroupMessage(
+                channel.getAgentMember(agent.agent.id!!)!!,
+                message
+            )
+        }
     }
 }

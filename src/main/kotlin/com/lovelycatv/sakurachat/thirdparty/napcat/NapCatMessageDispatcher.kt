@@ -170,18 +170,36 @@ class NapCatMessageDispatcher(
             }
         }
 
-        val userPlatformAccountId = thirdPartyAccountService.getAccountIdByPlatformAccountObject(
-            ThirdPartyPlatform.NAPCAT_OICQ,
-            userOICQId
-        )
+        val userAccountId = when (event) {
+            is PrivateMessageEvent -> {
+                thirdPartyAccountService.getAccountIdByPlatformAccountObject(
+                    ThirdPartyPlatform.NAPCAT_OICQ,
+                    event.privateSender
+                )
+            }
 
-        val relatedUser = userService.getUserByThirdPartyAccount(
-            ThirdPartyPlatform.NAPCAT_OICQ,
-            userPlatformAccountId
-        )
+            is GroupMessageEvent -> {
+                thirdPartyAccountService.getAccountIdByPlatformAccountObject(
+                    ThirdPartyPlatform.NAPCAT_OICQ,
+                    event.sender
+                )
+            }
+
+            else -> {
+                null
+            }
+        }
+
+        val relatedUser = userAccountId?.let { userAccountId ->
+            userService.getUserByThirdPartyAccount(
+                ThirdPartyPlatform.NAPCAT_OICQ,
+                userAccountId
+            )
+        }
 
         if (relatedUser == null) {
             logger.warn("Cannot find related user for OICQ User Account: $userOICQId")
+
             bot.sendPrivateMsg(
                 userOICQId,
                 "Your OICQ account $userOICQId has not been registered in SakuraChat, please turn to https://sakurachat.lovelycatv.com and bind your OICQ Account.",
@@ -191,16 +209,43 @@ class NapCatMessageDispatcher(
             return false
         }
 
-        // 6. Find the private message channel
+        // 6. Find the message channel
         val agent = agentService.toAggregatedAgentEntity(relatedAgent)
 
-        logger.info("Agent ${agent.agent.name} found for handling this private message: ${event.message}")
+        logger.info("Agent ${agent.agent.name} found for handling this message: ${event.message}")
         logger.info("Agent: ${agent.copy(agent = agent.agent.copy(prompt = "<...>")).toJSONString()}")
 
-        val privateMessageChannel = sakuraChatMessageChannelDaemon.getPrivateMessageChannel(
-            agent,
-            relatedUser
-        )
+        val messageChannel = when (event) {
+            is PrivateMessageEvent -> {
+                sakuraChatMessageChannelDaemon.getPrivateMessageChannel(
+                    agent,
+                    relatedUser
+                )
+            }
+
+            is GroupMessageEvent -> {
+                sakuraChatMessageChannelDaemon.getGroupMessageChannel(
+                    groupIdentifier = sakuraChatMessageChannelDaemon.buildGroupChannelIdentifier(
+                        ThirdPartyPlatform.NAPCAT_OICQ,
+                        event.groupId.toString()
+                    ),
+                    agent = agent,
+                    user = relatedUser
+                )
+            }
+
+            else -> {
+                logger.warn("Could not get message channel for platform ${platform.name} event ${event::class.qualifiedName}")
+
+                bot.sendPrivateMsg(
+                    userOICQId,
+                    "Could not get message channel for platform ${platform.name} event ${event::class.qualifiedName}",
+                    true
+                )
+
+                return false
+            }
+        }
 
         // 7. Prepare message
         val messageToSend = messageAdapterManager
@@ -209,7 +254,7 @@ class NapCatMessageDispatcher(
                 input = event,
                 extraBody = SakuraChatMessageExtra(
                     ThirdPartyPlatform.NAPCAT_OICQ,
-                    userPlatformAccountId,
+                    userAccountId,
                     bot
                 )
             )
@@ -227,12 +272,20 @@ class NapCatMessageDispatcher(
         }
 
         // 8. Send message through the message channel
-        return privateMessageChannel.sendPrivateMessage(
-            sender = privateMessageChannel.getUserMember(relatedUser.id!!)
-                ?: throw IllegalArgumentException("Member user: ${relatedUser.id} is not in channel ${privateMessageChannel.getChannelIdentifier()}"),
-            receiver = privateMessageChannel.getAgentMember(agent.agent.id!!)
-                ?: throw IllegalArgumentException("Member agent: ${agent.agent.id} is not in channel ${privateMessageChannel.getChannelIdentifier()}"),
-            message = messageToSend
-        )
+        return if (event is PrivateMessageEvent) {
+            messageChannel.sendPrivateMessage(
+                sender = messageChannel.getUserMember(relatedUser.id!!)
+                    ?: throw IllegalArgumentException("Member user: ${relatedUser.id} is not in channel ${messageChannel.getChannelIdentifier()}"),
+                receiver = messageChannel.getAgentMember(agent.agent.id!!)
+                    ?: throw IllegalArgumentException("Member agent: ${agent.agent.id} is not in channel ${messageChannel.getChannelIdentifier()}"),
+                message = messageToSend
+            )
+        } else {
+            messageChannel.sendGroupMessage(
+                sender = messageChannel.getUserMember(relatedUser.id!!)
+                    ?: throw IllegalArgumentException("Member user: ${relatedUser.id} is not in channel ${messageChannel.getChannelIdentifier()}"),
+                message = messageToSend
+            )
+        }
     }
 }
