@@ -39,25 +39,32 @@ class ThirdPartyAccountServiceImpl(
         return thirdPartyAccountRepository.getByAccountIdAndPlatform(accountId, platform.platformId)
     }
 
-    override fun getOrAddAccount(
+    override fun getAccountAdapter(
         platform: ThirdPartyPlatform,
-        platformAccount: Any
-    ): ThirdPartyAccountEntity {
+        platformAccount: Class<out Any>
+    ): ThirdPartyAccountAdapter<Any> {
         val adapters = this.getThirdPartyAccountAdapter(platform, platformAccount::class.java)
         if (adapters.isEmpty()) {
             throw BusinessException("No third party account adapter found for platform $platform")
         }
 
-        val adapter = adapters.first()
+        return adapters.first()
+    }
 
-        val accountEntity = adapter
-            .safeTransform(platformAccount)
-            .apply {
-                this.id = snowIdGenerator.nextId()
-                this.createdTime = System.currentTimeMillis()
-                this.modifiedTime = this.createdTime
-                this.deletedTime = null
-            }
+    override fun getOrAddAccount(
+        platform: ThirdPartyPlatform,
+        platformAccount: Any
+    ): ThirdPartyAccountEntity {
+        val adapter = this.getAccountAdapter(platform, platformAccount::class.java)
+
+        val accountEntity = ThirdPartyAccountEntity(
+            id = snowIdGenerator.nextId(),
+            accountId = adapter.getAccountId(platformAccount),
+            nickname = adapter.getNickName(platformAccount),
+            createdTime = System.currentTimeMillis(),
+            modifiedTime = System.currentTimeMillis(),
+            deletedTime = null
+        )
 
         val existingAccount = this.getAccountByPlatformAndAccountId(platform, accountEntity.accountId)
 

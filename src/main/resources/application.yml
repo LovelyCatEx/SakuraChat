@@ -22,6 +22,6 @@ shiro:
     server:
       enable: true
       url: '/ws/v1/napcat'
-  plugin-list: com.lovelycatv.sakurachat.napcat.NapCatBotPlugin
+  plugin-list: com.lovelycatv.sakurachat.thirdparty.napcat.NapCatBotPlugin
 server:
   port: 8080

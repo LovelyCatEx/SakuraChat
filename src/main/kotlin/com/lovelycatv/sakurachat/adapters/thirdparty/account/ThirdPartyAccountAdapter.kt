@@ -8,7 +8,6 @@
 
 package com.lovelycatv.sakurachat.adapters.thirdparty.account
 
-import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 
 interface ThirdPartyAccountAdapter<I: Any> {
@@ -16,11 +15,7 @@ interface ThirdPartyAccountAdapter<I: Any> {
 
     fun getThirdPartyAccountClass(): Class<I>
 
-    fun transform(thirdPartyAccount: I): ThirdPartyAccountEntity
+    fun getAccountId(thirdPartyAccount: I): String
 
-    fun safeTransform(thirdPartyAccount: I): ThirdPartyAccountEntity {
-        return transform(thirdPartyAccount).apply {
-            this.platform = getPlatform().platformId
-        }
-    }
+    fun getNickName(thirdPartyAccount: I): String
 }

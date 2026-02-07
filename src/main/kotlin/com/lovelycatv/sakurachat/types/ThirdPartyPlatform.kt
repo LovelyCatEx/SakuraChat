@@ -9,7 +9,8 @@
 package com.lovelycatv.sakurachat.types
 
 enum class ThirdPartyPlatform(val platformId: Int) {
-    OICQ(0);
+    OICQ(0),
+    LARK(1);
 
     companion object {
         fun getByPlatformId(platformId: Int): ThirdPartyPlatform? {

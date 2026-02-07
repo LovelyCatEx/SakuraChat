@@ -8,7 +8,6 @@
 
 package com.lovelycatv.sakurachat.adapters.thirdparty.account
 
-import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent
 import org.springframework.stereotype.Component
@@ -23,10 +22,11 @@ class OICQGroupSenderAccountAdapter : ThirdPartyAccountAdapter<GroupMessageEvent
         return GroupMessageEvent.GroupSender::class.java
     }
 
-    override fun transform(thirdPartyAccount: GroupMessageEvent.GroupSender): ThirdPartyAccountEntity {
-        return ThirdPartyAccountEntity(
-            accountId = thirdPartyAccount.userId.toString(),
-            nickname = thirdPartyAccount.nickname.toString(),
-        )
+    override fun getAccountId(thirdPartyAccount: GroupMessageEvent.GroupSender): String {
+        return thirdPartyAccount.userId.toString()
+    }
+
+    override fun getNickName(thirdPartyAccount: GroupMessageEvent.GroupSender): String {
+        return thirdPartyAccount.nickname.toString()
     }
 }

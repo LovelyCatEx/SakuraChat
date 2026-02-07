@@ -8,7 +8,6 @@
 
 package com.lovelycatv.sakurachat.adapters.thirdparty.account
 
-import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import com.mikuac.shiro.core.Bot
 import org.springframework.stereotype.Component
@@ -23,10 +22,11 @@ class OICQAccountAdapter : ThirdPartyAccountAdapter<Bot> {
         return Bot::class.java
     }
 
-    override fun transform(thirdPartyAccount: Bot): ThirdPartyAccountEntity {
-        return ThirdPartyAccountEntity(
-            accountId = thirdPartyAccount.selfId.toString(),
-            nickname = thirdPartyAccount.selfId.toString(),
-        )
+    override fun getAccountId(thirdPartyAccount: Bot): String {
+        return thirdPartyAccount.selfId.toString()
+    }
+
+    override fun getNickName(thirdPartyAccount: Bot): String {
+        return thirdPartyAccount.selfId.toString()
     }
 }
