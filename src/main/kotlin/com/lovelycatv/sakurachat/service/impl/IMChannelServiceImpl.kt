@@ -11,10 +11,13 @@ package com.lovelycatv.sakurachat.service.impl
 import com.lovelycatv.sakurachat.entity.channel.AgentChannelRelationEntity
 import com.lovelycatv.sakurachat.entity.channel.IMChannelEntity
 import com.lovelycatv.sakurachat.entity.channel.UserChannelRelationEntity
+import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyGroupChannelRelationEntity
 import com.lovelycatv.sakurachat.repository.AgentChannelRelationRepository
 import com.lovelycatv.sakurachat.repository.IMChannelRepository
+import com.lovelycatv.sakurachat.repository.ThirdPartyGroupChannelRelationRepository
 import com.lovelycatv.sakurachat.repository.UserChannelRelationRepository
 import com.lovelycatv.sakurachat.service.IMChannelService
+import com.lovelycatv.sakurachat.service.ThirdPartyGroupService
 import com.lovelycatv.sakurachat.types.ChannelType
 import com.lovelycatv.sakurachat.utils.SnowIdGenerator
 import com.lovelycatv.vertex.log.logger
@@ -22,13 +25,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import kotlin.jvm.optionals.getOrNull
 
 @Service
 class IMChannelServiceImpl(
     private val imChannelRepository: IMChannelRepository,
     private val userChannelRelationRepository: UserChannelRelationRepository,
     private val agentChannelRelationRepository: AgentChannelRelationRepository,
-    private val snowIdGenerator: SnowIdGenerator
+    private val thirdPartyGroupChannelRelationRepository: ThirdPartyGroupChannelRelationRepository,
+    private val thirdPartyGroupService: ThirdPartyGroupService,
+    private val snowIdGenerator: SnowIdGenerator,
+    partyGroupService: ThirdPartyGroupService
 ) : IMChannelService {
     private val logger = logger()
 
@@ -67,7 +74,6 @@ class IMChannelServiceImpl(
                     IMChannelEntity(
                         id = snowIdGenerator.nextId(),
                         channelName = "private:${userId}:${agentId}",
-                        channelIdentifier = "private:${userId}:${agentId}",
                         channelType = ChannelType.PRIVATE.channelTypeId,
                     )
                 ).also {
@@ -95,52 +101,40 @@ class IMChannelServiceImpl(
     }
 
     override suspend fun getOrCreateGroupChannelByUserIdAndAgentId(
-        groupId: String,
+        groupEntityId: Long,
         userId: Long,
         agentId: Long
     ): IMChannelEntity {
-        val expectChannelIdentifier = "group:${groupId}"
+        val thirdPartyGroupEntity = withContext(Dispatchers.IO) {
+            thirdPartyGroupService.getRepository().findById(groupEntityId).getOrNull()
+        }
 
-        return withContext(Dispatchers.IO) {
-            getRepository()
-                .findByChannelIdentifier(expectChannelIdentifier)
-                .firstOrNull {
-                    it.getRealChannelType() == ChannelType.GROUP
-                }
-                .also { foundChannel ->
-                    if (foundChannel == null) {
-                        return@also
-                    }
+        if (thirdPartyGroupEntity == null) {
+            throw IllegalArgumentException("Third party group entity $groupEntityId does not exist")
+        }
 
-                    // Even though the channel is existed (created by other user),
-                    // the user may not be in this channel
-                    val userIdsInThisChannel = userChannelRelationRepository
-                        .findByChannelId(foundChannel.id)
-                        .map { it.primaryKey.userId }
-                        .toSet()
+        val channelId = withContext(Dispatchers.IO) {
+            thirdPartyGroupChannelRelationRepository.findByThirdPartyGroupId(thirdPartyGroupEntity.id).firstOrNull()
+        }?.primaryKey?.channelId
 
-                    if (userId !in userIdsInThisChannel) {
-                        userChannelRelationRepository.save(
-                            UserChannelRelationEntity(
-                                primaryKey = UserChannelRelationEntity.PrimaryKey(
-                                    channelId = foundChannel.id,
-                                    userId = userId
-                                )
-                            )
-                        )
-
-                        logger.info("New user $userId joined group channel: ${foundChannel.id}")
-                    }
-                }
-                ?:
-                getRepository().save(
+        val channel = withContext(Dispatchers.IO) {
+            channelId?.let { channelId -> getRepository().findById(channelId).getOrNull() }
+                ?: getRepository().save(
                     IMChannelEntity(
                         id = snowIdGenerator.nextId(),
-                        channelName = expectChannelIdentifier,
-                        channelIdentifier = expectChannelIdentifier,
+                        channelName = "group:${thirdPartyGroupEntity.getPlatformType().name}:${thirdPartyGroupEntity.groupId}",
                         channelType = ChannelType.GROUP.channelTypeId,
                     )
                 ).also {
+                    thirdPartyGroupChannelRelationRepository.save(
+                        ThirdPartyGroupChannelRelationEntity(
+                            primaryKey = ThirdPartyGroupChannelRelationEntity.PrimaryKey(
+                                thirdPartyGroupId = thirdPartyGroupEntity.id,
+                                channelId = it.id
+                            )
+                        )
+                    )
+
                     userChannelRelationRepository.save(
                         UserChannelRelationEntity(
                             primaryKey = UserChannelRelationEntity.PrimaryKey(
@@ -161,7 +155,34 @@ class IMChannelServiceImpl(
 
                     logger.info("A group IM Channel created for user: $userId and agent: $agentId")
                 }
-
         }
+
+        channel.also { foundChannel ->
+            if (foundChannel == null) {
+                return@also
+            }
+
+            // Even though the channel is existed (created by other user),
+            // the user may not be in this channel
+            val userIdsInThisChannel = userChannelRelationRepository
+                .findByChannelId(foundChannel.id)
+                .map { it.primaryKey.userId }
+                .toSet()
+
+            if (userId !in userIdsInThisChannel) {
+                userChannelRelationRepository.save(
+                    UserChannelRelationEntity(
+                        primaryKey = UserChannelRelationEntity.PrimaryKey(
+                            channelId = foundChannel.id,
+                            userId = userId
+                        )
+                    )
+                )
+
+                logger.info("New user $userId joined group channel: ${foundChannel.id}")
+            }
+        }
+
+        return channel
     }
 }

@@ -18,9 +18,10 @@ data class SakuraChatMessageExtra(
     val platformInvoker: Any
 ) : ExtraBody() {
     companion object {
-        const val KEY_PLATFORM = "platform"
-        const val KEY_PLATFORM_ACCOUNT_ID = "platform_account_id"
-        const val KEY_PLATFORM_INVOKER = "platform_invoker"
+        const val KEY_PLATFORM = "_platform"
+        const val KEY_PLATFORM_ACCOUNT_ID = "_platform_account_id"
+        const val KEY_PLATFORM_GROUP_ID = "_platform_group_id"
+        const val KEY_PLATFORM_INVOKER = "_platform_invoker"
 
         @OptIn(ExperimentalContracts::class)
         fun isCapable(body: ExtraBody?): Boolean {
@@ -36,6 +37,14 @@ data class SakuraChatMessageExtra(
         this[KEY_PLATFORM] = platform.platformId
         this[KEY_PLATFORM_ACCOUNT_ID] = platformAccountId
         this[KEY_PLATFORM_INVOKER] = platformInvoker.toString()
+    }
+
+    fun addPlatformGroupId(platformGroupId: String) {
+        this[KEY_PLATFORM_GROUP_ID] = platformGroupId
+    }
+
+    fun getPlatformGroupId(): String {
+        return this.getString(KEY_PLATFORM_GROUP_ID) ?: throw IllegalStateException("$KEY_PLATFORM_GROUP_ID is not set")
     }
 
     fun getPlatformType(): ThirdPartyPlatform {

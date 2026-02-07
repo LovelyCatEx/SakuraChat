@@ -21,7 +21,7 @@ interface IMChannelService : BaseService<IMChannelRepository> {
 
     @Transactional
     suspend fun getOrCreateGroupChannelByUserIdAndAgentId(
-        groupId: String,
+        groupEntityId: Long,
         userId: Long,
         agentId: Long
     ): IMChannelEntity

@@ -19,7 +19,7 @@ import com.lovelycatv.sakurachat.utils.toJSONString
 import org.springframework.stereotype.Component
 
 @Component
-class LarkIMAccessor : IThirdPartyIMAccessor<LarkRestClient, String> {
+class LarkIMAccessor : IThirdPartyIMAccessor<LarkRestClient, String, String> {
     override fun getPlatform(): ThirdPartyPlatform {
         return ThirdPartyPlatform.LARK
     }
@@ -43,11 +43,37 @@ class LarkIMAccessor : IThirdPartyIMAccessor<LarkRestClient, String> {
             )
         }
 
+        return true
+    }
+
+    override suspend fun sendGroupMessage(
+        invoker: LarkRestClient,
+        targetGroup: String,
+        replyTarget: String,
+        message: AbstractMessage
+    ): Boolean {
+        if (message is TextMessage) {
+            invoker.sendMessage(
+                LarkIdType.CHAT_ID,
+                targetGroup,
+                message.message
+            )
+        } else {
+            invoker.sendMessage(
+                LarkIdType.CHAT_ID,
+                targetGroup,
+                message.toJSONString()
+            )
+        }
 
         return true
     }
 
     override suspend fun resolveTargetByPlatformAccountId(platformAccountId: String): String? {
         return platformAccountId
+    }
+
+    override suspend fun resolveGroupTargetByPlatformGroupId(platformGroupId: String): String? {
+        return platformGroupId
     }
 }

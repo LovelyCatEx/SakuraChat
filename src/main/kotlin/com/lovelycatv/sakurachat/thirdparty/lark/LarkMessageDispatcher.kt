@@ -18,22 +18,22 @@ import com.lovelycatv.sakurachat.core.SakuraChatMessageExtra
 import com.lovelycatv.sakurachat.daemon.SakuraChatMessageChannelDaemon
 import com.lovelycatv.sakurachat.service.AgentService
 import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
+import com.lovelycatv.sakurachat.service.ThirdPartyGroupService
 import com.lovelycatv.sakurachat.service.UserService
 import com.lovelycatv.sakurachat.thirdparty.AbstractThirdPartyMessageDispatcher
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
-import com.lovelycatv.sakurachat.utils.SnowIdGenerator
 import com.lovelycatv.sakurachat.utils.toJSONString
 import com.lovelycatv.vertex.log.logger
 import org.springframework.stereotype.Component
 
 @Component
 class LarkMessageDispatcher(
-    private val snowIdGenerator: SnowIdGenerator,
     private val thirdPartyAccountService: ThirdPartyAccountService,
     private val agentService: AgentService,
     private val userService: UserService,
     private val sakuraChatMessageChannelDaemon: SakuraChatMessageChannelDaemon,
-    private val messageAdapterManager: MessageAdapterManager
+    private val messageAdapterManager: MessageAdapterManager,
+    private val thirdPartyGroupService: ThirdPartyGroupService
 ) : AbstractThirdPartyMessageDispatcher(ThirdPartyPlatform.LARK) {
     private val logger = logger()
 
@@ -106,13 +106,23 @@ class LarkMessageDispatcher(
             return false
         }
 
-        // 6. Find the message channel
+        val messageType = LarkChatMessageType.getByTypeName(event.event.message.chatType)
+
+        // 6. Make sure the third party group has been registered to 3rd group table
+        val thirdPartyGroupEntity = if (messageType == LarkChatMessageType.GROUP) {
+            thirdPartyGroupService.getOrAddGroup(
+                ThirdPartyPlatform.LARK,
+                event.event.message
+            )
+        } else {
+            null
+        }
+
+        // 7. Find the message channel
         val agent = agentService.toAggregatedAgentEntity(relatedAgent)
 
         logger.info("Agent ${agent.agent.name} found for handling this message: ${event.event.message.toJSONString()}")
         logger.info("Agent: ${agent.copy(agent = agent.agent.copy(prompt = "<...>")).toJSONString()}")
-
-        val messageType = LarkChatMessageType.getByTypeName(event.event.message.chatType)
 
         val messageChannel = when (messageType) {
             LarkChatMessageType.P2P -> {
@@ -124,10 +134,10 @@ class LarkMessageDispatcher(
 
             LarkChatMessageType.GROUP -> {
                 sakuraChatMessageChannelDaemon.getGroupMessageChannel(
-                    groupIdentifier = sakuraChatMessageChannelDaemon.buildGroupChannelIdentifier(
-                        ThirdPartyPlatform.LARK,
-                        event.event.message.chatId.toString()
-                    ),
+                    thirdPartyGroupEntityId = thirdPartyGroupEntity?.id
+                        ?: throw IllegalStateException("Could not get group message channel because third party group entity is missing," +
+                                " please make sure that the third party group of platform ${platform.name} has been added to database."
+                        ),
                     agent = agent,
                     user = relatedUser
                 )
@@ -147,15 +157,26 @@ class LarkMessageDispatcher(
         }
 
         // 7. Prepare message
+        val messageExtra = SakuraChatMessageExtra(
+            platform = ThirdPartyPlatform.LARK,
+            platformAccountId = userPlatformAccountId.senderId.unionId,
+            platformInvoker = client
+        )
+
+        if (messageType == LarkChatMessageType.GROUP) {
+            messageExtra.addPlatformGroupId(
+                thirdPartyGroupEntity?.groupId
+                    ?: throw IllegalStateException("Could not prepare message extra because third party group entity is missing," +
+                            " please make sure that the third party group of platform ${platform.name} has been added to database."
+                    )
+            )
+        }
+
         val messageToSend = messageAdapterManager
             .getAdapter(ThirdPartyPlatform.LARK, event.event.message::class.java)
             ?.transform(
                 input = event.event.message,
-                extraBody = SakuraChatMessageExtra(
-                    platform = ThirdPartyPlatform.LARK,
-                    platformAccountId = userPlatformAccountId.senderId.unionId,
-                    platformInvoker = client
-                )
+                extraBody = messageExtra
             )
 
         if (messageToSend == null) {
@@ -188,11 +209,6 @@ class LarkMessageDispatcher(
                         ?: throw IllegalArgumentException("Member user: ${relatedUser.id} is not in channel ${messageChannel.getChannelIdentifier()}"),
                     message = messageToSend
                 )
-            }
-
-            else -> {
-                logger.warn("Unsupported lark message type $messageType")
-                false
             }
         }
     }

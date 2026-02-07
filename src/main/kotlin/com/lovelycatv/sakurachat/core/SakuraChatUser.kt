@@ -10,7 +10,6 @@ package com.lovelycatv.sakurachat.core
 
 import com.lovelycatv.sakurachat.adapters.thirdparty.im.ThirdPartyIMAccessorManager
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
-import com.lovelycatv.sakurachat.core.im.message.TextMessage
 import com.lovelycatv.sakurachat.core.im.thirdparty.IThirdPartyIMAccessor
 import com.lovelycatv.sakurachat.entity.UserEntity
 import com.lovelycatv.sakurachat.utils.toJSONString
@@ -59,15 +58,13 @@ class SakuraChatUser(
         message: AbstractMessage
     ) {
         handleMessage(sender, message) { extra ->
-            sendPrivateMessage(
+            sendGroupMessage(
                 invoker = extra.platformInvoker,
-                target = resolveTargetByPlatformAccountId(extra.platformAccountId)
+                targetGroup = resolveGroupTargetByPlatformGroupId(extra.getPlatformGroupId())
+                    ?: throw IllegalArgumentException("Could not resolve im accessor group target ${extra.platformAccountId} for platform ${extra.getPlatformType()}"),
+                replyTarget = resolveTargetByPlatformAccountId(extra.platformAccountId)
                     ?: throw IllegalArgumentException("Could not resolve im accessor target ${extra.platformAccountId} for platform ${extra.getPlatformType()}"),
-                message = TextMessage(
-                    sequence = message.sequence,
-                    message = "Group message reply is not supported yet.",
-                    extraBody = extra
-                )
+                message = message
             )
         }
     }
@@ -75,7 +72,7 @@ class SakuraChatUser(
     private fun handleMessage(
         sender: ISakuraChatMessageChannelMember,
         message: AbstractMessage,
-        accessorActions: suspend IThirdPartyIMAccessor<Any, Any>.(SakuraChatMessageExtra) -> Unit
+        accessorActions: suspend IThirdPartyIMAccessor<Any, Any, Any>.(SakuraChatMessageExtra) -> Unit
     ) {
         println("User ${user.id} received message from sender ${sender.memberId}: ${message.toJSONString()}")
         if (SakuraChatMessageExtra.isCapable(message.extraBody)) {

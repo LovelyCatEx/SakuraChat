@@ -22,19 +22,19 @@ class ThirdPartyIMAccessorManager(
 ) : InitializingBean {
     private val logger = logger()
 
-    private val accessors: MutableMap<ThirdPartyPlatform, IThirdPartyIMAccessor<Any, Any>> = mutableMapOf()
+    private val accessors: MutableMap<ThirdPartyPlatform, IThirdPartyIMAccessor<Any, Any, Any>> = mutableMapOf()
 
-    fun getAccessor(platform: ThirdPartyPlatform): IThirdPartyIMAccessor<Any, Any>? {
+    fun getAccessor(platform: ThirdPartyPlatform): IThirdPartyIMAccessor<Any, Any, Any>? {
         return accessors[platform]
     }
 
-    fun registerAccessor(accessor: IThirdPartyIMAccessor<Any, Any>) {
+    fun registerAccessor(accessor: IThirdPartyIMAccessor<Any, Any, Any>) {
         this.accessors[accessor.getPlatform()] = accessor
         logger.info("Registered ${accessor.getPlatform()} IM Accessor: ${accessor::class.qualifiedName}")
     }
 
     override fun afterPropertiesSet() {
-        val accessors = applicationContext.getBeansOfType<IThirdPartyIMAccessor<Any, Any>>()
+        val accessors = applicationContext.getBeansOfType<IThirdPartyIMAccessor<Any, Any, Any>>()
 
         logger.info("=".repeat(96))
         accessors.values.forEach {

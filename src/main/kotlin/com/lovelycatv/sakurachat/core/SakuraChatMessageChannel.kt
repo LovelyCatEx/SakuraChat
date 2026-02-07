@@ -12,7 +12,13 @@ import com.lovelycatv.sakurachat.core.im.channel.AbstractMessageChannel
 
 class SakuraChatMessageChannel(
     channelId: Long
-) : AbstractMessageChannel<SakuraChatMessageChannel, ISakuraChatMessageChannelMember, ISakuraChatMessageChannelListener>(channelId) {
+) : AbstractMessageChannel<
+        SakuraChatMessageChannel,
+        ISakuraChatMessageChannelMember,
+        ISakuraChatMessageChannelListener
+>(
+    channelId
+) {
     fun getAgentMember(agentId: Long): ISakuraChatMessageChannelMember? {
         return super.getMemberById("agent_$agentId")
     }

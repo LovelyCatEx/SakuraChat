@@ -17,6 +17,7 @@ import com.lovelycatv.sakurachat.repository.NapCatGroupMessageRepository
 import com.lovelycatv.sakurachat.repository.NapCatPrivateMessageRepository
 import com.lovelycatv.sakurachat.service.AgentService
 import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
+import com.lovelycatv.sakurachat.service.ThirdPartyGroupService
 import com.lovelycatv.sakurachat.service.UserService
 import com.lovelycatv.sakurachat.thirdparty.AbstractThirdPartyMessageDispatcher
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
@@ -38,6 +39,7 @@ class NapCatMessageDispatcher(
     private val napCatGroupMessageRepository: NapCatGroupMessageRepository,
     private val snowIdGenerator: SnowIdGenerator,
     private val thirdPartyAccountService: ThirdPartyAccountService,
+    private val thirdPartyGroupService: ThirdPartyGroupService,
     private val agentService: AgentService,
     private val userService: UserService,
     private val sakuraChatMessageChannelDaemon: SakuraChatMessageChannelDaemon,
@@ -138,7 +140,19 @@ class NapCatMessageDispatcher(
             }
         }
 
-        // 4. Find the related agent
+        // 4. Make sure the group has been registered to 3rd party group table
+        val thirdPartyGroupEntity = if (event is GroupMessageEvent) {
+            thirdPartyGroupService.getOrAddGroup(
+                ThirdPartyPlatform.NAPCAT_OICQ,
+                bot.groupList.data.first {
+                    it.groupId == event.groupId
+                }
+            )
+        } else {
+            null
+        }
+
+        // 5. Find the related agent
         val relatedAgentAccountId = thirdPartyAccountService.getAccountIdByPlatformAccountObject(
             ThirdPartyPlatform.NAPCAT_OICQ,
             bot
@@ -154,7 +168,7 @@ class NapCatMessageDispatcher(
             return false
         }
 
-        // 5. Find the related user
+        // 6. Find the related user
         val userOICQId = when (event) {
             is PrivateMessageEvent -> {
                 event.privateSender.userId
@@ -209,7 +223,7 @@ class NapCatMessageDispatcher(
             return false
         }
 
-        // 6. Find the message channel
+        // 7. Find the message channel
         val agent = agentService.toAggregatedAgentEntity(relatedAgent)
 
         logger.info("Agent ${agent.agent.name} found for handling this message: ${event.message}")
@@ -225,10 +239,10 @@ class NapCatMessageDispatcher(
 
             is GroupMessageEvent -> {
                 sakuraChatMessageChannelDaemon.getGroupMessageChannel(
-                    groupIdentifier = sakuraChatMessageChannelDaemon.buildGroupChannelIdentifier(
-                        ThirdPartyPlatform.NAPCAT_OICQ,
-                        event.groupId.toString()
-                    ),
+                    thirdPartyGroupEntityId = thirdPartyGroupEntity?.id
+                        ?: throw IllegalStateException("Could not get group message channel because third party group entity is missing," +
+                                " please make sure that the third party group of platform ${platform.name} has been added to database."
+                        ),
                     agent = agent,
                     user = relatedUser
                 )
@@ -247,16 +261,22 @@ class NapCatMessageDispatcher(
             }
         }
 
-        // 7. Prepare message
+        // 8. Prepare message
+        val messageExtra = SakuraChatMessageExtra(
+            ThirdPartyPlatform.NAPCAT_OICQ,
+            userAccountId,
+            bot
+        )
+
+        if (event is GroupMessageEvent) {
+            messageExtra.addPlatformGroupId(event.groupId.toString())
+        }
+
         val messageToSend = messageAdapterManager
             .getAdapter(ThirdPartyPlatform.NAPCAT_OICQ, event::class.java)
             ?.transform(
                 input = event,
-                extraBody = SakuraChatMessageExtra(
-                    ThirdPartyPlatform.NAPCAT_OICQ,
-                    userAccountId,
-                    bot
-                )
+                extraBody = messageExtra
             )
 
         if (messageToSend == null) {
@@ -271,7 +291,7 @@ class NapCatMessageDispatcher(
             return false
         }
 
-        // 8. Send message through the message channel
+        // 9. Send message through the message channel
         return if (event is PrivateMessageEvent) {
             messageChannel.sendPrivateMessage(
                 sender = messageChannel.getUserMember(relatedUser.id!!)

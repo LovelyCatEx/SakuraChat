@@ -11,7 +11,7 @@ package com.lovelycatv.sakurachat.core.im.thirdparty
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 
-interface IThirdPartyIMAccessor<I: Any, T: Any> {
+interface IThirdPartyIMAccessor<I: Any, T: Any, G: Any> {
     fun getPlatform(): ThirdPartyPlatform
 
     /**
@@ -27,10 +27,38 @@ interface IThirdPartyIMAccessor<I: Any, T: Any> {
     suspend fun sendPrivateMessage(invoker: I, target: T, message: AbstractMessage): Boolean
 
     /**
+     * Send a private message from sender to target.
+     *
+     * @param invoker Sender
+     * @param targetGroup Which group will the message be sent to.
+     *               Please use [resolveGroupTargetByPlatformGroupId] to get a valid group target
+     *               unless you are sure that what you do.
+     * @param replyTarget Whom the message will be sent to.
+     *               Please use [resolveTargetByPlatformAccountId] to get a valid target
+     *               unless you are sure that what you do.
+     * @param message [AbstractMessage]
+     * @return Send success returns true
+     */
+    suspend fun sendGroupMessage(
+        invoker: I,
+        targetGroup: G,
+        replyTarget: T,
+        message: AbstractMessage
+    ): Boolean
+
+    /**
      * Resolve a valid target.
      *
      * @param platformAccountId normally comes from [com.lovelycatv.sakurachat.core.SakuraChatMessageExtra.platformAccountId]
      * @return
      */
     suspend fun resolveTargetByPlatformAccountId(platformAccountId: String): T?
+
+    /**
+     * Resolve a valid group target.
+     *
+     * @param platformGroupId normally comes from value of key [com.lovelycatv.sakurachat.core.SakuraChatMessageExtra.KEY_PLATFORM_GROUP_ID]
+     * @return
+     */
+    suspend fun resolveGroupTargetByPlatformGroupId(platformGroupId: String): G?
 }

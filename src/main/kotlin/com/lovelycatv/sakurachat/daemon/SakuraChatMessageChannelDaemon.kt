@@ -15,7 +15,6 @@ import com.lovelycatv.sakurachat.entity.UserEntity
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.repository.AgentRepository
 import com.lovelycatv.sakurachat.service.IMChannelService
-import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import com.lovelycatv.vertex.log.logger
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -30,11 +29,7 @@ class SakuraChatMessageChannelDaemon(
     private val logger = logger()
 
     private val privateChannels: MutableMap<Long, MutableMap<Long, SakuraChatMessageChannel>> = mutableMapOf()
-    private val groupChannels: MutableMap<String, SakuraChatMessageChannel> = mutableMapOf()
-
-    fun buildGroupChannelIdentifier(platform: ThirdPartyPlatform, id: String): String {
-        return "${platform.name}#$id"
-    }
+    private val groupChannels: MutableMap<Long, SakuraChatMessageChannel> = mutableMapOf()
 
     suspend fun getPrivateMessageChannel(
         agent: AggregatedAgentEntity,
@@ -72,16 +67,16 @@ class SakuraChatMessageChannelDaemon(
     }
 
     suspend fun getGroupMessageChannel(
-        groupIdentifier: String,
+        thirdPartyGroupEntityId: Long,
         agent: AggregatedAgentEntity,
         user: UserEntity
     ): SakuraChatMessageChannel {
         val agentId = agent.agent.id!!
         val userId = user.id!!
 
-        val channel = groupChannels[groupIdentifier] ?: run {
+        val channel = groupChannels[thirdPartyGroupEntityId] ?: run {
             val channel = imChannelService.getOrCreateGroupChannelByUserIdAndAgentId(
-                groupIdentifier,
+                thirdPartyGroupEntityId,
                 userId,
                 agentId
             )
@@ -96,7 +91,7 @@ class SakuraChatMessageChannelDaemon(
                 )
                 it.registerListener(agentMember, agentMember)
 
-                groupChannels.getOrPut(groupIdentifier) { it }
+                groupChannels.getOrPut(thirdPartyGroupEntityId) { it }
             }
         }
 

@@ -94,9 +94,7 @@ class ThirdPartyAccountServiceImpl(
             .getBeansOfType<ThirdPartyAccountAdapter<Any>>()
             .values
             .filter {
-                it.getPlatform() == platform
-                        && it.getThirdPartyAccountClass().simpleName == thirdPartyAccountClass.simpleName
-                        && it.getThirdPartyAccountClass().canonicalName == thirdPartyAccountClass.canonicalName
+                it.getPlatform() == platform && it.getThirdPartyAccountClass().isAssignableFrom(thirdPartyAccountClass)
             }
     }
 }
