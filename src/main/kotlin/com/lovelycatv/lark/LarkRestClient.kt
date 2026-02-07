@@ -18,6 +18,7 @@ import com.lark.oapi.service.im.v1.model.CreateMessageReq
 import com.lark.oapi.service.im.v1.model.CreateMessageReqBody
 import com.lovelycatv.lark.exception.LarkRestRequestException
 import com.lovelycatv.lark.message.AbstractLarkMessage
+import com.lovelycatv.lark.message.LarkTextMessage
 import com.lovelycatv.lark.response.LarkGetTenantTokenResponse
 import com.lovelycatv.lark.response.LarkSendMessageResponse
 import com.lovelycatv.lark.type.LarkIdType
@@ -52,6 +53,14 @@ class LarkRestClient(
             client.auth().v3().tenantAccessToken().internal(req),
             LarkGetTenantTokenResponse::class.java
         )
+    }
+
+    fun sendMessage(
+        receiverIdType: LarkIdType,
+        receiverId: String,
+        message: String
+    ): LarkSendMessageResponse {
+        return this.sendMessage(receiverIdType, receiverId, LarkTextMessage(message))
     }
 
     /**

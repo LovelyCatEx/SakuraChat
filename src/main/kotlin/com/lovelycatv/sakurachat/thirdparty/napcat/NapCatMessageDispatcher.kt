@@ -117,40 +117,57 @@ class NapCatMessageDispatcher(
         )
 
         // 3. Make sure the message sender has been registered to 3rd party account table
-        if (event is PrivateMessageEvent) {
-            thirdPartyAccountService.getOrAddAccount(
-                ThirdPartyPlatform.NAPCAT_OICQ,
-                event.privateSender
-            )
-        } else if (event is GroupMessageEvent) {
-            thirdPartyAccountService.getOrAddAccount(
-                ThirdPartyPlatform.NAPCAT_OICQ,
-                event.sender
-            )
-        } else {
-            logger.warn("Could not get or create third party account for event ${event::class.qualifiedName}")
-            return false
+        when (event) {
+            is PrivateMessageEvent -> {
+                thirdPartyAccountService.getOrAddAccount(
+                    ThirdPartyPlatform.NAPCAT_OICQ,
+                    event.privateSender
+                )
+            }
+
+            is GroupMessageEvent -> {
+                thirdPartyAccountService.getOrAddAccount(
+                    ThirdPartyPlatform.NAPCAT_OICQ,
+                    event.sender
+                )
+            }
+
+            else -> {
+                logger.warn("Could not get or create third party account for event ${event::class.qualifiedName}")
+                return false
+            }
         }
 
         // 4. Find the related agent
+        val relatedAgentAccountId = thirdPartyAccountService.getAccountIdByPlatformAccountObject(
+            ThirdPartyPlatform.NAPCAT_OICQ,
+            bot
+        )
+
         val relatedAgent = agentService.getAgentByThirdPartyAccount(
             ThirdPartyPlatform.NAPCAT_OICQ,
-            bot.selfId.toString()
+            relatedAgentAccountId
         )
 
         if (relatedAgent == null) {
-            logger.warn("Cannot find related agent for OICQ Bot Account: ${bot.selfId}")
+            logger.warn("Cannot find related agent for OICQ Bot Account: $relatedAgentAccountId")
             return false
         }
 
         // 5. Find the related user
-        val userOICQId = if (event is PrivateMessageEvent) {
-            event.privateSender.userId
-        } else if (event is GroupMessageEvent) {
-            event.sender.userId
-        } else {
-            logger.warn("Could not get OICQ userId from event: ${event::class.qualifiedName}")
-            return false
+        val userOICQId = when (event) {
+            is PrivateMessageEvent -> {
+                event.privateSender.userId
+            }
+
+            is GroupMessageEvent -> {
+                event.sender.userId
+            }
+
+            else -> {
+                logger.warn("Could not get OICQ userId from event: ${event::class.qualifiedName}")
+                return false
+            }
         }
 
         val userPlatformAccountId = thirdPartyAccountService.getAccountIdByPlatformAccountObject(
@@ -160,10 +177,7 @@ class NapCatMessageDispatcher(
 
         val relatedUser = userService.getUserByThirdPartyAccount(
             ThirdPartyPlatform.NAPCAT_OICQ,
-            thirdPartyAccountService.getAccountIdByPlatformAccountObject(
-                ThirdPartyPlatform.NAPCAT_OICQ,
-                userPlatformAccountId
-            )
+            userPlatformAccountId
         )
 
         if (relatedUser == null) {
@@ -177,12 +191,12 @@ class NapCatMessageDispatcher(
             return false
         }
 
+        // 6. Find the private message channel
         val agent = agentService.toAggregatedAgentEntity(relatedAgent)
 
         logger.info("Agent ${agent.agent.name} found for handling this private message: ${event.message}")
         logger.info("Agent: ${agent.copy(agent = agent.agent.copy(prompt = "<...>")).toJSONString()}")
 
-        // 6. Find the private message channel
         val privateMessageChannel = sakuraChatMessageChannelDaemon.getPrivateMessageChannel(
             agent,
             relatedUser
@@ -190,7 +204,7 @@ class NapCatMessageDispatcher(
 
         // 7. Prepare message
         val messageToSend = messageAdapterManager
-            .getAdapter(ThirdPartyPlatform.NAPCAT_OICQ)
+            .getAdapter(ThirdPartyPlatform.NAPCAT_OICQ, event::class.java)
             ?.transform(
                 input = event,
                 extraBody = SakuraChatMessageExtra(
@@ -202,6 +216,13 @@ class NapCatMessageDispatcher(
 
         if (messageToSend == null) {
             logger.warn("Could not transform NapCat message to SakuraChat capable message")
+
+            bot.sendPrivateMsg(
+                userOICQId,
+                "Could not transform NapCat message to SakuraChat capable message",
+                true
+            )
+
             return false
         }
 

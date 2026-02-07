@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component
 @Component
 class LarkMessageAdapter : IMessageAdapter<EventMessage> {
     override fun getPlatform(): ThirdPartyPlatform {
-        return ThirdPartyPlatform.NAPCAT_OICQ
+        return ThirdPartyPlatform.LARK
     }
 
     override fun getInputMessageClass(): Class<EventMessage> {

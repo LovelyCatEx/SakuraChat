@@ -43,9 +43,9 @@ class ThirdPartyAccountServiceImpl(
         platform: ThirdPartyPlatform,
         platformAccount: Class<out Any>
     ): ThirdPartyAccountAdapter<Any> {
-        val adapters = this.getThirdPartyAccountAdapter(platform, platformAccount::class.java)
+        val adapters = this.getThirdPartyAccountAdapter(platform, platformAccount)
         if (adapters.isEmpty()) {
-            throw BusinessException("No third party account adapter found for platform $platform")
+            throw BusinessException("No third party account adapter found for platform $platform account ${platformAccount.canonicalName}")
         }
 
         return adapters.first()
@@ -61,6 +61,7 @@ class ThirdPartyAccountServiceImpl(
             id = snowIdGenerator.nextId(),
             accountId = adapter.getAccountId(platformAccount),
             nickname = adapter.getNickName(platformAccount),
+            platform = adapter.getPlatform().platformId,
             createdTime = System.currentTimeMillis(),
             modifiedTime = System.currentTimeMillis(),
             deletedTime = null

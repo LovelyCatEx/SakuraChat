@@ -18,9 +18,13 @@ import org.springframework.stereotype.Component
 class MessageAdapterManager(
     private val applicationContext: ApplicationContext
 ) {
-    fun getAdapter(platform: ThirdPartyPlatform): IMessageAdapter<Any>? {
+    fun getAdapter(platform: ThirdPartyPlatform, inputClazz: Class<out Any>): IMessageAdapter<Any>? {
         return applicationContext
             .getBeansOfType<IMessageAdapter<Any>>()
-            .values.firstOrNull { it.getPlatform() == platform }
+            .values.firstOrNull {
+                it.getPlatform() == platform
+                        && it.getInputMessageClass().simpleName == inputClazz.simpleName
+                        && it.getInputMessageClass().canonicalName == inputClazz.canonicalName
+            }
     }
 }
