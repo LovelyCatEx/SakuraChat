@@ -14,4 +14,8 @@ class TextMessage(
     sequence: Long,
     val message: String,
     extraBody: ExtraBody?
-) : AbstractMessage(MessageType.TEXT, sequence, extraBody)
+) : AbstractMessage(MessageType.TEXT, sequence, extraBody) {
+    override fun isEmpty(): Boolean {
+        return this.message.isEmpty()
+    }
+}

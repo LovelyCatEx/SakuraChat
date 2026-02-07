@@ -13,4 +13,6 @@ package com.lovelycatv.lark.message
  */
 abstract class AbstractLarkMessage(
     val type: LarkMessageType
-)
+) {
+    abstract fun isEmpty(): Boolean
+}

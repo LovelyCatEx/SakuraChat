@@ -75,12 +75,21 @@ class SakuraChatUser(
         accessorActions: suspend IThirdPartyIMAccessor<Any, Any, Any>.(SakuraChatMessageExtra) -> Unit
     ) {
         println("User ${user.id} received message from sender ${sender.memberId}: ${message.toJSONString()}")
-        if (SakuraChatMessageExtra.isCapable(message.extraBody)) {
-            val imAccessor = thirdPartyIMAccessorManager.getAccessor(message.extraBody.getPlatformType())
-                ?: throw IllegalArgumentException("No IM Accessor for ${message.extraBody.getPlatformType()}")
 
-            coroutineScope.launch {
-                accessorActions.invoke(imAccessor, message.extraBody)
+        if (SakuraChatMessageExtra.isCapable(message.extraBody)) {
+            try {
+                val imAccessor = thirdPartyIMAccessorManager.getAccessor(message.extraBody.getPlatformType())
+                    ?: throw IllegalArgumentException("No IM Accessor for ${message.extraBody.getPlatformType()}")
+
+                coroutineScope.launch {
+                    try {
+                        accessorActions.invoke(imAccessor, message.extraBody)
+                    } catch (e: Exception) {
+                        logger.error("Could not send message received by channel user $memberId, accessor: ${imAccessor::class.qualifiedName}, data: ${message.toJSONString()}", e)
+                    }
+                }
+            } catch (e: Exception) {
+                logger.error("Could not handle message received by channel user $memberId", e)
             }
         } else {
             logger.warn("User ${user.id} received a message but not seem like a valid SakuraChat Message, data: ${message.toJSONString()}")

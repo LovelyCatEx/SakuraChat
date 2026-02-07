@@ -9,6 +9,7 @@
 package com.lovelycatv.sakurachat.core
 
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
+import com.lovelycatv.sakurachat.core.im.message.ChainMessage
 import com.lovelycatv.sakurachat.core.im.message.TextMessage
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.service.UserService
@@ -54,11 +55,13 @@ class SakuraChatAgent(
 
         coroutineScope.launch {
             if (sender is SakuraChatUser) {
-                channel.sendPrivateMessage(
-                    channel.getAgentMember(agent.agent.id!!)!!,
-                    sender,
-                    getMessageToResponse(sender, message)
-                )
+                getMessageToResponse(sender, message).forEach {
+                    channel.sendPrivateMessage(
+                        channel.getAgentMember(agent.agent.id!!)!!,
+                        sender,
+                        it
+                    )
+                }
             }
         }
     }
@@ -72,10 +75,12 @@ class SakuraChatAgent(
 
         coroutineScope.launch {
             if (sender is SakuraChatUser) {
-                channel.sendGroupMessage(
-                    channel.getAgentMember(agent.agent.id!!)!!,
-                    getMessageToResponse(sender, message)
-                )
+                getMessageToResponse(sender, message).forEach {
+                    channel.sendGroupMessage(
+                        channel.getAgentMember(agent.agent.id!!)!!,
+                        it
+                    )
+                }
             }
         }
     }
@@ -83,23 +88,25 @@ class SakuraChatAgent(
     private suspend fun getMessageToResponse(
         sender: SakuraChatUser,
         message: AbstractMessage
-    ): AbstractMessage {
-        val chatModelEntity = agent.chatModel ?: return message
-        val modelCredential = agent.chatModel.credential ?: return message
-        val modelProvider = agent.chatModel.provider ?: return message
+    ): List<AbstractMessage> {
+        val chatModelEntity = agent.chatModel ?: return listOf(message)
+        val modelCredential = agent.chatModel.credential ?: return listOf(message)
+        val modelProvider = agent.chatModel.provider ?: return listOf(message)
 
         val predictedPoints = (
-                (0.95 * agent.agent.prompt.length + chatModelEntity.chatModel.maxTokens)
-                        * chatModelEntity.chatModel.getQualifiedTokenPointRate()
+                0.95 * agent.agent.prompt.length * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.inputTokenPointRate) +
+                chatModelEntity.chatModel.maxTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.outputTokenPointRate)
         ).toLong()
 
         val pointsThreshold = userService.hasPoints(sender.user.id!!, predictedPoints)
 
         if (!pointsThreshold) {
-            return TextMessage(
-                sequence = System.currentTimeMillis(),
-                message = "Insufficient points, required $predictedPoints",
-                extraBody = message.extraBody
+            return listOf(
+                TextMessage(
+                    sequence = System.currentTimeMillis(),
+                    message = "Insufficient points, required $predictedPoints",
+                    extraBody = message.extraBody
+                )
             )
         }
 
@@ -131,14 +138,17 @@ class SakuraChatAgent(
             )
         )
 
-        val consumedPoints = resp.usage.totalTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate()
+        val consumedPoints = resp.usage.promptTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.inputTokenPointRate) +
+                resp.usage.completionTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.outputTokenPointRate)
 
         userService.consumePoints(sender.user.id!!, ceil(consumedPoints).toLong())
 
-        return TextMessage(
-            sequence = System.currentTimeMillis(),
-            message = resp.choices.first().message.content,
-            extraBody = message.extraBody
-        )
+        return resp.choices.first().message.content.split("\n").map {
+            TextMessage(
+                sequence = System.currentTimeMillis(),
+                message = it,
+                extraBody = message.extraBody
+            )
+        }
     }
 }

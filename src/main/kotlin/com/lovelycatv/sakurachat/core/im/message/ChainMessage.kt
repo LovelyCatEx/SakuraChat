@@ -14,4 +14,8 @@ class ChainMessage(
     sequence: Long,
     extraBody: ExtraBody?,
     val messages: List<AbstractMessage>
-) : AbstractMessage(MessageType.CHAIN, sequence, extraBody)
+) : AbstractMessage(MessageType.CHAIN, sequence, extraBody) {
+    override fun isEmpty(): Boolean {
+        return messages.isEmpty() || messages.all { it.isEmpty() }
+    }
+}

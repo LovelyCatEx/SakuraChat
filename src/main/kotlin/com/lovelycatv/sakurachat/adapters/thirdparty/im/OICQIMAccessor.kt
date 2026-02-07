@@ -18,6 +18,7 @@ import com.lovelycatv.sakurachat.repository.NapCatPrivateMessageRepository
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import com.lovelycatv.sakurachat.utils.SnowIdGenerator
 import com.lovelycatv.sakurachat.utils.toJSONString
+import com.lovelycatv.vertex.log.logger
 import com.mikuac.shiro.common.utils.MsgUtils
 import com.mikuac.shiro.common.utils.ShiroUtils
 import com.mikuac.shiro.core.Bot
@@ -31,6 +32,8 @@ class OICQIMAccessor(
     private val napCatGroupMessageRepository: NapCatGroupMessageRepository,
     private val snowIdGenerator: SnowIdGenerator
 ) : IThirdPartyIMAccessor<Bot, Long, Long> {
+    private val logger = logger()
+
     override fun getPlatform(): ThirdPartyPlatform {
         return ThirdPartyPlatform.NAPCAT_OICQ
     }
@@ -40,6 +43,11 @@ class OICQIMAccessor(
         target: Long,
         message: AbstractMessage
     ): Boolean {
+        if (message.isEmpty()) {
+            logger.warn("sendPrivateMessage skipped due to empty message")
+            return false
+        }
+
         val msg = MsgUtils.builder().apply {
             if (message is TextMessage) {
                 text(message.message)
@@ -73,6 +81,11 @@ class OICQIMAccessor(
         replyTarget: Long,
         message: AbstractMessage
     ): Boolean {
+        if (message.isEmpty()) {
+            logger.warn("sendGroupMessage skipped due to empty message")
+            return false
+        }
+
         val msg = if (message is TextMessage) {
             MsgUtils
                 .builder()

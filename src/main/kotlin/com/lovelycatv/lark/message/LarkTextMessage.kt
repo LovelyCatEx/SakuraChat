@@ -15,4 +15,8 @@ package com.lovelycatv.lark.message
  */
 class LarkTextMessage(
     val text: String
-) : AbstractLarkMessage(LarkMessageType.TEXT)
+) : AbstractLarkMessage(LarkMessageType.TEXT) {
+    override fun isEmpty(): Boolean {
+        return this.text.isEmpty()
+    }
+}

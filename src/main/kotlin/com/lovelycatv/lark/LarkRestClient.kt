@@ -76,6 +76,10 @@ class LarkRestClient(
         receiverId: String,
         message: AbstractLarkMessage
     ): LarkSendMessageResponse {
+        if (message.isEmpty()) {
+            throw LarkRestRequestException("Message is empty")
+        }
+
         val validTypes = arrayOf(
             LarkIdType.USER_ID,
             LarkIdType.CHAT_ID,

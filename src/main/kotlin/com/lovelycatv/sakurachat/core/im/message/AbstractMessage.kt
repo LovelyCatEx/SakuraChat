@@ -19,4 +19,6 @@ abstract class AbstractMessage @JsonCreator constructor(
     val sequence: Long,
     @field:JsonProperty("extraBody")
     val extraBody: ExtraBody?
-)
+) {
+    abstract fun isEmpty(): Boolean
+}

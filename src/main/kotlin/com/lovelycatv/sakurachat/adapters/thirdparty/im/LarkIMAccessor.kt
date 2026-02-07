@@ -16,10 +16,13 @@ import com.lovelycatv.sakurachat.core.im.message.TextMessage
 import com.lovelycatv.sakurachat.core.im.thirdparty.IThirdPartyIMAccessor
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import com.lovelycatv.sakurachat.utils.toJSONString
+import com.lovelycatv.vertex.log.logger
 import org.springframework.stereotype.Component
 
 @Component
 class LarkIMAccessor : IThirdPartyIMAccessor<LarkRestClient, String, String> {
+    private val logger = logger()
+
     override fun getPlatform(): ThirdPartyPlatform {
         return ThirdPartyPlatform.LARK
     }
@@ -29,6 +32,11 @@ class LarkIMAccessor : IThirdPartyIMAccessor<LarkRestClient, String, String> {
         target: String,
         message: AbstractMessage
     ): Boolean {
+        if (message.isEmpty()) {
+            logger.warn("sendPrivateMessage skipped due to empty message")
+            return false
+        }
+
         if (message is TextMessage) {
             invoker.sendMessage(
                 LarkIdType.UNION_ID,
@@ -52,6 +60,11 @@ class LarkIMAccessor : IThirdPartyIMAccessor<LarkRestClient, String, String> {
         replyTarget: String,
         message: AbstractMessage
     ): Boolean {
+        if (message.isEmpty()) {
+            logger.warn("sendGroupMessage skipped due to empty message")
+            return false
+        }
+
         if (message is TextMessage) {
             invoker.sendMessage(
                 LarkIdType.CHAT_ID,
