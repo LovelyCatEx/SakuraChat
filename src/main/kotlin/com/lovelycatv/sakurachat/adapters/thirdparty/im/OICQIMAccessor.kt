@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component
 @Component
 class OICQIMAccessor : IThirdPartyIMAccessor<Bot, Long> {
     override fun getPlatform(): ThirdPartyPlatform {
-        return ThirdPartyPlatform.OICQ
+        return ThirdPartyPlatform.NAPCAT_OICQ
     }
 
     override suspend fun sendPrivateMessage(

@@ -9,9 +9,12 @@
 package com.lovelycatv.sakurachat.core.im.message
 
 import com.lovelycatv.sakurachat.core.ExtraBody
+import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 
-class TextMessage(
-    sequence: Long,
-    val message: String,
-    extraBody: ExtraBody?
-) : AbstractMessage(sequence, extraBody)
+interface IMessageAdapter<I> {
+    fun getPlatform(): ThirdPartyPlatform
+
+    fun getInputMessageClass(): Class<I>
+
+    fun transform(input: I, extraBody: ExtraBody): AbstractMessage
+}

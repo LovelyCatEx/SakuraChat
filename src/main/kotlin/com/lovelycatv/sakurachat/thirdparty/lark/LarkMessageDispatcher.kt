@@ -11,6 +11,7 @@ package com.lovelycatv.sakurachat.thirdparty.lark
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.lark.oapi.service.im.v1.model.P2MessageReadV1
 import com.lark.oapi.service.im.v1.model.P2MessageReceiveV1
+import com.lovelycatv.lark.message.LarkTextMessage
 import com.lovelycatv.sakurachat.thirdparty.AbstractThirdPartyMessageDispatcher
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import com.lovelycatv.sakurachat.utils.toJSONString

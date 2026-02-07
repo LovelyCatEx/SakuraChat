@@ -6,15 +6,13 @@
  *
  */
 
-package com.lovelycatv.sakurachat.thirdparty.lark
+package com.lovelycatv.lark.message
 
 /**
  * Lark Text Message
- *
- * https://open.feishu.cn/document/server-docs/im-v1/message-content-description/message_content#c9e08671
  *
  * @property text text
  */
 class LarkTextMessage(
     val text: String
-)
+) : AbstractLarkMessage(LarkMessageType.TEXT)

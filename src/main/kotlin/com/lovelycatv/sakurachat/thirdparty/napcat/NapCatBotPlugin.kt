@@ -21,13 +21,13 @@ class NapCatBotPlugin(
     private val thirdPartyMessageDispatcherManager: ThirdPartyMessageDispatcherManager
 ) : BotPlugin() {
     override fun onPrivateMessage(bot: Bot, event: PrivateMessageEvent): Int {
-        thirdPartyMessageDispatcherManager.dispatch(ThirdPartyPlatform.OICQ, bot, event)
+        thirdPartyMessageDispatcherManager.dispatch(ThirdPartyPlatform.NAPCAT_OICQ, bot, event)
 
         return super.onPrivateMessage(bot, event)
     }
 
     override fun onGroupMessage(bot: Bot, event: GroupMessageEvent): Int {
-        thirdPartyMessageDispatcherManager.dispatch(ThirdPartyPlatform.OICQ, bot, event)
+        thirdPartyMessageDispatcherManager.dispatch(ThirdPartyPlatform.NAPCAT_OICQ, bot, event)
 
         return super.onGroupMessage(bot, event)
     }

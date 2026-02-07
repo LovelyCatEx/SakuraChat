@@ -8,6 +8,7 @@
 
 package com.lovelycatv.sakurachat.thirdparty.napcat
 
+import com.lovelycatv.sakurachat.adapters.thirdparty.message.MessageAdapterManager
 import com.lovelycatv.sakurachat.core.SakuraChatMessageExtra
 import com.lovelycatv.sakurachat.core.im.message.TextMessage
 import com.lovelycatv.sakurachat.daemon.SakuraChatMessageChannelDaemon
@@ -41,7 +42,8 @@ class NapCatMessageDispatcher(
     private val agentService: AgentService,
     private val userService: UserService,
     private val sakuraChatMessageChannelDaemon: SakuraChatMessageChannelDaemon,
-) : AbstractThirdPartyMessageDispatcher(ThirdPartyPlatform.OICQ) {
+    private val messageAdapterManager: MessageAdapterManager
+) : AbstractThirdPartyMessageDispatcher(ThirdPartyPlatform.NAPCAT_OICQ) {
     private val logger = logger()
 
     override suspend fun doHandle(vararg args: Any?): Boolean {
@@ -111,19 +113,19 @@ class NapCatMessageDispatcher(
 
         // 2. Make sure the bot has been registered to 3rd party account table
         thirdPartyAccountService.getOrAddAccount(
-            ThirdPartyPlatform.OICQ,
+            ThirdPartyPlatform.NAPCAT_OICQ,
             bot
         )
 
         // 3. Make sure the message sender has been registered to 3rd party account table
         if (event is PrivateMessageEvent) {
             thirdPartyAccountService.getOrAddAccount(
-                ThirdPartyPlatform.OICQ,
+                ThirdPartyPlatform.NAPCAT_OICQ,
                 event.privateSender
             )
         } else if (event is GroupMessageEvent) {
             thirdPartyAccountService.getOrAddAccount(
-                ThirdPartyPlatform.OICQ,
+                ThirdPartyPlatform.NAPCAT_OICQ,
                 event.sender
             )
         } else {
@@ -133,7 +135,7 @@ class NapCatMessageDispatcher(
 
         // 4. Find the related agent
         val relatedAgent = agentService.getAgentByThirdPartyAccount(
-            ThirdPartyPlatform.OICQ,
+            ThirdPartyPlatform.NAPCAT_OICQ,
             bot.selfId.toString()
         )
 
@@ -153,14 +155,14 @@ class NapCatMessageDispatcher(
         }
 
         val userPlatformAccountId = thirdPartyAccountService.getAccountIdByPlatformAccountObject(
-            ThirdPartyPlatform.OICQ,
+            ThirdPartyPlatform.NAPCAT_OICQ,
             userOICQId
         )
 
         val relatedUser = userService.getUserByThirdPartyAccount(
-            ThirdPartyPlatform.OICQ,
+            ThirdPartyPlatform.NAPCAT_OICQ,
             thirdPartyAccountService.getAccountIdByPlatformAccountObject(
-                ThirdPartyPlatform.OICQ,
+                ThirdPartyPlatform.NAPCAT_OICQ,
                 userPlatformAccountId
             )
         )
@@ -187,21 +189,30 @@ class NapCatMessageDispatcher(
             relatedUser
         )
 
-        // 7. Send message through the message channel
+        // 7. Prepare message
+        val messageToSend = messageAdapterManager
+            .getAdapter(ThirdPartyPlatform.NAPCAT_OICQ)
+            ?.transform(
+                input = event,
+                extraBody = SakuraChatMessageExtra(
+                    ThirdPartyPlatform.NAPCAT_OICQ,
+                    userPlatformAccountId,
+                    bot
+                )
+            )
+
+        if (messageToSend == null) {
+            logger.warn("Could not transform NapCat message to SakuraChat capable message")
+            return false
+        }
+
+        // 8. Send message through the message channel
         return privateMessageChannel.sendPrivateMessage(
             sender = privateMessageChannel.getUserMember(relatedUser.id!!)
                 ?: throw IllegalArgumentException("Member user: ${relatedUser.id} is not in channel ${privateMessageChannel.getChannelIdentifier()}"),
             receiver = privateMessageChannel.getAgentMember(agent.agent.id!!)
                 ?: throw IllegalArgumentException("Member agent: ${agent.agent.id} is not in channel ${privateMessageChannel.getChannelIdentifier()}"),
-            message = TextMessage(
-                sequence = System.currentTimeMillis(),
-                message = event.message,
-                extraBody = SakuraChatMessageExtra(
-                    ThirdPartyPlatform.OICQ,
-                    userPlatformAccountId,
-                    bot
-                )
-            )
+            message = messageToSend
         )
     }
 }

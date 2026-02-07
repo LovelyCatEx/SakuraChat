@@ -10,8 +10,8 @@ package com.lovelycatv.sakurachat.core.im.message
 
 import com.lovelycatv.sakurachat.core.ExtraBody
 
-class TextMessage(
+class ChainMessage(
     sequence: Long,
-    val message: String,
-    extraBody: ExtraBody?
+    extraBody: ExtraBody?,
+    val messages: List<AbstractMessage>
 ) : AbstractMessage(sequence, extraBody)

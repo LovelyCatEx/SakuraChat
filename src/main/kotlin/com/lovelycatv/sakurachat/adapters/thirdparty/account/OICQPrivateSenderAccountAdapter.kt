@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component
 @Component
 class OICQPrivateSenderAccountAdapter : ThirdPartyAccountAdapter<PrivateMessageEvent.PrivateSender> {
     override fun getPlatform(): ThirdPartyPlatform {
-        return ThirdPartyPlatform.OICQ
+        return ThirdPartyPlatform.NAPCAT_OICQ
     }
 
     override fun getThirdPartyAccountClass(): Class<PrivateMessageEvent.PrivateSender> {
