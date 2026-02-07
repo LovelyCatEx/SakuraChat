@@ -8,17 +8,9 @@
 
 package com.lovelycatv.sakurachat.napcat
 
-import com.lovelycatv.sakurachat.core.SakuraChatAgentInstanceManager
 import com.lovelycatv.sakurachat.core.SakuraChatMessageExtra
-import com.lovelycatv.sakurachat.core.SakuraChatUser
-import com.lovelycatv.sakurachat.core.SakuraChatUserInstanceManager
-import com.lovelycatv.sakurachat.core.im.channel.IMessageChannel
-import com.lovelycatv.sakurachat.core.im.channel.IMessageChannelMember
-import com.lovelycatv.sakurachat.core.im.channel.MessageChannelListener
-import com.lovelycatv.sakurachat.core.im.channel.SakuraChatMessageChannel
-import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
 import com.lovelycatv.sakurachat.core.im.message.TextMessage
-import com.lovelycatv.sakurachat.daemon.SakuraChatAgentDaemon
+import com.lovelycatv.sakurachat.daemon.SakuraChatMessageChannelDaemon
 import com.lovelycatv.sakurachat.entity.napcat.NapCatGroupMessageEntity
 import com.lovelycatv.sakurachat.entity.napcat.NapCatPrivateMessageEntity
 import com.lovelycatv.sakurachat.repository.NapCatGroupMessageRepository
@@ -48,9 +40,7 @@ class NapCatBotPlugin(
     private val thirdPartyAccountService: ThirdPartyAccountService,
     private val agentService: AgentService,
     private val userService: UserService,
-    private val sakuraChatAgentDaemon: SakuraChatAgentDaemon,
-    private val sakuraChatAgentInstanceManager: SakuraChatAgentInstanceManager,
-    private val sakuraChatUserInstanceManager: SakuraChatUserInstanceManager
+    private val sakuraChatMessageChannelDaemon: SakuraChatMessageChannelDaemon
 ) : BotPlugin() {
     private val logger = logger()
 
@@ -99,73 +89,16 @@ class NapCatBotPlugin(
 
                 if (relatedUser == null) {
                     logger.warn("Cannot find related user for OICQ User Account: ${event.privateSender.userId}")
+                    bot.sendPrivateMsg(event.privateSender.userId, "Your OICQ account ${event.privateSender.userId} has not been registered in SakuraChat, please turn to https://sakurachat.lovelycatv.com and bind your OICQ Account.", true)
                 } else {
                     val agent = agentService.toAggregatedAgentEntity(relatedAgent)
                     logger.info("Agent ${agent.agent.name} found for handling this private message: ${event.message}")
                     logger.info("Agent: ${agent.copy(agent = agent.agent.copy(prompt = "<...>")).toJSONString()}")
 
                     // Find the private message channel
-                    val privateMessageChannel = sakuraChatAgentDaemon.getPrivateMessageChannel(
+                    val privateMessageChannel = sakuraChatMessageChannelDaemon.getPrivateMessageChannel(
                         agent,
-                        relatedUser,
-                        object : MessageChannelListener {
-                            override fun onPrivateMessage(
-                                channel: IMessageChannel,
-                                sender: IMessageChannelMember,
-                                message: AbstractMessage
-                            ) {
-                                println("Agent ${agent.agent.id} received message: ${message.toJSONString()}")
-
-                                coroutineScope.launch {
-                                    channel.sendPrivateMessage(
-                                        if (channel is SakuraChatMessageChannel)
-                                            channel.getAgentMember(agent.agent.id!!)!!
-                                        else
-                                            channel.getMemberById("agent_" + agent.agent.id!!)!!,
-                                        sender,
-                                        message
-                                    )
-                                }
-                            }
-
-                            override fun onGroupMessage(
-                                channel: IMessageChannel,
-                                sender: IMessageChannelMember,
-                                message: AbstractMessage
-                            ) {
-
-                            }
-                        },
-                        object : MessageChannelListener {
-                            override fun onPrivateMessage(
-                                channel: IMessageChannel,
-                                sender: IMessageChannelMember,
-                                message: AbstractMessage
-                            ) {
-                                println("User ${relatedUser.id} received message from sender ${sender.memberId}: ${message.toJSONString()}")
-                                if (SakuraChatMessageExtra.isCapable(message.extraBody)) {
-                                    when (message.extraBody.getPlatformType()) {
-                                        ThirdPartyPlatform.OICQ -> {
-                                            if (message is TextMessage) {
-                                                bot.sendPrivateMsg(message.extraBody.platformAccountId.toLong(), message.message, true)
-                                            } else {
-                                                bot.sendPrivateMsg(message.extraBody.platformAccountId.toLong(), message.toJSONString(), true)
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    logger.warn("User ${relatedUser.id} received a message but not seem like a valid SakuraChat Message, data: ${message.toJSONString()}")
-                                }
-                            }
-
-                            override fun onGroupMessage(
-                                channel: IMessageChannel,
-                                sender: IMessageChannelMember,
-                                message: AbstractMessage
-                            ) {
-
-                            }
-                        }
+                        relatedUser
                     )
 
                     privateMessageChannel.sendPrivateMessage(
@@ -178,7 +111,8 @@ class NapCatBotPlugin(
                              message = event.message,
                              extraBody = SakuraChatMessageExtra(
                                  ThirdPartyPlatform.OICQ,
-                                 event.privateSender.userId.toString()
+                                 event.privateSender.userId.toString(),
+                                 bot
                              )
                         )
                     )

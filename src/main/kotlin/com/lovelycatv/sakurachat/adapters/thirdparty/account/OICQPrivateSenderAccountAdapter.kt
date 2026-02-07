@@ -6,24 +6,24 @@
  *
  */
 
-package com.lovelycatv.sakurachat.adapters
+package com.lovelycatv.sakurachat.adapters.thirdparty.account
 
 import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
-import com.mikuac.shiro.dto.event.message.GroupMessageEvent
+import com.mikuac.shiro.dto.event.message.PrivateMessageEvent
 import org.springframework.stereotype.Component
 
 @Component
-class OICQGroupSenderAccountAdapter : ThirdPartyAccountAdapter<GroupMessageEvent.GroupSender> {
+class OICQPrivateSenderAccountAdapter : ThirdPartyAccountAdapter<PrivateMessageEvent.PrivateSender> {
     override fun getPlatform(): ThirdPartyPlatform {
         return ThirdPartyPlatform.OICQ
     }
 
-    override fun getThirdPartyAccountClass(): Class<GroupMessageEvent.GroupSender> {
-        return GroupMessageEvent.GroupSender::class.java
+    override fun getThirdPartyAccountClass(): Class<PrivateMessageEvent.PrivateSender> {
+        return PrivateMessageEvent.PrivateSender::class.java
     }
 
-    override fun transform(thirdPartyAccount: GroupMessageEvent.GroupSender): ThirdPartyAccountEntity {
+    override fun transform(thirdPartyAccount: PrivateMessageEvent.PrivateSender): ThirdPartyAccountEntity {
         return ThirdPartyAccountEntity(
             accountId = thirdPartyAccount.userId.toString(),
             nickname = thirdPartyAccount.nickname.toString(),

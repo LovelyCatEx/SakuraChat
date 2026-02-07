@@ -16,7 +16,7 @@ class SakuraChatAgentInstanceManager {
     private val instances = mutableMapOf<String, SakuraChatAgent>()
 
     fun getAgent(agentId: Long): SakuraChatAgent? {
-        return instances["agent_$agentId"]
+        return instances[SakuraChatAgent.buildMemberId(agentId)]
     }
 
     fun addAgent(agent: SakuraChatAgent): SakuraChatAgent {

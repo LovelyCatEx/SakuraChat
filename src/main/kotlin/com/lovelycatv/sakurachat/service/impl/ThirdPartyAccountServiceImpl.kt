@@ -8,7 +8,7 @@
 
 package com.lovelycatv.sakurachat.service.impl
 
-import com.lovelycatv.sakurachat.adapters.ThirdPartyAccountAdapter
+import com.lovelycatv.sakurachat.adapters.thirdparty.account.ThirdPartyAccountAdapter
 import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.exception.BusinessException
 import com.lovelycatv.sakurachat.repository.ThirdPartyAccountRepository

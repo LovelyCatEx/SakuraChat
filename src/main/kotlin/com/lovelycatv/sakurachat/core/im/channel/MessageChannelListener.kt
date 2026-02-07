@@ -10,16 +10,16 @@ package com.lovelycatv.sakurachat.core.im.channel
 
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
 
-interface MessageChannelListener {
+interface MessageChannelListener<C: IMessageChannel<M>, M: IMessageChannelMember> {
     fun onPrivateMessage(
-        channel: IMessageChannel,
-        sender: IMessageChannelMember,
+        channel: C,
+        sender: M,
         message: AbstractMessage
     )
 
     fun onGroupMessage(
-        channel: IMessageChannel,
-        sender: IMessageChannelMember,
+        channel: C,
+        sender: M,
         message: AbstractMessage
     )
 }

@@ -10,33 +10,25 @@ package com.lovelycatv.sakurachat.core.im.channel
 
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
 
-interface IMessageChannel {
+interface IMessageChannel<M: IMessageChannelMember> {
     fun getChannelIdentifier(): Long
 
-    fun addMember(member: IMessageChannelMember): IMessageChannelMember
+    fun addMember(member: M): M
 
-    fun removeMember(member: IMessageChannelMember): Boolean
+    fun removeMember(member: M): Boolean
 
-    fun listMembers(): List<IMessageChannelMember>
+    fun listMembers(): List<M>
 
-    fun getMemberById(id: String): IMessageChannelMember?
+    fun getMemberById(id: String): M?
 
     suspend fun sendPrivateMessage(
-        sender: IMessageChannelMember,
-        receiver: IMessageChannelMember,
+        sender: M,
+        receiver: M,
         message: AbstractMessage
     ): Boolean
 
     suspend fun sendGroupMessage(
-        sender: IMessageChannelMember,
+        sender: M,
         message: AbstractMessage
     ): Boolean
-
-    fun getListeners(member: IMessageChannelMember): List<MessageChannelListener>
-
-    fun registerListener(member: IMessageChannelMember, listener: MessageChannelListener)
-
-    fun unregisterListener(member: IMessageChannelMember, listener: MessageChannelListener)
-
-    fun unregisterAllListeners(member: IMessageChannelMember)
 }

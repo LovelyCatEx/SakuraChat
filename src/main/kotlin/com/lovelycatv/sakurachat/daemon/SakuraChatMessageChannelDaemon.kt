@@ -9,12 +9,8 @@
 package com.lovelycatv.sakurachat.daemon
 
 import com.lovelycatv.sakurachat.core.SakuraChatAgentInstanceManager
+import com.lovelycatv.sakurachat.core.SakuraChatMessageChannel
 import com.lovelycatv.sakurachat.core.SakuraChatUserInstanceManager
-import com.lovelycatv.sakurachat.core.im.channel.IMessageChannel
-import com.lovelycatv.sakurachat.core.im.channel.IMessageChannelMember
-import com.lovelycatv.sakurachat.core.im.channel.MessageChannelListener
-import com.lovelycatv.sakurachat.core.im.channel.SakuraChatMessageChannel
-import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
 import com.lovelycatv.sakurachat.entity.UserEntity
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.repository.AgentRepository
@@ -24,7 +20,7 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
-class SakuraChatAgentDaemon(
+class SakuraChatMessageChannelDaemon(
     private val agentRepository: AgentRepository,
     private val imChannelService: IMChannelService,
     private val sakuraChatAgentInstanceManager: SakuraChatAgentInstanceManager,
@@ -37,38 +33,6 @@ class SakuraChatAgentDaemon(
     suspend fun getPrivateMessageChannel(
         agent: AggregatedAgentEntity,
         user: UserEntity,
-        agentListener: MessageChannelListener = object : MessageChannelListener {
-            override fun onPrivateMessage(
-                channel: IMessageChannel,
-                sender: IMessageChannelMember,
-                message: AbstractMessage
-            ) {
-                logger.warn("Agent ${agent.agent.id} is not listening the channel ${channel.getChannelIdentifier()} on private messages")
-            }
-            override fun onGroupMessage(
-                channel: IMessageChannel,
-                sender: IMessageChannelMember,
-                message: AbstractMessage
-            ) {
-                logger.warn("Agent ${agent.agent.id} is not listening the channel ${channel.getChannelIdentifier()} on group messages")
-            }
-        },
-        userListener: MessageChannelListener = object : MessageChannelListener {
-            override fun onPrivateMessage(
-                channel: IMessageChannel,
-                sender: IMessageChannelMember,
-                message: AbstractMessage
-            ) {
-                logger.warn("User ${agent.agent.id} is not listening the channel ${channel.getChannelIdentifier()} on private messages")
-            }
-            override fun onGroupMessage(
-                channel: IMessageChannel,
-                sender: IMessageChannelMember,
-                message: AbstractMessage
-            ) {
-                logger.warn("User ${agent.agent.id} is not listening the channel ${channel.getChannelIdentifier()} on group messages")
-            }
-        }
     ): SakuraChatMessageChannel {
         val agentId = agent.agent.id!!
         val userId = user.id!!
@@ -90,9 +54,9 @@ class SakuraChatAgentDaemon(
                     }
                 )
 
-                it.registerListener(agentMember, agentListener)
+                it.registerListener(agentMember, agentMember)
 
-                it.registerListener(userMember, userListener)
+                it.registerListener(userMember, userMember)
 
                 privateChannels.getOrPut(agentId) {
                     mutableMapOf()

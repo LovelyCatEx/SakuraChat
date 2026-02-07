@@ -14,11 +14,13 @@ import kotlin.contracts.contract
 
 data class SakuraChatMessageExtra(
     val platform: ThirdPartyPlatform,
-    val platformAccountId: String
+    val platformAccountId: String,
+    val platformInvoker: Any
 ) : ExtraBody() {
     companion object {
         const val KEY_PLATFORM = "platform"
         const val KEY_PLATFORM_ACCOUNT_ID = "platform_account_id"
+        const val KEY_PLATFORM_INVOKER = "platform_invoker"
 
         @OptIn(ExperimentalContracts::class)
         fun isCapable(body: ExtraBody?): Boolean {
@@ -33,6 +35,7 @@ data class SakuraChatMessageExtra(
     init {
         this[KEY_PLATFORM] = platform.platformId
         this[KEY_PLATFORM_ACCOUNT_ID] = platformAccountId
+        this[KEY_PLATFORM_INVOKER] = platformInvoker.toString()
     }
 
     fun getPlatformType(): ThirdPartyPlatform {

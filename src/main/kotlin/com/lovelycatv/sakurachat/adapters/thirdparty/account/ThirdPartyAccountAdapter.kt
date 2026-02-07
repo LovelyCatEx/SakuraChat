@@ -6,7 +6,7 @@
  *
  */
 
-package com.lovelycatv.sakurachat.adapters
+package com.lovelycatv.sakurachat.adapters.thirdparty.account
 
 import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform

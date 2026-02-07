@@ -8,15 +8,18 @@
 
 package com.lovelycatv.sakurachat.core
 
+import com.lovelycatv.sakurachat.adapters.thirdparty.im.ThirdPartyIMAccessorManager
 import com.lovelycatv.sakurachat.entity.UserEntity
 import org.springframework.stereotype.Component
 
 @Component
-class SakuraChatUserInstanceManager {
+class SakuraChatUserInstanceManager(
+    private val thirdPartyIMAccessorManager: ThirdPartyIMAccessorManager
+) {
     private val instances = mutableMapOf<String, SakuraChatUser>()
 
     fun getUser(userId: Long): SakuraChatUser? {
-        return instances["user_$userId"]
+        return instances[SakuraChatUser.buildMemberId(userId)]
     }
 
     fun addUser(user: SakuraChatUser): SakuraChatUser {
@@ -27,7 +30,8 @@ class SakuraChatUserInstanceManager {
     fun addUser(user: UserEntity): SakuraChatUser {
         return this.addUser(
             SakuraChatUser(
-                user = user
+                user = user,
+                thirdPartyIMAccessorManager = thirdPartyIMAccessorManager
             )
         )
     }

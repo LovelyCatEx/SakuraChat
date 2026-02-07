@@ -11,16 +11,19 @@ package com.lovelycatv.sakurachat.core.im.channel
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
 import com.lovelycatv.vertex.log.logger
 
-abstract class AbstractMessageChannel(
+abstract class AbstractMessageChannel<
+        C: IMessageChannel<M>,
+        M: IMessageChannelMember,
+        L: MessageChannelListener<C, M>
+>(
     val channelId: Long
-) : IMessageChannel {
+) : ListenableMessageChannel<C, M, L>() {
     private val logger = logger()
-    private val members: MutableList<IMessageChannelMember> = mutableListOf()
-    private val listeners: MutableMap<IMessageChannelMember, MutableList<MessageChannelListener>> = mutableMapOf()
+    private val members: MutableList<M> = mutableListOf()
 
     override fun getChannelIdentifier(): Long = this.channelId
 
-    override fun addMember(member: IMessageChannelMember): IMessageChannelMember {
+    override fun addMember(member: M): M {
         if (this.getMemberById(member.memberId) == null) {
             this.members.add(member)
         }
@@ -28,21 +31,21 @@ abstract class AbstractMessageChannel(
         return member
     }
 
-    override fun removeMember(member: IMessageChannelMember): Boolean {
+    override fun removeMember(member: M): Boolean {
         return this.members.remove(member)
     }
 
-    override fun listMembers(): List<IMessageChannelMember> {
+    override fun listMembers(): List<M> {
         return this.members
     }
 
-    override fun getMemberById(id: String): IMessageChannelMember? {
+    override fun getMemberById(id: String): M? {
         return this.listMembers().find { it.memberId == id }
     }
 
     override suspend fun sendPrivateMessage(
-        sender: IMessageChannelMember,
-        receiver: IMessageChannelMember,
+        sender: M,
+        receiver: M,
         message: AbstractMessage
     ): Boolean {
         if (sender == receiver) {
@@ -50,7 +53,7 @@ abstract class AbstractMessageChannel(
         }
         return try {
             this.getListeners(receiver).forEach {
-                it.onPrivateMessage(this, sender, message)
+                it.onPrivateMessage(this as C, sender, message)
             }
             true
         } catch (e: Exception) {
@@ -60,51 +63,17 @@ abstract class AbstractMessageChannel(
     }
 
     override suspend fun sendGroupMessage(
-        sender: IMessageChannelMember,
+        sender: M,
         message: AbstractMessage
     ): Boolean {
         return try {
             this.getListenersExcept(sender).forEach {
-                it.onGroupMessage(this, sender, message)
+                it.onGroupMessage(this as C, sender, message)
             }
             true
         } catch (e: Exception) {
             logger.error("Exception occurred when sending message", e)
             false
         }
-    }
-
-    override fun getListeners(member: IMessageChannelMember): List<MessageChannelListener> {
-        return this.listeners[member] ?: listOf()
-    }
-
-    fun getListenersExcept(exceptMember: IMessageChannelMember): List<MessageChannelListener> {
-        return this.getListenersExcept(listOf(exceptMember))
-    }
-
-    fun getListenersExcept(exceptMembers: List<IMessageChannelMember>): List<MessageChannelListener> {
-        return this.listeners.filterNot { it.key in exceptMembers }.values.flatten()
-    }
-
-    override fun registerListener(
-        member: IMessageChannelMember,
-        listener: MessageChannelListener
-    ) {
-        val list = this.listeners.getOrPut(member) { mutableListOf() }
-        if (!list.contains(listener)) {
-            list.add(listener)
-        }
-    }
-
-    override fun unregisterListener(
-        member: IMessageChannelMember,
-        listener: MessageChannelListener
-    ) {
-        val list = this.listeners.getOrPut(member) { mutableListOf() }
-        list.remove(listener)
-    }
-
-    override fun unregisterAllListeners(member: IMessageChannelMember) {
-        this.listeners.remove(member)
     }
 }
