@@ -33,8 +33,12 @@ data class ChatModelEntity(
     val temperature: Int = -1,
     @Column(name = "max_tokens", nullable = false)
     val maxTokens: Int = -1,
-    @Column(name = "token_point_rate", nullable = false)
-    val tokenPointRate: Int = 10000,
+    @Column(name = "input_token_point_rate", nullable = false)
+    val inputTokenPointRate: Int = 10000,
+    @Column(name = "output_token_point_rate", nullable = false)
+    var outputTokenPointRate: Int = 10000,
+    @Column(name = "cached_input_token_point_rate", nullable = false)
+    var cachedInputTokenPointRate: Int = 10000,
     @Column(name = "credential_id", nullable = false)
     val credentialId: Long = 0,
     @Column(name = "active", nullable = false)
@@ -50,7 +54,7 @@ data class ChatModelEntity(
         if (this > 0) this / 100f else null
     }
 
-    fun getQualifiedTokenPointRate(): Float = this.tokenPointRate.run {
+    fun getQualifiedTokenPointRate(original: Int): Float = original.run {
         this / 10000f
     }
 }
