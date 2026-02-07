@@ -14,4 +14,4 @@ class ChainMessage(
     sequence: Long,
     extraBody: ExtraBody?,
     val messages: List<AbstractMessage>
-) : AbstractMessage(sequence, extraBody)
+) : AbstractMessage(MessageType.CHAIN, sequence, extraBody)

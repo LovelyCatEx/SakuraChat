@@ -25,6 +25,7 @@ import com.lovelycatv.sakurachat.utils.EncryptUtils
 import com.lovelycatv.sakurachat.utils.SnowIdGenerator
 import com.lovelycatv.sakurachat.utils.toJSONString
 import com.lovelycatv.vertex.log.logger
+import com.mikuac.shiro.common.utils.ShiroUtils
 import com.mikuac.shiro.core.Bot
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent
 import com.mikuac.shiro.dto.event.message.MessageEvent
@@ -71,7 +72,7 @@ class NapCatMessageDispatcher(
                         botId = bot.selfId,
                         senderId = event.privateSender.userId,
                         senderNickname = event.privateSender.nickname,
-                        message = event.arrayMsg.joinToString(),
+                        message = ShiroUtils.arrayMsgToCode(event.arrayMsg),
                         createdTime = event.time
                     )
                 )
@@ -97,7 +98,7 @@ class NapCatMessageDispatcher(
                                 botId = bot.selfId,
                                 senderId = event.sender.userId,
                                 senderNickname = event.sender.nickname,
-                                message = event.arrayMsg.joinToString(),
+                                message = ShiroUtils.arrayMsgToCode(event.arrayMsg),
                                 createdTime = event.time,
                                 hash = hash
                             )

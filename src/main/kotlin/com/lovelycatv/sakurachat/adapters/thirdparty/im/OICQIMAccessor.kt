@@ -11,14 +11,26 @@ package com.lovelycatv.sakurachat.adapters.thirdparty.im
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
 import com.lovelycatv.sakurachat.core.im.message.TextMessage
 import com.lovelycatv.sakurachat.core.im.thirdparty.IThirdPartyIMAccessor
+import com.lovelycatv.sakurachat.entity.napcat.NapCatGroupMessageEntity
+import com.lovelycatv.sakurachat.entity.napcat.NapCatPrivateMessageEntity
+import com.lovelycatv.sakurachat.repository.NapCatGroupMessageRepository
+import com.lovelycatv.sakurachat.repository.NapCatPrivateMessageRepository
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
+import com.lovelycatv.sakurachat.utils.SnowIdGenerator
 import com.lovelycatv.sakurachat.utils.toJSONString
 import com.mikuac.shiro.common.utils.MsgUtils
+import com.mikuac.shiro.common.utils.ShiroUtils
 import com.mikuac.shiro.core.Bot
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Component
 
 @Component
-class OICQIMAccessor : IThirdPartyIMAccessor<Bot, Long, Long> {
+class OICQIMAccessor(
+    private val napcatPrivateMessageRepository: NapCatPrivateMessageRepository,
+    private val napCatGroupMessageRepository: NapCatGroupMessageRepository,
+    private val snowIdGenerator: SnowIdGenerator
+) : IThirdPartyIMAccessor<Bot, Long, Long> {
     override fun getPlatform(): ThirdPartyPlatform {
         return ThirdPartyPlatform.NAPCAT_OICQ
     }
@@ -28,10 +40,28 @@ class OICQIMAccessor : IThirdPartyIMAccessor<Bot, Long, Long> {
         target: Long,
         message: AbstractMessage
     ): Boolean {
-        val result = if (message is TextMessage) {
-            invoker.sendPrivateMsg(target, message.message, true)
-        } else {
-            invoker.sendPrivateMsg(target, message.toJSONString(), true)
+        val msg = MsgUtils.builder().apply {
+            if (message is TextMessage) {
+                text(message.message)
+            } else {
+                text(message.toJSONString())
+            }
+        }.build()
+
+        val result = invoker.sendPrivateMsg(target, msg, false)
+
+        withContext(Dispatchers.IO) {
+            napcatPrivateMessageRepository.save(
+                NapCatPrivateMessageEntity(
+                    id = snowIdGenerator.nextId(),
+                    botId = target,
+                    senderId = invoker.selfId,
+                    senderNickname = invoker.selfId.toString(),
+                    messageId = result.data.messageId,
+                    message = ShiroUtils.arrayMsgToCode(ShiroUtils.rawToArrayMsg(msg)),
+                    createdTime = System.currentTimeMillis()
+                )
+            )
         }
 
         return result?.retCode == 0
@@ -43,27 +73,36 @@ class OICQIMAccessor : IThirdPartyIMAccessor<Bot, Long, Long> {
         replyTarget: Long,
         message: AbstractMessage
     ): Boolean {
-        val result = if (message is TextMessage) {
-            invoker.sendGroupMsg(
-                targetGroup,
-                MsgUtils
-                    .builder()
-                    .at(replyTarget)
-                    .text(" ")
-                    .text(message.message)
-                    .build(),
-                false
-            )
+        val msg = if (message is TextMessage) {
+            MsgUtils
+                .builder()
+                .at(replyTarget)
+                .text(" ")
+                .text(message.message)
+                .build()
         } else {
-            invoker.sendGroupMsg(
-                targetGroup,
-                MsgUtils
-                    .builder()
-                    .at(replyTarget)
-                    .text(" ")
-                    .text(message.toJSONString())
-                    .build(),
-                false
+            MsgUtils
+                .builder()
+                .at(replyTarget)
+                .text(" ")
+                .text(message.toJSONString())
+                .build()
+        }
+
+        val result = invoker.sendGroupMsg(targetGroup, msg, false)
+
+        withContext(Dispatchers.IO) {
+            napCatGroupMessageRepository.save(
+                NapCatGroupMessageEntity(
+                    id = snowIdGenerator.nextId(),
+                    botId = replyTarget,
+                    groupId = targetGroup,
+                    senderId = invoker.selfId,
+                    senderNickname = invoker.selfId.toString(),
+                    messageId = result.data.messageId,
+                    message = ShiroUtils.arrayMsgToCode(ShiroUtils.rawToArrayMsg(msg)),
+                    createdTime = System.currentTimeMillis()
+                )
             )
         }
 

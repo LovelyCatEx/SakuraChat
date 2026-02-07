@@ -18,7 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class SakuraChatAgent(
-    val agent: AggregatedAgentEntity
+    val agent: AggregatedAgentEntity,
 ) : ISakuraChatMessageChannelMember {
     companion object {
         const val MEMBER_PREFIX = "agent_"

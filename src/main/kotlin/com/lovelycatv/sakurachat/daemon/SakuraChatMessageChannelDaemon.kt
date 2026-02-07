@@ -8,12 +8,16 @@
 
 package com.lovelycatv.sakurachat.daemon
 
+import com.lovelycatv.sakurachat.core.ISakuraChatMessageChannelListener
+import com.lovelycatv.sakurachat.core.ISakuraChatMessageChannelMember
 import com.lovelycatv.sakurachat.core.SakuraChatAgentInstanceManager
 import com.lovelycatv.sakurachat.core.SakuraChatMessageChannel
 import com.lovelycatv.sakurachat.core.SakuraChatUserInstanceManager
+import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
 import com.lovelycatv.sakurachat.entity.UserEntity
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.repository.AgentRepository
+import com.lovelycatv.sakurachat.service.ChannelMessageService
 import com.lovelycatv.sakurachat.service.IMChannelService
 import com.lovelycatv.vertex.log.logger
 import org.springframework.scheduling.annotation.Scheduled
@@ -24,7 +28,8 @@ class SakuraChatMessageChannelDaemon(
     private val agentRepository: AgentRepository,
     private val imChannelService: IMChannelService,
     private val sakuraChatAgentInstanceManager: SakuraChatAgentInstanceManager,
-    private val sakuraChatUserInstanceManager: SakuraChatUserInstanceManager
+    private val sakuraChatUserInstanceManager: SakuraChatUserInstanceManager,
+    private val channelMessageService: ChannelMessageService
 ) {
     private val logger = logger()
 
@@ -58,6 +63,8 @@ class SakuraChatMessageChannelDaemon(
                 it.registerListener(agentMember, agentMember)
 
                 it.registerListener(userMember, userMember)
+
+                applyChannelMessageSaverInterceptor(it)
 
                 privateChannels.getOrPut(agentId) {
                     mutableMapOf()
@@ -107,7 +114,37 @@ class SakuraChatMessageChannelDaemon(
             channel.registerListener(userMember, userMember)
         }
 
+        applyChannelMessageSaverInterceptor(channel)
+
         return channel
+    }
+
+    private fun applyChannelMessageSaverInterceptor(
+        channel: SakuraChatMessageChannel
+    ) {
+        val listener = object : ISakuraChatMessageChannelListener {
+            override fun onPrivateMessage(
+                channel: SakuraChatMessageChannel,
+                sender: ISakuraChatMessageChannelMember,
+                message: AbstractMessage
+            ) {
+                channelMessageService.saveMessage(channel, sender, message)
+            }
+
+            override fun onGroupMessage(
+                channel: SakuraChatMessageChannel,
+                sender: ISakuraChatMessageChannelMember,
+                message: AbstractMessage
+            ) {
+                channelMessageService.saveMessage(channel, sender, message)
+            }
+
+        }
+
+        // Intercept all members' message
+        channel.listMembers().forEach {
+            channel.registerListener(it, listener)
+        }
     }
 
     @Scheduled(cron = "0 */5 * * * *")
