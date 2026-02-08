@@ -9,7 +9,7 @@
 package com.lovelycatv.sakurachat.adapters.thirdparty.group
 
 import com.lark.oapi.service.im.v1.model.EventMessage
-import com.lovelycatv.lark.type.LarkChatMessageType
+import com.lovelycatv.lark.types.LarkChatMessageType
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import com.lovelycatv.sakurachat.utils.toJSONString
 import org.springframework.stereotype.Component

@@ -6,7 +6,7 @@
  *
  */
 
-package com.lovelycatv.lark.type
+package com.lovelycatv.lark.types
 
 /**
  * To tell the difference between types, see:

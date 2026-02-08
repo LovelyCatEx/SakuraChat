@@ -27,7 +27,7 @@ import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Component
 
 @Component
-class OICQIMAccessor(
+class NapCatIMAccessor(
     private val napcatPrivateMessageRepository: NapCatPrivateMessageRepository,
     private val napCatGroupMessageRepository: NapCatGroupMessageRepository,
     private val snowIdGenerator: SnowIdGenerator

@@ -9,7 +9,7 @@
 package com.lovelycatv.sakurachat.adapters.thirdparty.message
 
 import com.lark.oapi.service.im.v1.model.EventMessage
-import com.lovelycatv.lark.message.LarkMessageUtils
+import com.lovelycatv.lark.utils.LarkMessageUtils
 import com.lovelycatv.lark.message.LarkTextMessage
 import com.lovelycatv.sakurachat.core.ExtraBody
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage

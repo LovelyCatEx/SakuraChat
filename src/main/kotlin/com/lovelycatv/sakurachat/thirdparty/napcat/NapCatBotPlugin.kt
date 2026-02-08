@@ -16,6 +16,11 @@ import com.mikuac.shiro.dto.event.message.GroupMessageEvent
 import com.mikuac.shiro.dto.event.message.PrivateMessageEvent
 import org.springframework.stereotype.Component
 
+/**
+ * https://misakatat.github.io/shiro-docs/
+ *
+ * @property thirdPartyMessageDispatcherManager
+ */
 @Component
 class NapCatBotPlugin(
     private val thirdPartyMessageDispatcherManager: ThirdPartyMessageDispatcherManager

@@ -9,7 +9,7 @@
 package com.lovelycatv.lark
 
 import com.lovelycatv.lark.message.LarkTextMessage
-import com.lovelycatv.lark.type.LarkIdType
+import com.lovelycatv.lark.types.LarkIdType
 import com.lovelycatv.sakurachat.utils.toJSONString
 import org.junit.jupiter.api.Test
 

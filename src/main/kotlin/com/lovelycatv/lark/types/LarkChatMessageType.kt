@@ -6,7 +6,7 @@
  *
  */
 
-package com.lovelycatv.lark.type
+package com.lovelycatv.lark.types
 
 /**
  * https://open.feishu.cn/document/server-docs/im-v1/message/events/receive

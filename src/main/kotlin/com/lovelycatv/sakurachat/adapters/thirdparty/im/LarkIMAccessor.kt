@@ -10,7 +10,7 @@ package com.lovelycatv.sakurachat.adapters.thirdparty.im
 
 import com.lovelycatv.lark.LarkRestClient
 import com.lovelycatv.lark.message.LarkTextMessage
-import com.lovelycatv.lark.type.LarkIdType
+import com.lovelycatv.lark.types.LarkIdType
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
 import com.lovelycatv.sakurachat.core.im.message.TextMessage
 import com.lovelycatv.sakurachat.core.im.thirdparty.IThirdPartyIMAccessor

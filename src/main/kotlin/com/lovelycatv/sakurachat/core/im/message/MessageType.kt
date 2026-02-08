@@ -10,5 +10,7 @@ package com.lovelycatv.sakurachat.core.im.message
 
 enum class MessageType {
     TEXT,
-    CHAIN
+    CHAIN,
+    JSON,
+    QUOTE
 }

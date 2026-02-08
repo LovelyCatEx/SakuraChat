@@ -21,7 +21,7 @@ import com.lovelycatv.lark.message.AbstractLarkMessage
 import com.lovelycatv.lark.message.LarkTextMessage
 import com.lovelycatv.lark.response.LarkGetTenantTokenResponse
 import com.lovelycatv.lark.response.LarkSendMessageResponse
-import com.lovelycatv.lark.type.LarkIdType
+import com.lovelycatv.lark.types.LarkIdType
 import java.util.*
 
 class LarkRestClient(

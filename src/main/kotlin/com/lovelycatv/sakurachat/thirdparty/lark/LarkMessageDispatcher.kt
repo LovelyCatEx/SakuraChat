@@ -11,8 +11,8 @@ package com.lovelycatv.sakurachat.thirdparty.lark
 import com.lark.oapi.service.im.v1.model.P2MessageReadV1
 import com.lark.oapi.service.im.v1.model.P2MessageReceiveV1
 import com.lovelycatv.lark.LarkRestClient
-import com.lovelycatv.lark.type.LarkChatMessageType
-import com.lovelycatv.lark.type.LarkIdType
+import com.lovelycatv.lark.types.LarkChatMessageType
+import com.lovelycatv.lark.types.LarkIdType
 import com.lovelycatv.sakurachat.adapters.thirdparty.message.MessageAdapterManager
 import com.lovelycatv.sakurachat.core.SakuraChatMessageExtra
 import com.lovelycatv.sakurachat.daemon.SakuraChatMessageChannelDaemon
