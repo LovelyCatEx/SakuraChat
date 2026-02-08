@@ -123,24 +123,39 @@ class SakuraChatAgent(
             )
         )
 
-        val resp = client.chatCompletionBlocking(
-            ChatCompletionRequest(
-                model = chatModelEntity.chatModel.qualifiedName,
-                maxTokens = chatModelEntity.chatModel.maxTokens,
-                stream = false,
-                messages = listOf(
-                    ChatMessage(
-                        role = ChatMessageRole.SYSTEM,
-                        content = agent.agent.prompt
+        val resp = try {
+            client.chatCompletionBlocking(
+                ChatCompletionRequest(
+                    model = chatModelEntity.chatModel.qualifiedName,
+                    maxTokens = chatModelEntity.chatModel.maxTokens,
+                    stream = false,
+                    messages = listOf(
+                        ChatMessage(
+                            role = ChatMessageRole.SYSTEM,
+                            content = agent.agent.prompt
+                        ),
+                        ChatMessage(
+                            role = ChatMessageRole.USER,
+                            content = message.toJSONString()
+                        )
                     ),
-                    ChatMessage(
-                        role = ChatMessageRole.USER,
-                        content = message.toJSONString()
-                    )
-                ),
-                temperature = chatModelEntity.chatModel.getQualifiedTemperature()
+                    temperature = chatModelEntity.chatModel.getQualifiedTemperature()
+                )
             )
-        )
+        } catch (e: Exception) {
+            logger.error("An error occurred when calling chat completion request, chatModel: ${agent.chatModel.toJSONString()}", e)
+            null
+        }
+
+        if (resp == null) {
+            return listOf(
+                TextMessage(
+                    sequence = System.currentTimeMillis(),
+                    message = "Could not process your request, please try again later",
+                    extraBody = message.extraBody
+                )
+            )
+        }
 
         val consumedPoints = resp.usage.promptTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.inputTokenPointRate) +
                 resp.usage.completionTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.outputTokenPointRate)
