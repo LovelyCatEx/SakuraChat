@@ -147,7 +147,10 @@ class SakuraChatAgent(
                     content = message.toJSONString()
                 )
             ),
-            temperature = chatModelEntity.chatModel.getQualifiedTemperature()
+            temperature = chatModelEntity.chatModel.getQualifiedTemperature(),
+            thinking = ChatCompletionRequest.ThinkingParameter(
+                type = "disabled"
+            )
         )
 
         val hasDelimiter = agent.agent.delimiter != null
