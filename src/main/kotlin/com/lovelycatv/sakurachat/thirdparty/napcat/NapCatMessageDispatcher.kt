@@ -273,16 +273,23 @@ class NapCatMessageDispatcher(
             messageExtra.addPlatformGroupId(event.groupId.toString())
         }
 
-        val messageToSend = messageAdapterManager
-            .getAdapter(ThirdPartyPlatform.NAPCAT_OICQ, event::class.java)
-            ?.transform(
-                input = event,
-                extraBody = messageExtra
-            )
+        val messageToSend = try {
+            messageAdapterManager
+                .getAdapter(ThirdPartyPlatform.NAPCAT_OICQ, event::class.java)
+                ?.transform(
+                    input = event,
+                    extraBody = messageExtra
+                ).also {
+                    if (it == null) {
+                        logger.warn("Could not transform NapCat message to SakuraChat capable message, reason: no adapter found")
+                    }
+                }
+        } catch (e: Exception) {
+            logger.warn("Could not transform NapCat message to SakuraChat capable message, reason: ${e.message}", e)
+            null
+        }
 
         if (messageToSend == null) {
-            logger.warn("Could not transform NapCat message to SakuraChat capable message")
-
             bot.sendPrivateMsg(
                 userOICQId,
                 "Could not transform NapCat message to SakuraChat capable message",

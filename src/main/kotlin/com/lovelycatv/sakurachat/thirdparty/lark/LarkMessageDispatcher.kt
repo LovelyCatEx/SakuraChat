@@ -172,16 +172,23 @@ class LarkMessageDispatcher(
             )
         }
 
-        val messageToSend = messageAdapterManager
-            .getAdapter(ThirdPartyPlatform.LARK, event.event.message::class.java)
-            ?.transform(
-                input = event.event.message,
-                extraBody = messageExtra
-            )
+        val messageToSend = try {
+            messageAdapterManager
+                .getAdapter(ThirdPartyPlatform.LARK, event.event.message::class.java)
+                ?.transform(
+                    input = event.event.message,
+                    extraBody = messageExtra
+                ).also {
+                    if (it == null) {
+                        logger.warn("Could not transform Lark message to SakuraChat capable message, reason: no adapter found")
+                    }
+                }
+        } catch (e: Exception) {
+            logger.warn("Could not transform Lark message to SakuraChat capable message, reason: ${e.message}", e)
+            null
+        }
 
         if (messageToSend == null) {
-            logger.warn("Could not transform Lark message to SakuraChat capable message")
-
             client.sendMessage(
                 LarkIdType.UNION_ID,
                 event.event.sender.senderId.unionId,

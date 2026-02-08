@@ -33,16 +33,14 @@ class LarkMessageAdapter : IMessageAdapter<EventMessage> {
         val larkMessage = LarkMessageUtils.parseFromJSONString(
             input.messageType,
             input.content
-        ) {
-            LarkTextMessage(input.content)
-        }
+        )
 
         return TextMessage(
             sequence = System.currentTimeMillis(),
             message = if (larkMessage is LarkTextMessage) {
                 larkMessage.text
             } else {
-                larkMessage.toJSONString()
+                throw IllegalArgumentException("Unsupported ${this.getPlatform().name} message type ${larkMessage.javaClass}")
             },
             extraBody = extraBody
         )
