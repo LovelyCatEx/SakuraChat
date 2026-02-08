@@ -9,6 +9,7 @@
 package com.lovelycatv.sakurachat.core.im.message
 
 import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.lovelycatv.sakurachat.core.ExtraBody
 
@@ -20,5 +21,9 @@ abstract class AbstractMessage @JsonCreator constructor(
     @field:JsonProperty("extraBody")
     val extraBody: ExtraBody?
 ) {
+    @JsonIgnore
     abstract fun isEmpty(): Boolean
+
+    @JsonIgnore
+    fun isNotEmpty(): Boolean = !this.isEmpty()
 }

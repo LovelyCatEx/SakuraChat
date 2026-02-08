@@ -56,11 +56,13 @@ class SakuraChatAgent(
         coroutineScope.launch {
             if (sender is SakuraChatUser) {
                 getMessageToResponse(sender, message).forEach {
-                    channel.sendPrivateMessage(
-                        channel.getAgentMember(agent.agent.id!!)!!,
-                        sender,
-                        it
-                    )
+                    if (it.isNotEmpty()) {
+                        channel.sendPrivateMessage(
+                            channel.getAgentMember(agent.agent.id!!)!!,
+                            sender,
+                            it
+                        )
+                    }
                 }
             }
         }
@@ -76,10 +78,12 @@ class SakuraChatAgent(
         coroutineScope.launch {
             if (sender is SakuraChatUser) {
                 getMessageToResponse(sender, message).forEach {
-                    channel.sendGroupMessage(
-                        channel.getAgentMember(agent.agent.id!!)!!,
-                        it
-                    )
+                    if (it.isNotEmpty()) {
+                        channel.sendGroupMessage(
+                            channel.getAgentMember(agent.agent.id!!)!!,
+                            it
+                        )
+                    }
                 }
             }
         }

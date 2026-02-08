@@ -51,8 +51,14 @@ abstract class AbstractMessageChannel<
         if (sender == receiver) {
             throw IllegalArgumentException("Sender and receiver cannot be the same, senderMemberId: ${sender.memberId}")
         }
+
+        if (message.isEmpty()) {
+            throw IllegalArgumentException("Message cannot be empty")
+        }
+
         return try {
             this.getListeners(receiver).forEach {
+                @Suppress("UNCHECKED_CAST")
                 it.onPrivateMessage(this as C, sender, message)
             }
             true
@@ -66,8 +72,13 @@ abstract class AbstractMessageChannel<
         sender: M,
         message: AbstractMessage
     ): Boolean {
+        if (message.isEmpty()) {
+            throw IllegalArgumentException("Message cannot be empty")
+        }
+
         return try {
             this.getListenersExcept(sender).forEach {
+                @Suppress("UNCHECKED_CAST")
                 it.onGroupMessage(this as C, sender, message)
             }
             true
