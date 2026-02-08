@@ -8,11 +8,12 @@
 
 package com.lovelycatv.sakurachat.service.impl
 
-import com.fasterxml.jackson.annotation.JsonSetter
-import com.fasterxml.jackson.annotation.Nulls
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
+import com.lovelycatv.sakurachat.core.im.message.ChainMessage
 import com.lovelycatv.sakurachat.service.ChannelMessageSerializationService
 import org.springframework.stereotype.Service
 
@@ -24,13 +25,42 @@ class ChannelMessageSerializationServiceImpl : ChannelMessageSerializationServic
     }
 
     override fun toJSONString(abstractMessage: AbstractMessage): String {
-        @Suppress("UNCHECKED_CAST")
-        val messageMap = objectMapper.convertValue(abstractMessage, Map::class.java) as MutableMap<String, *>
+        return when (abstractMessage) {
+            is ChainMessage -> chainMessageToJson(abstractMessage)
+            else -> singleMessageToJson(abstractMessage)
+        }
+    }
 
-        messageMap.remove("sequence")
-        messageMap.remove("extraBody")
+    private fun singleMessageToJson(message: AbstractMessage): String {
+        val jsonNode = objectMapper.valueToTree<JsonNode>(message)
 
-        return objectMapper.writeValueAsString(messageMap)
+        (jsonNode as ObjectNode).apply {
+            remove("sequence")
+            remove("extraBody")
+        }
+
+        return objectMapper.writeValueAsString(jsonNode)
+    }
+
+    private fun chainMessageToJson(chainMessage: ChainMessage): String {
+        val messageJsons = chainMessage.messages.map { message ->
+            when (message) {
+                is ChainMessage -> {
+                    chainMessageToJson(message)
+                }
+
+                else -> {
+                    singleMessageToJson(message)
+                }
+            }
+        }
+
+        val result = mapOf(
+            "type" to chainMessage.type.name.lowercase(),
+            "messages" to messageJsons
+        )
+
+        return objectMapper.writeValueAsString(result)
     }
 
     override fun fromJSONString(jsonString: String): AbstractMessage {
