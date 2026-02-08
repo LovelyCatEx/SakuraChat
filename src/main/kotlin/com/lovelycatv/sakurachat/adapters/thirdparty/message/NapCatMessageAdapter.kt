@@ -8,20 +8,26 @@
 
 package com.lovelycatv.sakurachat.adapters.thirdparty.message
 
+import com.lovelycatv.napcat.message.NapCatFaceMessage
+import com.lovelycatv.napcat.message.NapCatReplyMessage
+import com.lovelycatv.napcat.message.NapCatTextMessage
+import com.lovelycatv.napcat.utils.NapCatMessageUtils
 import com.lovelycatv.sakurachat.core.ExtraBody
-import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
-import com.lovelycatv.sakurachat.core.im.message.ChainMessage
-import com.lovelycatv.sakurachat.core.im.message.IMessageAdapter
-import com.lovelycatv.sakurachat.core.im.message.TextMessage
+import com.lovelycatv.sakurachat.core.im.message.*
+import com.lovelycatv.sakurachat.repository.NapCatGroupMessageRepository
+import com.lovelycatv.sakurachat.repository.NapCatPrivateMessageRepository
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
-import com.lovelycatv.sakurachat.utils.toJSONString
+import com.mikuac.shiro.common.utils.ShiroUtils
 import com.mikuac.shiro.dto.event.message.MessageEvent
-import com.mikuac.shiro.enums.MsgTypeEnum
+import com.mikuac.shiro.dto.event.message.PrivateMessageEvent
 import com.mikuac.shiro.model.ArrayMsg
 import org.springframework.stereotype.Component
 
 @Component
-class NapCatMessageAdapter : IMessageAdapter<MessageEvent> {
+class NapCatMessageAdapter(
+    private val napCatPrivateMessageRepository: NapCatPrivateMessageRepository,
+    private val napCatGroupMessageRepository: NapCatGroupMessageRepository
+) : IMessageAdapter<MessageEvent> {
     override fun getPlatform(): ThirdPartyPlatform {
         return ThirdPartyPlatform.NAPCAT_OICQ
     }
@@ -31,66 +37,69 @@ class NapCatMessageAdapter : IMessageAdapter<MessageEvent> {
     }
 
     override fun transform(input: MessageEvent, extraBody: ExtraBody): AbstractMessage {
-        return if (input.arrayMsg.size > 1) {
+        val isPrivateMsg = input is PrivateMessageEvent
+
+        return transformArrayMsgList(isPrivateMsg, input.arrayMsg, extraBody)
+    }
+
+    private fun transformArrayMsgList(isPrivateMsg: Boolean, arrayMsg: List<ArrayMsg>, extraBody: ExtraBody?): AbstractMessage {
+        return if (arrayMsg.size > 1) {
             ChainMessage(
                 sequence = System.currentTimeMillis(),
                 extraBody = extraBody,
-                messages = input.arrayMsg.mapIndexed { index, msg ->
-                    transformArrayMsg(index.toLong(), msg)
+                messages = arrayMsg.mapIndexed { index, msg ->
+                    transformArrayMsg(isPrivateMsg, index.toLong(), msg)
                 }
             )
-        } else {
-            TextMessage(
-                sequence = System.currentTimeMillis(),
-                extraBody = extraBody,
-                message = input.message
+        } else if (arrayMsg.size == 1) {
+            transformArrayMsg(
+                isPrivate = isPrivateMsg,
+                index = System.currentTimeMillis(),
+                arrayMsg = arrayMsg[0],
+                extraBody = extraBody
             )
+        } else {
+            throw IllegalArgumentException("Message to be transformed is empty")
         }
     }
 
-    private fun transformArrayMsg(index: Long, arrayMsg: ArrayMsg): AbstractMessage {
-        return when (arrayMsg.type) {
-            MsgTypeEnum.at -> TODO()
-            MsgTypeEnum.text -> TextMessage(
+    private fun transformArrayMsg(isPrivate: Boolean, index: Long, arrayMsg: ArrayMsg, extraBody: ExtraBody? = null): AbstractMessage {
+        return when (val message = NapCatMessageUtils.fromArrayMsg(arrayMsg)) {
+            is NapCatTextMessage -> TextMessage(
                 sequence = index,
-                extraBody = null,
-                message = arrayMsg.data[""]
+                extraBody = extraBody,
+                message = message.text
             )
-            MsgTypeEnum.face -> TextMessage(
+
+            is NapCatFaceMessage -> TextMessage(
                 sequence = index,
-                extraBody = null,
-                message = arrayMsg.toJSONString()
+                extraBody = extraBody,
+                message = message.raw.faceText
             )
-            MsgTypeEnum.mface -> TODO()
-            MsgTypeEnum.marketface -> TODO()
-            MsgTypeEnum.basketball -> TODO()
-            MsgTypeEnum.record -> TODO()
-            MsgTypeEnum.video -> TODO()
-            MsgTypeEnum.rps -> TODO()
-            MsgTypeEnum.new_rps -> TODO()
-            MsgTypeEnum.dice -> TODO()
-            MsgTypeEnum.new_dice -> TODO()
-            MsgTypeEnum.shake -> TODO()
-            MsgTypeEnum.anonymous -> TODO()
-            MsgTypeEnum.share -> TODO()
-            MsgTypeEnum.contact -> TODO()
-            MsgTypeEnum.location -> TODO()
-            MsgTypeEnum.music -> TODO()
-            MsgTypeEnum.image -> TODO()
-            MsgTypeEnum.reply -> TODO()
-            MsgTypeEnum.redbag -> TODO()
-            MsgTypeEnum.poke -> TODO()
-            MsgTypeEnum.gift -> TODO()
-            MsgTypeEnum.forward -> TODO()
-            MsgTypeEnum.markdown -> TODO()
-            MsgTypeEnum.keyboard -> TODO()
-            MsgTypeEnum.node -> TODO()
-            MsgTypeEnum.xml -> TODO()
-            MsgTypeEnum.json -> TODO()
-            MsgTypeEnum.cardimage -> TODO()
-            MsgTypeEnum.tts -> TODO()
-            MsgTypeEnum.longmsg -> TODO()
-            MsgTypeEnum.unknown -> TODO()
+
+            is NapCatReplyMessage -> {
+                val quotedMessage = if (isPrivate) {
+                    napCatPrivateMessageRepository
+                        .findByMessageId(message.id.toInt())
+                        .getOrNull(0)
+                        ?.message
+                } else {
+                    napCatGroupMessageRepository
+                        .findByMessageId(message.id.toInt())
+                        .getOrNull(0)
+                        ?.message
+                }
+
+                QuoteMessage(
+                    sequence = index,
+                    extraBody = extraBody,
+                    message = quotedMessage?.let {
+                        transformArrayMsgList(isPrivate, ShiroUtils.rawToArrayMsg(it), extraBody)
+                    } ?: TextMessage(sequence = 0, message = "", extraBody = null)
+                )
+            }
+
+            else -> throw IllegalArgumentException("Unsupported message type ${message.messageType}")
         }
     }
 }

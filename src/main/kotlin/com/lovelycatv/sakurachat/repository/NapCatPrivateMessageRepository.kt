@@ -13,4 +13,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface NapCatPrivateMessageRepository : JpaRepository<NapCatPrivateMessageEntity, Long>
+interface NapCatPrivateMessageRepository : JpaRepository<NapCatPrivateMessageEntity, Long> {
+    fun findByMessageId(messageId: Int): MutableList<NapCatPrivateMessageEntity>
+}

@@ -17,14 +17,17 @@ import com.lovelycatv.napcat.types.NapCatMessageType
 import com.lovelycatv.napcat.message.NapCatPokeMessage
 import com.lovelycatv.napcat.message.NapCatRecordMessage
 import com.lovelycatv.napcat.message.NapCatReplyMessage
+import com.lovelycatv.napcat.message.NapCatTextMessage
 import com.lovelycatv.napcat.message.NapCatUnknownMessage
 import com.lovelycatv.napcat.message.NapCatVideoMessage
 import com.lovelycatv.sakurachat.utils.toJSONString
 import com.mikuac.shiro.model.ArrayMsg
+import kotlin.jvm.Throws
 
 object NapCatMessageUtils {
     private val objectMapper: ObjectMapper = jacksonObjectMapper()
 
+    @Throws(IllegalArgumentException::class)
     fun fromArrayMsg(arrayMsg: ArrayMsg): AbstractNapCatMessage {
         val type = NapCatMessageType.Companion.fromMsgTypeEnum(arrayMsg.type)
             ?: throw IllegalArgumentException("ArrayMsg type ${arrayMsg.type.name} not supported yet, " +
@@ -43,7 +46,7 @@ object NapCatMessageUtils {
             objectMapper.readValue(
                 data,
                 when (type) {
-                    NapCatMessageType.TEXT -> NapCatImageMessage::class.java
+                    NapCatMessageType.TEXT -> NapCatTextMessage::class.java
                     NapCatMessageType.FACE -> NapCatFaceMessage::class.java
                     NapCatMessageType.IMAGE -> NapCatImageMessage::class.java
                     NapCatMessageType.VIDEO -> NapCatVideoMessage::class.java

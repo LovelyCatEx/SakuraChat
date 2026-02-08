@@ -15,4 +15,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface NapCatGroupMessageRepository : JpaRepository<NapCatGroupMessageEntity, Long> {
     fun getByHash(hash: String): NapCatGroupMessageEntity?
+    fun findByMessageId(messageId: Int): MutableList<NapCatGroupMessageEntity>
 }
