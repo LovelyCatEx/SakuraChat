@@ -18,4 +18,8 @@ class QuoteMessage(
     override fun isEmpty(): Boolean {
         return this.message.isEmpty()
     }
+
+    override fun isAtomic(): Boolean {
+        return true
+    }
 }

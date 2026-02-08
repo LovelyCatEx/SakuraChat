@@ -27,6 +27,8 @@ class SakuraChatUser(
         const val MEMBER_PREFIX = "user_"
 
         fun buildMemberId(userId: Long) = "${MEMBER_PREFIX}$userId"
+
+        fun isUserMemberId(memberId: String) = memberId.startsWith(MEMBER_PREFIX)
     }
 
     private val logger = logger()

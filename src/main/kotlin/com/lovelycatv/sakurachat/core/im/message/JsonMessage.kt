@@ -18,4 +18,8 @@ class JsonMessage(
     override fun isEmpty(): Boolean {
         return jsonString.isEmpty()
     }
+
+    override fun isAtomic(): Boolean {
+        return true
+    }
 }

@@ -12,6 +12,8 @@ import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
 import com.lovelycatv.sakurachat.core.im.message.ChainMessage
 import com.lovelycatv.sakurachat.core.im.message.TextMessage
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
+import com.lovelycatv.sakurachat.service.AgentContextService
+import com.lovelycatv.sakurachat.service.ChannelMessageService
 import com.lovelycatv.sakurachat.service.UserService
 import com.lovelycatv.sakurachat.utils.toJSONString
 import com.lovelycatv.vertex.ai.openai.ChatMessageRole
@@ -32,12 +34,16 @@ import kotlin.math.log
 
 class SakuraChatAgent(
     val agent: AggregatedAgentEntity,
-    val userService: UserService
+    val userService: UserService,
+    val agentContextService: AgentContextService,
+    val channelMessageService: ChannelMessageService,
 ) : ISakuraChatMessageChannelMember {
     companion object {
         const val MEMBER_PREFIX = "agent_"
 
         fun buildMemberId(agentId: Long) = "${MEMBER_PREFIX}$agentId"
+
+        fun isAgentMemberId(memberId: String) = memberId.startsWith(MEMBER_PREFIX)
     }
 
     private val logger = logger()
@@ -57,14 +63,19 @@ class SakuraChatAgent(
 
         coroutineScope.launch {
             if (sender is SakuraChatUser) {
-                getMessageToResponse(sender, message, true) {
+                val agentMember = channel.getAgentMember(agent.agent.id!!)!!
+
+                getMessageToResponse(channel, sender, message, true) {
                     it.forEach {
                         if (it.isNotEmpty()) {
                             channel.sendPrivateMessage(
-                                channel.getAgentMember(agent.agent.id!!)!!,
+                                agentMember,
                                 sender,
                                 it
                             )
+
+                            // Save agent message into database
+                            channelMessageService.saveMessage(channel, agentMember, it)
                         }
                     }
                 }
@@ -81,13 +92,17 @@ class SakuraChatAgent(
 
         coroutineScope.launch {
             if (sender is SakuraChatUser) {
-                getMessageToResponse(sender, message, true) {
+                val agentMember = channel.getAgentMember(agent.agent.id!!)!!
+                getMessageToResponse(channel, sender, message, true) {
                     if (it.isNotEmpty()) {
                         it.forEach {
                             channel.sendGroupMessage(
-                                channel.getAgentMember(agent.agent.id!!)!!,
+                                agentMember,
                                 it
                             )
+
+                            // Save agent message into database
+                            channelMessageService.saveMessage(channel, agentMember, it)
                         }
                     }
                 }
@@ -96,6 +111,7 @@ class SakuraChatAgent(
     }
 
     private suspend fun getMessageToResponse(
+        channel: SakuraChatMessageChannel,
         sender: SakuraChatUser,
         message: AbstractMessage,
         stream: Boolean,
@@ -137,21 +153,26 @@ class SakuraChatAgent(
             model = chatModelEntity.chatModel.qualifiedName,
             maxTokens = chatModelEntity.chatModel.maxTokens,
             stream = stream,
-            messages = listOf(
-                ChatMessage(
-                    role = ChatMessageRole.SYSTEM,
-                    content = agent.agent.prompt
-                ),
-                ChatMessage(
-                    role = ChatMessageRole.USER,
-                    content = message.toJSONString()
+            messages = agentContextService.getContextForChatCompletions(
+                userId = sender.user.id!!,
+                agentId = agent.agent.id!!,
+                channelId = channel.channelId
+            ) + listOf(
+                // User input
+                agentContextService.buildChatMessageFromAbstractMessage(
+                    message,
+                    ChatMessageRole.USER
                 )
             ),
             temperature = chatModelEntity.chatModel.getQualifiedTemperature(),
+            // Disable model thinking mode
             thinking = ChatCompletionRequest.ThinkingParameter(
                 type = "disabled"
             )
         )
+
+        // Save user message into database
+        channelMessageService.saveMessage(channel, sender, message)
 
         val hasDelimiter = agent.agent.delimiter != null
         val delimiter by lazy {

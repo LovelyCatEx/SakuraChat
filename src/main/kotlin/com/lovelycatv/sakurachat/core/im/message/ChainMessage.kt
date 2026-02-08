@@ -18,4 +18,8 @@ class ChainMessage(
     override fun isEmpty(): Boolean {
         return messages.isEmpty() || messages.all { it.isEmpty() }
     }
+
+    override fun isAtomic(): Boolean {
+        return false
+    }
 }
