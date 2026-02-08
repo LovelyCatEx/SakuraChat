@@ -12,6 +12,7 @@ import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import jakarta.validation.constraints.Size
 
 @Entity
 @Table(name = "agents")
@@ -25,6 +26,8 @@ data class AgentEntity(
     val description: String? = null,
     @Column(name = "prompt", nullable = false)
     val prompt: String = "",
+    @Column(name = "delimiter", length = 16)
+    var delimiter: String? = null,
     @Column(name = "user_id", nullable = false)
     val userId: Long = 0,
     @Column(name = "chat_model_id", nullable = false)

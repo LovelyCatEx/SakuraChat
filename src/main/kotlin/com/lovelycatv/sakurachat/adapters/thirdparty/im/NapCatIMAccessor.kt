@@ -58,21 +58,24 @@ class NapCatIMAccessor(
 
         val result = invoker.sendPrivateMsg(target, msg, false)
 
-        withContext(Dispatchers.IO) {
-            napcatPrivateMessageRepository.save(
-                NapCatPrivateMessageEntity(
-                    id = snowIdGenerator.nextId(),
-                    botId = target,
-                    senderId = invoker.selfId,
-                    senderNickname = invoker.selfId.toString(),
-                    messageId = result.data.messageId,
-                    message = ShiroUtils.arrayMsgToCode(ShiroUtils.rawToArrayMsg(msg)),
-                    createdTime = System.currentTimeMillis()
+        return if (result?.retCode == 0) {
+            withContext(Dispatchers.IO) {
+                napcatPrivateMessageRepository.save(
+                    NapCatPrivateMessageEntity(
+                        id = snowIdGenerator.nextId(),
+                        botId = target,
+                        senderId = invoker.selfId,
+                        senderNickname = invoker.selfId.toString(),
+                        messageId = result.data.messageId,
+                        message = ShiroUtils.arrayMsgToCode(ShiroUtils.rawToArrayMsg(msg)),
+                        createdTime = System.currentTimeMillis()
+                    )
                 )
-            )
+            }
+            true
+        } else {
+            false
         }
-
-        return result?.retCode == 0
     }
 
     override suspend fun sendGroupMessage(
@@ -104,22 +107,25 @@ class NapCatIMAccessor(
 
         val result = invoker.sendGroupMsg(targetGroup, msg, false)
 
-        withContext(Dispatchers.IO) {
-            napCatGroupMessageRepository.save(
-                NapCatGroupMessageEntity(
-                    id = snowIdGenerator.nextId(),
-                    botId = replyTarget,
-                    groupId = targetGroup,
-                    senderId = invoker.selfId,
-                    senderNickname = invoker.selfId.toString(),
-                    messageId = result.data.messageId,
-                    message = ShiroUtils.arrayMsgToCode(ShiroUtils.rawToArrayMsg(msg)),
-                    createdTime = System.currentTimeMillis()
+        return if (result?.retCode == 0) {
+            withContext(Dispatchers.IO) {
+                napCatGroupMessageRepository.save(
+                    NapCatGroupMessageEntity(
+                        id = snowIdGenerator.nextId(),
+                        botId = replyTarget,
+                        groupId = targetGroup,
+                        senderId = invoker.selfId,
+                        senderNickname = invoker.selfId.toString(),
+                        messageId = result.data.messageId,
+                        message = ShiroUtils.arrayMsgToCode(ShiroUtils.rawToArrayMsg(msg)),
+                        createdTime = System.currentTimeMillis()
+                    )
                 )
-            )
+            }
+            true
+        } else {
+            false
         }
-
-        return result?.retCode == 0
     }
 
     override suspend fun resolveTargetByPlatformAccountId(platformAccountId: String): Long? {

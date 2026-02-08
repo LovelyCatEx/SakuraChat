@@ -20,9 +20,9 @@ data class ProviderEntity(
     @Column(name = "id", nullable = false)
     val id: Long? = null,
     @Column(name = "name", length = 32, nullable = false, unique = true)
-    private val name: String = "",
+    val name: String = "",
     @Column(name = "description", length = 512, nullable = true)
-    private val description: String? = null,
+    val description: String? = null,
     @Column(name = "icon", nullable = true)
     val icon: ByteArray? = null,
     @Column(name = "api_type", nullable = false)

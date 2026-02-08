@@ -21,12 +21,14 @@ import com.lovelycatv.vertex.ai.openai.message.ChatMessage
 import com.lovelycatv.vertex.ai.openai.message.ChoiceMessage
 import com.lovelycatv.vertex.ai.openai.message.IChatMessage
 import com.lovelycatv.vertex.ai.openai.request.ChatCompletionRequest
+import com.lovelycatv.vertex.ai.openai.response.ChatCompletionStreamChunkResponse
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
+import kotlin.math.log
 
 class SakuraChatAgent(
     val agent: AggregatedAgentEntity,
@@ -55,13 +57,15 @@ class SakuraChatAgent(
 
         coroutineScope.launch {
             if (sender is SakuraChatUser) {
-                getMessageToResponse(sender, message).forEach {
-                    if (it.isNotEmpty()) {
-                        channel.sendPrivateMessage(
-                            channel.getAgentMember(agent.agent.id!!)!!,
-                            sender,
-                            it
-                        )
+                getMessageToResponse(sender, message, true) {
+                    it.forEach {
+                        if (it.isNotEmpty()) {
+                            channel.sendPrivateMessage(
+                                channel.getAgentMember(agent.agent.id!!)!!,
+                                sender,
+                                it
+                            )
+                        }
                     }
                 }
             }
@@ -77,12 +81,14 @@ class SakuraChatAgent(
 
         coroutineScope.launch {
             if (sender is SakuraChatUser) {
-                getMessageToResponse(sender, message).forEach {
+                getMessageToResponse(sender, message, true) {
                     if (it.isNotEmpty()) {
-                        channel.sendGroupMessage(
-                            channel.getAgentMember(agent.agent.id!!)!!,
-                            it
-                        )
+                        it.forEach {
+                            channel.sendGroupMessage(
+                                channel.getAgentMember(agent.agent.id!!)!!,
+                                it
+                            )
+                        }
                     }
                 }
             }
@@ -91,11 +97,13 @@ class SakuraChatAgent(
 
     private suspend fun getMessageToResponse(
         sender: SakuraChatUser,
-        message: AbstractMessage
-    ): List<AbstractMessage> {
-        val chatModelEntity = agent.chatModel ?: return listOf(message)
-        val modelCredential = agent.chatModel.credential ?: return listOf(message)
-        val modelProvider = agent.chatModel.provider ?: return listOf(message)
+        message: AbstractMessage,
+        stream: Boolean,
+        emitter: suspend (List<AbstractMessage>) -> Unit
+    ) {
+        val chatModelEntity = agent.chatModel ?: return emitter.invoke(listOf(message))
+        val modelCredential = agent.chatModel.credential ?: return emitter.invoke(listOf(message))
+        val modelProvider = agent.chatModel.provider ?: return emitter.invoke(listOf(message))
 
         val predictedPoints = (
                 0.95 * agent.agent.prompt.length * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.inputTokenPointRate) +
@@ -105,11 +113,13 @@ class SakuraChatAgent(
         val pointsThreshold = userService.hasPoints(sender.user.id!!, predictedPoints)
 
         if (!pointsThreshold) {
-            return listOf(
-                TextMessage(
-                    sequence = System.currentTimeMillis(),
-                    message = "Insufficient points, required $predictedPoints",
-                    extraBody = message.extraBody
+            return emitter.invoke(
+                listOf(
+                    TextMessage(
+                        sequence = System.currentTimeMillis(),
+                        message = "Insufficient points, required $predictedPoints",
+                        extraBody = message.extraBody
+                    )
                 )
             )
         }
@@ -118,56 +128,182 @@ class SakuraChatAgent(
             config = VertexAIClientConfig(
                 baseUrl = modelProvider.chatCompletionsUrl.replace("chat/completions", ""),
                 apiKey = modelCredential.data,
-                timeoutSeconds = 60,
+                timeoutSeconds = 30,
                 enableLogging = true
             )
         )
 
-        val resp = try {
-            client.chatCompletionBlocking(
-                ChatCompletionRequest(
-                    model = chatModelEntity.chatModel.qualifiedName,
-                    maxTokens = chatModelEntity.chatModel.maxTokens,
-                    stream = false,
-                    messages = listOf(
-                        ChatMessage(
-                            role = ChatMessageRole.SYSTEM,
-                            content = agent.agent.prompt
-                        ),
-                        ChatMessage(
-                            role = ChatMessageRole.USER,
-                            content = message.toJSONString()
+        val chatCompletionRequest = ChatCompletionRequest(
+            model = chatModelEntity.chatModel.qualifiedName,
+            maxTokens = chatModelEntity.chatModel.maxTokens,
+            stream = stream,
+            messages = listOf(
+                ChatMessage(
+                    role = ChatMessageRole.SYSTEM,
+                    content = agent.agent.prompt
+                ),
+                ChatMessage(
+                    role = ChatMessageRole.USER,
+                    content = message.toJSONString()
+                )
+            ),
+            temperature = chatModelEntity.chatModel.getQualifiedTemperature()
+        )
+
+        val hasDelimiter = agent.agent.delimiter != null
+        val delimiter by lazy {
+            agent.agent.delimiter?.unescape()
+                ?: throw IllegalStateException("Please check hasDelimiter before using delimiter")
+        }
+
+        if (chatCompletionRequest.stream) {
+            // Streaming
+            val chunks = mutableListOf<ChatCompletionStreamChunkResponse>()
+            val resp = try {
+                val buffer = StringBuilder()
+                client.chatCompletionStreaming(chatCompletionRequest).collect {
+                    chunks.add(it)
+
+                    val choiceMessage = it.choices.firstOrNull()?.delta?.content
+
+                    if (choiceMessage != null) {
+                        if (hasDelimiter) {
+                            if (choiceMessage.contains(delimiter)) {
+                                val sp = choiceMessage.split(delimiter)
+
+                                if (sp[0].isNotEmpty()) {
+                                    buffer.append(sp[0])
+                                }
+
+                                emitter.invoke(
+                                    listOf(
+                                        TextMessage(
+                                            sequence = System.currentTimeMillis(),
+                                            message = buffer.toString(),
+                                            extraBody = message.extraBody
+                                        )
+                                    )
+                                )
+
+                                buffer.clear()
+
+                                if (sp[1].isNotEmpty()) {
+                                    buffer.append(sp[1])
+                                }
+                            } else {
+                                buffer.append(choiceMessage)
+                            }
+                        } else {
+                            // Not delimiter
+                            buffer.append(choiceMessage)
+                        }
+                    } else {
+                        // Abort empty choices
+                    }
+                }
+
+                if (buffer.isNotEmpty()) {
+                    emitter.invoke(
+                        listOf(
+                            TextMessage(
+                                sequence = System.currentTimeMillis(),
+                                message = buffer.toString(),
+                                extraBody = message.extraBody
+                            )
                         )
-                    ),
-                    temperature = chatModelEntity.chatModel.getQualifiedTemperature()
+                    )
+                }
+
+                chunks.last()
+            } catch (e: Exception) {
+                logger.error("An error occurred when calling stream chat completion request, chatModel: ${agent.chatModel.toJSONString()}", e)
+                null
+            }
+
+            if (resp == null) {
+                return emitter.invoke(listOf(
+                    TextMessage(
+                        sequence = System.currentTimeMillis(),
+                        message = "Could not process your request, please try again later",
+                        extraBody = message.extraBody
+                    )
+                ))
+            }
+
+            // After actions
+            if (resp.usage != null) {
+                val consumedPoints = resp.usage!!.promptTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.inputTokenPointRate) +
+                        resp.usage!!.completionTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.outputTokenPointRate)
+
+                userService.consumePoints(sender.user.id!!, ceil(consumedPoints).toLong())
+            } else {
+                logger.error("[ERROR]" + "=".repeat(128))
+                logger.error("StreamChatCompletion with model ${chatModelEntity.chatModel.qualifiedName} of provider " +
+                        "${chatModelEntity.provider?.name} responses null usages which is disallowed, " +
+                        "data: ${chatModelEntity.toJSONString()}"
                 )
-            )
-        } catch (e: Exception) {
-            logger.error("An error occurred when calling chat completion request, chatModel: ${agent.chatModel.toJSONString()}", e)
-            null
-        }
+                logger.error("Collected chunks:")
+                chunks.forEach { chunk ->
+                    logger.error(chunk.toJSONString())
+                }
+                logger.error("[ERROR]" + "=".repeat(128))
+            }
+        } else {
+            // Blocking
+            val resp = try {
+                client.chatCompletionBlocking(chatCompletionRequest)
+            } catch (e: Exception) {
+                logger.error("An error occurred when calling blocking chat completion request, chatModel: ${agent.chatModel.toJSONString()}", e)
+                null
+            }
 
-        if (resp == null) {
-            return listOf(
-                TextMessage(
-                    sequence = System.currentTimeMillis(),
-                    message = "Could not process your request, please try again later",
-                    extraBody = message.extraBody
+            if (resp == null) {
+                return emitter.invoke(listOf(
+                    TextMessage(
+                        sequence = System.currentTimeMillis(),
+                        message = "Could not process your request, please try again later",
+                        extraBody = message.extraBody
+                    )
+                ))
+            }
+
+            val choiceMessage = resp.choices.first().message.content
+
+            return emitter.invoke(
+                agent.agent.delimiter?.let { delimiter ->
+                    choiceMessage.split(delimiter.unescape()).map {
+                        TextMessage(
+                            sequence = System.currentTimeMillis(),
+                            message = it,
+                            extraBody = message.extraBody
+                        )
+                    }
+                } ?: listOf(
+                    TextMessage(
+                        sequence = System.currentTimeMillis(),
+                        message = choiceMessage,
+                        extraBody = message.extraBody
+                    )
                 )
-            )
+            ).also {
+                // After actions
+                val consumedPoints = resp.usage.promptTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.inputTokenPointRate) +
+                        resp.usage.completionTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.outputTokenPointRate)
+
+                userService.consumePoints(sender.user.id!!, ceil(consumedPoints).toLong())
+            }
         }
 
-        val consumedPoints = resp.usage.promptTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.inputTokenPointRate) +
-                resp.usage.completionTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.outputTokenPointRate)
 
-        userService.consumePoints(sender.user.id!!, ceil(consumedPoints).toLong())
+    }
 
-        return resp.choices.first().message.content.split("\n").map {
-            TextMessage(
-                sequence = System.currentTimeMillis(),
-                message = it,
-                extraBody = message.extraBody
-            )
-        }
+    private fun String.unescape(): String {
+        return this
+            .replace("\\n", "\n")
+            .replace("\\r", "\r")
+            .replace("\\t", "\t")
+            .replace("\\\\", "\\")
+            .replace("\\\"", "\"")
+            .replace("\\'", "'")
     }
 }
