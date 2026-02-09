@@ -52,11 +52,15 @@ class SakuraChatAgent(
 
     override val memberId: String get() = buildMemberId(this.agent.agent.id!!)
 
+    // Supervisor job prevents exception blocking message handler tasks
     private val supervisorJob = SupervisorJob()
+    // Name of coroutine
     private val coroutineName = CoroutineName("SakuraChatAgent#$memberId")
+    // Exception handler
     private val coroutineExceptionHandler = CoroutineExceptionHandler { ctx, t ->
         logger.error("An error occurred while attempting to call agent ${agent.agent.id}#${agent.agent.name}", t)
     }
+
     private val coroutineScope = CoroutineScope(
         supervisorJob + Dispatchers.IO + coroutineName + coroutineExceptionHandler
     )
