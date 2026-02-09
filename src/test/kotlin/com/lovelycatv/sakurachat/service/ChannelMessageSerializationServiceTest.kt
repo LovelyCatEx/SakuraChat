@@ -59,7 +59,7 @@ class ChannelMessageSerializationServiceTest {
 
     @Test
     fun toJSONString() {
-        val expect = "{\"type\":\"chain\",\"messages\":[\"{\\\"type\\\":\\\"chain\\\",\\\"messages\\\":[\\\"{\\\\\\\"message\\\\\\\":\\\\\\\"Hello\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"TEXT\\\\\\\"}\\\",\\\"{\\\\\\\"message\\\\\\\":\\\\\\\"World\\\\\\\",\\\\\\\"type\\\\\\\":\\\\\\\"TEXT\\\\\\\"}\\\"]}\",\"{\\\"message\\\":\\\"Hello World\\\",\\\"type\\\":\\\"TEXT\\\"}\",\"{\\\"message\\\":\\\"Hello World\\\",\\\"type\\\":\\\"TEXT\\\"}\"]}"
+        val expect = "{\"type\":\"CHAIN\",\"messages\":[{\"type\":\"CHAIN\",\"messages\":[{\"message\":\"Hello\",\"type\":\"TEXT\"},{\"message\":\"World\",\"type\":\"TEXT\"}]},{\"message\":\"Hello World\",\"type\":\"TEXT\"},{\"message\":\"Hello World\",\"type\":\"TEXT\"}]}"
         val actual = channelMessageSerializationService.toJSONString(chainMessage)
 
         println(actual)
@@ -68,7 +68,7 @@ class ChannelMessageSerializationServiceTest {
 
     @Test
     fun fromJSONString() {
-        val jsonString = "{\"messages\":[{\"messages\":[{\"message\":\"Hello\",\"type\":\"TEXT\"},{\"message\":\"World\",\"type\":\"TEXT\"}],\"type\":\"CHAIN\"},{\"message\":\"Hello World\",\"type\":\"TEXT\"},{\"message\":\"Hello World\",\"type\":\"TEXT\"}],\"type\":\"CHAIN\"}"
+        val jsonString = "{\"type\":\"CHAIN\",\"messages\":[{\"type\":\"CHAIN\",\"messages\":[{\"message\":\"Hello\",\"type\":\"TEXT\"},{\"message\":\"World\",\"type\":\"TEXT\"}]},{\"message\":\"Hello World\",\"type\":\"TEXT\"},{\"message\":\"Hello World\",\"type\":\"TEXT\"}]}"
         val actual = channelMessageSerializationService.fromJSONString(jsonString) as ChainMessage
 
         println("Original: $jsonString")

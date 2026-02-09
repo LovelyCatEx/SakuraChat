@@ -25,9 +25,11 @@ import com.lovelycatv.vertex.ai.openai.message.IChatMessage
 import com.lovelycatv.vertex.ai.openai.request.ChatCompletionRequest
 import com.lovelycatv.vertex.ai.openai.response.ChatCompletionStreamChunkResponse
 import com.lovelycatv.vertex.log.logger
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
 import kotlin.math.log
@@ -50,8 +52,13 @@ class SakuraChatAgent(
 
     override val memberId: String get() = buildMemberId(this.agent.agent.id!!)
 
+    private val supervisorJob = SupervisorJob()
+    private val coroutineName = CoroutineName("SakuraChatAgent#$memberId")
+    private val coroutineExceptionHandler = CoroutineExceptionHandler { ctx, t ->
+        logger.error("An error occurred while attempting to call agent ${agent.agent.id}#${agent.agent.name}", t)
+    }
     private val coroutineScope = CoroutineScope(
-        Dispatchers.IO + CoroutineName("SakuraChatAgent#$memberId")
+        supervisorJob + Dispatchers.IO + coroutineName + coroutineExceptionHandler
     )
 
     override fun onPrivateMessage(

@@ -43,22 +43,41 @@ class ChannelMessageSerializationServiceImpl : ChannelMessageSerializationServic
     }
 
     private fun chainMessageToJson(chainMessage: ChainMessage): String {
-        val messageJsons = chainMessage.messages.map { message ->
+        // 收集消息对象（JsonNode）
+        val messageNodes = chainMessage.messages.map { message ->
             when (message) {
                 is ChainMessage -> {
-                    chainMessageToJson(message)
+                    // 递归处理嵌套 ChainMessage，返回 JsonNode
+                    objectMapper.readTree(chainMessageToJson(message))
                 }
-
                 else -> {
-                    singleMessageToJson(message)
+                    // 普通消息转为 JsonNode 并移除字段
+                    val jsonNode = objectMapper.valueToTree<JsonNode>(message)
+                    (jsonNode as ObjectNode).apply {
+                        remove("sequence")
+                        remove("extraBody")
+                    }
+                    jsonNode
                 }
             }
         }
 
-        val result = mapOf(
-            "type" to chainMessage.type.name.lowercase(),
-            "messages" to messageJsons
-        )
+        // 构建 ChainMessage 的 JSON 结构
+        val result = objectMapper.createObjectNode().apply {
+            // 添加 type 字段
+            put("type", chainMessage.type.name)
+
+            // 添加 messages 数组，包含真正的对象而不是字符串
+            val messagesArray = putArray("messages")
+            messageNodes.forEach { node ->
+                messagesArray.add(node)
+            }
+
+            // 如果需要，也可以移除 ChainMessage 本身的 sequence 和 extraBody
+            //（如果 ChainMessage 也有这些字段）
+            remove("sequence")
+            remove("extraBody")
+        }
 
         return objectMapper.writeValueAsString(result)
     }
