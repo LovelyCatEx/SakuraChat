@@ -153,6 +153,13 @@ class SakuraChatAgent(
             model = chatModelEntity.chatModel.qualifiedName,
             maxTokens = chatModelEntity.chatModel.maxTokens,
             stream = stream,
+            streamOptions = if (stream) {
+                ChatCompletionRequest.StreamOptions(
+                    includeUsage = true
+                )
+            } else {
+                null
+            },
             messages = agentContextService.getContextForChatCompletions(
                 userId = sender.user.id!!,
                 agentId = agent.agent.id!!,
