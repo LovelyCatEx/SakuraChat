@@ -1,5 +1,6 @@
 import {del, get, patch, post, put} from "./request.ts";
 import {getUserAuthentication} from "../utils/token.utils.ts";
+import {message} from "antd";
 
 export interface ApiResponse<T> {
     code: number;
@@ -10,6 +11,11 @@ export interface ApiResponse<T> {
 function handleApiResponse<T>(response: ApiResponse<T>) {
     if (response.code === 200) {
         return response;
+    } else if (response.code === 401) {
+        void message.warning('登录信息已过期');
+        setTimeout(() => {
+            window.location.pathname = '/auth/login';
+        }, 500);
     } else {
         throw response;
     }

@@ -15,7 +15,8 @@ class JSONExtensions private constructor()
 
 val objectMapper: ObjectMapper = jacksonObjectMapper()
 
-fun Any.toJSONString(objectMapper: ObjectMapper = com.lovelycatv.sakurachat.utils.objectMapper) = objectMapper.writeValueAsString(this)
+fun Any?.toJSONString(objectMapper: ObjectMapper = com.lovelycatv.sakurachat.utils.objectMapper)
+    = if (this == null) "null" else objectMapper.writeValueAsString(this)
 
 inline fun <reified T> String.parseObject(objectMapper: ObjectMapper = com.lovelycatv.sakurachat.utils.objectMapper): T {
     return objectMapper.readValue(this, T::class.java)

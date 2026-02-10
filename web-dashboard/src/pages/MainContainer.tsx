@@ -1,4 +1,4 @@
-import React, {type JSX, useMemo, useState} from 'react';
+import React, {type JSX, useEffect, useMemo, useState} from 'react';
 import {Route, Routes, useLocation, useNavigate} from 'react-router-dom';
 import {Avatar, Button, ConfigProvider, Divider, Dropdown, Layout, Menu, Space,} from 'antd';
 import {
@@ -26,6 +26,8 @@ import {UserPage} from './manager/user/UserPage.tsx';
 import './MainContainerStyles.css';
 import type {ItemType} from "antd/es/menu/interface";
 import {clearUserAuthentication} from "../utils/token.utils.ts";
+import type {UserProfileVO} from "../types/user.types.ts";
+import {getUserProfile} from "../api/user.api.ts";
 
 const { Header, Sider, Content } = Layout;
 
@@ -61,8 +63,16 @@ export function MainContainer() {
     const matchedKey = menuItems.find((item) =>
         currentPath.startsWith(item.key)
     );
-    return matchedKey ? [matchedKey.key] : ['/dashboard'];
+    return matchedKey ? [matchedKey.key] : ['/'];
   }, [location.pathname, menuItems]);
+
+  const [userProfile, setUserProfile] = useState<UserProfileVO | null>(null);
+  useEffect(() => {
+    getUserProfile()
+        .then((res) => {
+          setUserProfile(res.data);
+        })
+  }, []);
 
   return (
     <ConfigProvider
@@ -124,7 +134,7 @@ export function MainContainer() {
                   icon={<UserOutlined />}
                 />
                 <span className="hidden sm:inline font-medium text-gray-700">
-                  管理员
+                  {userProfile?.username}
                 </span>
               </Space>
             </Dropdown>

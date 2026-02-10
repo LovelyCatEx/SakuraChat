@@ -126,6 +126,12 @@ class UserServiceImpl : UserService {
         }
     }
 
+    override suspend fun getUserProfileById(userId: Long): UserEntity {
+        return withContext(Dispatchers.IO) {
+            getRepository().findById(userId)
+        }.getOrNull() ?: throw BusinessException("User $userId not found")
+    }
+
     override fun loadUserByUsername(username: String?): UserDetails {
         if (username == null) {
             throw BusinessException("Username could not be null")

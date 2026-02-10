@@ -7,9 +7,13 @@
  */
 package com.lovelycatv.sakurachat.config
 
+import com.lovelycatv.sakurachat.annotations.Unauthorized
 import com.lovelycatv.sakurachat.filter.AuthorizationFilter
 import com.lovelycatv.sakurachat.filter.CustomLoginFilter
+import com.lovelycatv.vertex.log.logger
 import jakarta.annotation.Resource
+import org.springframework.beans.factory.getBeansWithAnnotation
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
@@ -27,13 +31,25 @@ import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher
 import org.springframework.security.web.util.matcher.RequestMatcher
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+import kotlin.jvm.java
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 class SecurityConfig {
+    private val logger = logger()
+
     @Resource
     private lateinit var authenticationConfiguration: AuthenticationConfiguration
+    @Resource
+    private lateinit var applicationContext: ApplicationContext
 
     @Bean
     @Throws(Exception::class)
@@ -42,6 +58,16 @@ class SecurityConfig {
         requestMatchers.add(PathPatternRequestMatcher.withDefaults().matcher("/user/login"))
         requestMatchers.add(PathPatternRequestMatcher.withDefaults().matcher("/user/register"))
         requestMatchers.add(PathPatternRequestMatcher.withDefaults().matcher("/ws/v1/napcat"))
+        this.getUnauthorizedEndpointsSimple().forEach {
+            requestMatchers.add(
+                PathPatternRequestMatcher.withDefaults().matcher(it)
+            )
+        }
+
+        logger.warn("The following urls will not go through the authorization check:")
+        requestMatchers.forEach {
+            logger.warn("$it")
+        }
 
         http.authorizeHttpRequests { registry ->
             requestMatchers.forEach {
@@ -82,4 +108,59 @@ class SecurityConfig {
     }
     @Bean
     fun passwordEncoder() = BCryptPasswordEncoder()
+
+    fun getUnauthorizedEndpointsSimple(): List<String> {
+        val endpoints = mutableListOf<String>()
+        val controllerBeans = applicationContext.getBeansWithAnnotation<RestController>()
+
+        controllerBeans.values.forEach { bean ->
+            val beanType = bean.javaClass
+
+            val classUnauthorized = beanType.getAnnotation(Unauthorized::class.java)
+
+            val classRequestMapping = beanType.getAnnotation(RequestMapping::class.java)
+            val classPathPrefixes = classRequestMapping?.value?.toList() ?: listOf("")
+
+            val a = beanType.declaredMethods
+
+            beanType.declaredMethods.forEach { method ->
+                val methodUnauthorized = method.getAnnotation(Unauthorized::class.java)
+
+                if (classUnauthorized != null || methodUnauthorized != null) {
+                    val requestMapping = method.getAnnotation(RequestMapping::class.java)
+                    val getMapping = method.getAnnotation(GetMapping::class.java)
+                    val postMapping = method.getAnnotation(PostMapping::class.java)
+                    val putMapping = method.getAnnotation(PutMapping::class.java)
+                    val deleteMapping = method.getAnnotation(DeleteMapping::class.java)
+                    val patchMapping = method.getAnnotation(PatchMapping::class.java)
+
+                    val methodPaths = when {
+                        requestMapping != null -> requestMapping.value.toList()
+                        getMapping != null -> getMapping.value.toList()
+                        postMapping != null -> postMapping.value.toList()
+                        putMapping != null -> putMapping.value.toList()
+                        deleteMapping != null -> deleteMapping.value.toList()
+                        patchMapping != null -> patchMapping.value.toList()
+                        else -> listOf("")
+                    }
+
+                    classPathPrefixes.forEach { classPrefix ->
+                        methodPaths.forEach { methodPath ->
+                            val fullPath = if (classPrefix.endsWith("/") && methodPath.startsWith("/")) {
+                                "$classPrefix${methodPath.substring(1)}"
+                            } else if (!classPrefix.endsWith("/") && !methodPath.startsWith("/") && methodPath.isNotEmpty()) {
+                                "$classPrefix/$methodPath"
+                            } else {
+                                "$classPrefix$methodPath"
+                            }
+
+                            endpoints.add(fullPath)
+                        }
+                    }
+                }
+            }
+        }
+
+        return endpoints.distinct()
+    }
 }

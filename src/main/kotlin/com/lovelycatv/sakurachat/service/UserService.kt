@@ -33,4 +33,6 @@ interface UserService : UserDetailsService, BaseService<UserRepository> {
 
     @Transactional(propagation = Propagation.REQUIRED)
     suspend fun consumePoints(userId: Long, points: Long): UserEntity
+
+    suspend fun getUserProfileById(userId: Long): UserEntity
 }
