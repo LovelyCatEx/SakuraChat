@@ -12,6 +12,7 @@ import com.lovelycatv.sakurachat.adapters.thirdparty.im.ThirdPartyIMAccessorMana
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
 import com.lovelycatv.sakurachat.core.im.thirdparty.IThirdPartyIMAccessor
 import com.lovelycatv.sakurachat.entity.UserEntity
+import com.lovelycatv.sakurachat.types.ChannelMemberType
 import com.lovelycatv.sakurachat.utils.toJSONString
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.CoroutineName
@@ -22,18 +23,10 @@ import kotlinx.coroutines.launch
 class SakuraChatUser(
     val user: UserEntity,
     val thirdPartyIMAccessorManager: ThirdPartyIMAccessorManager
-) : ISakuraChatMessageChannelMember {
-    companion object {
-        const val MEMBER_PREFIX = "user_"
-
-        fun buildMemberId(userId: Long) = "${MEMBER_PREFIX}$userId"
-
-        fun isUserMemberId(memberId: String) = memberId.startsWith(MEMBER_PREFIX)
-    }
-
+) : AbstractSakuraChatChannelMember(ChannelMemberType.USER) {
     private val logger = logger()
 
-    override val memberId: String get() = buildMemberId(this.user.id!!)
+    override val id: Long get() = this.user.id!!
 
     private val coroutineScope = CoroutineScope(
         Dispatchers.IO + CoroutineName("SakuraChatUser#$memberId")
@@ -41,7 +34,7 @@ class SakuraChatUser(
 
     override fun onPrivateMessage(
         channel: SakuraChatMessageChannel,
-        sender: ISakuraChatMessageChannelMember,
+        sender: AbstractSakuraChatChannelMember,
         message: AbstractMessage
     ) {
         handleMessage(sender, message) { extra ->
@@ -56,7 +49,7 @@ class SakuraChatUser(
 
     override fun onGroupMessage(
         channel: SakuraChatMessageChannel,
-        sender: ISakuraChatMessageChannelMember,
+        sender: AbstractSakuraChatChannelMember,
         message: AbstractMessage
     ) {
         handleMessage(sender, message) { extra ->

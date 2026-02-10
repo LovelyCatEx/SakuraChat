@@ -19,7 +19,8 @@ import com.lovelycatv.sakurachat.core.im.message.TextMessage
 import com.lovelycatv.sakurachat.service.AgentContextService
 import com.lovelycatv.sakurachat.service.AgentService
 import com.lovelycatv.sakurachat.service.ChannelMessageSerializationService
-import com.lovelycatv.sakurachat.service.ChannelMessageService
+import com.lovelycatv.sakurachat.service.IMChannelMessageService
+import com.lovelycatv.sakurachat.types.ChannelMemberType
 import com.lovelycatv.vertex.ai.openai.ChatMessageRole
 import com.lovelycatv.vertex.ai.openai.message.ChatMessage
 import com.lovelycatv.vertex.log.logger
@@ -32,7 +33,7 @@ import kotlin.jvm.optionals.getOrNull
 
 @Service
 class AgentContextServiceImpl(
-    private val channelMessageService: ChannelMessageService,
+    private val IMChannelMessageService: IMChannelMessageService,
     private val agentService: AgentService,
     private val objectMapper: ObjectMapper,
     private val channelMessageSerializationService: ChannelMessageSerializationService,
@@ -54,7 +55,7 @@ class AgentContextServiceImpl(
         }
 
         val messages = withContext(Dispatchers.IO) {
-            channelMessageService
+            IMChannelMessageService
                 .getRepository()
                 .findByChannelId(
                     channelId,
@@ -75,9 +76,9 @@ class AgentContextServiceImpl(
         ) + messages.map {
             this.buildChatMessageFromAbstractMessage(
                 message = channelMessageSerializationService.fromJSONString(it.content),
-                role = if (SakuraChatAgent.isAgentMemberId(it.memberId)) {
+                role = if (it.getRealMemberType() == ChannelMemberType.AGENT) {
                     ChatMessageRole.ASSISTANT
-                } else if (SakuraChatUser.isUserMemberId(it.memberId)) {
+                } else if (it.getRealMemberType() == ChannelMemberType.USER) {
                     ChatMessageRole.USER
                 } else {
                     throw IllegalStateException("Unknown memberId ${it.memberId} of channel ${it.channelId}, neither agent nor user.")

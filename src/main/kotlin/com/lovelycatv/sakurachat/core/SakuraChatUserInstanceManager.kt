@@ -16,14 +16,14 @@ import org.springframework.stereotype.Component
 class SakuraChatUserInstanceManager(
     private val thirdPartyIMAccessorManager: ThirdPartyIMAccessorManager
 ) {
-    private val instances = mutableMapOf<String, SakuraChatUser>()
+    private val instances = mutableMapOf<Long, SakuraChatUser>()
 
     fun getUser(userId: Long): SakuraChatUser? {
-        return instances[SakuraChatUser.buildMemberId(userId)]
+        return instances[userId]
     }
 
     fun addUser(user: SakuraChatUser): SakuraChatUser {
-        instances[user.memberId] = user
+        instances[user.id] = user
         return user
     }
 

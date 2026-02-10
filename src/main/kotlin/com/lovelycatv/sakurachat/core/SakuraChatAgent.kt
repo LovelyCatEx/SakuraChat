@@ -9,19 +9,16 @@
 package com.lovelycatv.sakurachat.core
 
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
-import com.lovelycatv.sakurachat.core.im.message.ChainMessage
 import com.lovelycatv.sakurachat.core.im.message.TextMessage
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.service.AgentContextService
-import com.lovelycatv.sakurachat.service.ChannelMessageService
+import com.lovelycatv.sakurachat.service.IMChannelMessageService
 import com.lovelycatv.sakurachat.service.UserService
+import com.lovelycatv.sakurachat.types.ChannelMemberType
 import com.lovelycatv.sakurachat.utils.toJSONString
 import com.lovelycatv.vertex.ai.openai.ChatMessageRole
 import com.lovelycatv.vertex.ai.openai.VertexAIClient
 import com.lovelycatv.vertex.ai.openai.VertexAIClientConfig
-import com.lovelycatv.vertex.ai.openai.message.ChatMessage
-import com.lovelycatv.vertex.ai.openai.message.ChoiceMessage
-import com.lovelycatv.vertex.ai.openai.message.IChatMessage
 import com.lovelycatv.vertex.ai.openai.request.ChatCompletionRequest
 import com.lovelycatv.vertex.ai.openai.response.ChatCompletionStreamChunkResponse
 import com.lovelycatv.vertex.log.logger
@@ -32,25 +29,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
-import kotlin.math.log
 
 class SakuraChatAgent(
     val agent: AggregatedAgentEntity,
     val userService: UserService,
     val agentContextService: AgentContextService,
-    val channelMessageService: ChannelMessageService,
-) : ISakuraChatMessageChannelMember {
-    companion object {
-        const val MEMBER_PREFIX = "agent_"
-
-        fun buildMemberId(agentId: Long) = "${MEMBER_PREFIX}$agentId"
-
-        fun isAgentMemberId(memberId: String) = memberId.startsWith(MEMBER_PREFIX)
-    }
-
+    val imChannelMessageService: IMChannelMessageService,
+) : AbstractSakuraChatChannelMember(ChannelMemberType.AGENT) {
     private val logger = logger()
 
-    override val memberId: String get() = buildMemberId(this.agent.agent.id!!)
+    override val id: Long get() = this.agent.agent.id!!
 
     // Supervisor job prevents exception blocking message handler tasks
     private val supervisorJob = SupervisorJob()
@@ -67,7 +55,7 @@ class SakuraChatAgent(
 
     override fun onPrivateMessage(
         channel: SakuraChatMessageChannel,
-        sender: ISakuraChatMessageChannelMember,
+        sender: AbstractSakuraChatChannelMember,
         message: AbstractMessage
     ) {
         println("Agent ${agent.agent.id} received a private message: ${message.toJSONString()}")
@@ -86,7 +74,7 @@ class SakuraChatAgent(
                             )
 
                             // Save agent message into database
-                            channelMessageService.saveMessage(channel, agentMember, it)
+                            imChannelMessageService.saveMessage(channel, agentMember, it)
                         }
                     }
                 }
@@ -96,7 +84,7 @@ class SakuraChatAgent(
 
     override fun onGroupMessage(
         channel: SakuraChatMessageChannel,
-        sender: ISakuraChatMessageChannelMember,
+        sender: AbstractSakuraChatChannelMember,
         message: AbstractMessage
     ) {
         println("Agent ${agent.agent.id} received a group message: ${message.toJSONString()}")
@@ -113,7 +101,7 @@ class SakuraChatAgent(
                             )
 
                             // Save agent message into database
-                            channelMessageService.saveMessage(channel, agentMember, it)
+                            imChannelMessageService.saveMessage(channel, agentMember, it)
                         }
                     }
                 }
@@ -190,7 +178,7 @@ class SakuraChatAgent(
         )
 
         // Save user message into database
-        channelMessageService.saveMessage(channel, sender, message)
+        imChannelMessageService.saveMessage(channel, sender, message)
 
         val hasDelimiter = agent.agent.delimiter != null
         val delimiter by lazy {

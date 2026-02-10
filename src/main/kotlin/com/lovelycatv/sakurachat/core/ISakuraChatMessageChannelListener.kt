@@ -11,4 +11,4 @@ package com.lovelycatv.sakurachat.core
 import com.lovelycatv.sakurachat.core.im.channel.MessageChannelListener
 
 interface ISakuraChatMessageChannelListener :
-    MessageChannelListener<SakuraChatMessageChannel, ISakuraChatMessageChannelMember>
+    MessageChannelListener<SakuraChatMessageChannel, AbstractSakuraChatChannelMember>
