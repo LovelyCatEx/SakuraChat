@@ -18,6 +18,10 @@ export function LoginPage() {
   }) => {
     setLoading(true);
 
+    if (values.remember) {
+      localStorage.setItem('login_username', values.username);
+    }
+
     login(values.username, values.password)
         .then((res) => {
           void message.success('登录成功');
@@ -48,7 +52,10 @@ export function LoginPage() {
       <Form
         name="login_form"
         layout="vertical"
-        initialValues={{ remember: true }}
+        initialValues={{
+          username: localStorage.getItem('login_username') || '',
+          remember: true
+      }}
         onFinish={onFinish}
         size="large"
         requiredMark={false}
