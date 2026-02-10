@@ -16,6 +16,7 @@ function handleApiResponse<T>(response: ApiResponse<T>) {
         setTimeout(() => {
             window.location.pathname = '/auth/login';
         }, 500);
+        throw response;
     } else {
         throw response;
     }
