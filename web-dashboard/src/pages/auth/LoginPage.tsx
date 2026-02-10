@@ -3,18 +3,33 @@ import { LockOutlined, MailOutlined } from '@ant-design/icons';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthCardLayout } from './AuthorizationPage.tsx';
+import {login} from "../../api/auth.api.ts";
+import {setUserAuthentication} from "../../utils/token.utils.ts";
 
 export function LoginPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const onFinish = (values: any) => {
+  const onFinish = (values: {
+    username: string,
+    password: string,
+    remember: boolean
+  }) => {
     setLoading(true);
-    console.log('Login Success:', values);
-    setTimeout(() => {
-      setLoading(false);
-      void message.success('登录成功！');
-    }, 1500);
+
+    login(values.username, values.password)
+        .then((res) => {
+          void message.success('登录成功');
+          if (res.data) {
+            setUserAuthentication(res.data.token, res.data.expiresIn)
+          }
+        })
+        .catch(() => {
+          void message.error('登录失败');
+        })
+        .finally(() => {
+          setLoading(false);
+        })
   };
 
   return (
@@ -35,7 +50,7 @@ export function LoginPage() {
         autoComplete="off"
       >
         <Form.Item
-          name="email"
+          name="username"
           rules={[
             { required: true, message: '请输入邮箱' },
             { type: 'email', message: '邮箱格式不正确' },

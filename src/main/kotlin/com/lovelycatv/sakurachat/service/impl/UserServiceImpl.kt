@@ -42,25 +42,31 @@ class UserServiceImpl : UserService {
     private val logger = logger()
 
     override suspend fun register(username: String, password: String, email: String, emailCode: String) {
-        val userByName = userRepository.findByUsername(username)
+        val userByName = withContext(Dispatchers.IO) {
+            userRepository.findByUsername(username)
+        }
         if (userByName != null) {
             throw BusinessException("user $username already registered")
         }
 
-        val userByEmail = userRepository.findByEmail(email)
+        val userByEmail = withContext(Dispatchers.IO) {
+            userRepository.findByEmail(email)
+        }
         if (userByEmail != null) {
             throw BusinessException("user $email already registered")
         }
 
-        userRepository.save(
-            UserEntity(
-                snowIdGenerator.nextId(),
-                username,
-                passwordEncoder.encode(password),
-                username,
-                email
+        withContext(Dispatchers.IO) {
+            userRepository.save(
+                UserEntity(
+                    snowIdGenerator.nextId(),
+                    username,
+                    passwordEncoder.encode(password),
+                    username,
+                    email
+                )
             )
-        )
+        }
     }
 
     override suspend fun getUserByThirdPartyAccount(
