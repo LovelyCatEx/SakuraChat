@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthCardLayout } from './AuthorizationPage.tsx';
 import {login} from "../../api/auth.api.ts";
 import {setUserAuthentication} from "../../utils/token.utils.ts";
+import {getQueryString} from "../../utils/url.utils.ts";
 
 export function LoginPage() {
   const [loading, setLoading] = useState(false);
@@ -21,7 +22,11 @@ export function LoginPage() {
         .then((res) => {
           void message.success('登录成功');
           if (res.data) {
-            setUserAuthentication(res.data.token, res.data.expiresIn)
+            setUserAuthentication(res.data.token, res.data.expiresIn);
+            const redirectTo = getQueryString('redirectTo') || '/dashboard';
+            navigate(redirectTo);
+          } else {
+            void message.error('登录失败 未知错误');
           }
         })
         .catch(() => {

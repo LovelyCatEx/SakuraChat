@@ -25,6 +25,7 @@ import {ThirdPartyAccountPage} from './manager/third-party-account/ThirdPartyAcc
 import {UserPage} from './manager/user/UserPage.tsx';
 import './MainContainerStyles.css';
 import type {ItemType} from "antd/es/menu/interface";
+import {clearUserAuthentication} from "../utils/token.utils.ts";
 
 const { Header, Sider, Content } = Layout;
 
@@ -99,14 +100,22 @@ export function MainContainer() {
             <Dropdown
               menu={{
                 items: [
-                  { key: '1', label: '个人中心', icon: <UserOutlined /> },
+                  { key: 'profile', label: '个人中心', icon: <UserOutlined /> },
                   {
-                    key: '2',
+                    key: 'logout',
                     label: '退出登录',
                     icon: <LogoutOutlined />,
                     danger: true,
                   },
                 ],
+                onClick: (e) => {
+                  if (e.key === 'profile') {
+                    navigate('/profile');
+                  } else if (e.key === 'logout') {
+                    clearUserAuthentication();
+                    navigate('/auth/login');
+                  }
+                },
               }}
             >
               <Space className="cursor-pointer">

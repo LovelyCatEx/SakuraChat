@@ -21,3 +21,8 @@ export function getUserAuthentication(): {
         expired: new Date().getTime() > expires,
     };
 }
+
+export function clearUserAuthentication() {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('expires');
+}
