@@ -1,0 +1,87 @@
+import { Button, Checkbox, Form, Input, message } from 'antd';
+import { LockOutlined, MailOutlined } from '@ant-design/icons';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { AuthCardLayout } from './AuthorizationPage.tsx';
+
+export function LoginPage() {
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const onFinish = (values: any) => {
+    setLoading(true);
+    console.log('Login Success:', values);
+    setTimeout(() => {
+      setLoading(false);
+      void message.success('登录成功！');
+    }, 1500);
+  };
+
+  return (
+    <AuthCardLayout
+      title="欢迎回来"
+      subtitle="请输入您的凭据以访问控制台"
+      footerText="还没有账号?"
+      footerLink="现在注册"
+      footerAction={() => navigate('/auth/register')}
+    >
+      <Form
+        name="login_form"
+        layout="vertical"
+        initialValues={{ remember: true }}
+        onFinish={onFinish}
+        size="large"
+        requiredMark={false}
+        autoComplete="off"
+      >
+        <Form.Item
+          name="email"
+          rules={[
+            { required: true, message: '请输入邮箱' },
+            { type: 'email', message: '邮箱格式不正确' },
+          ]}
+        >
+          <Input
+            prefix={<MailOutlined className="text-gray-400 mr-2" />}
+            placeholder="电子邮箱"
+            className="hover:border-blue-400 focus:border-blue-500 rounded-xl"
+          />
+        </Form.Item>
+
+        <Form.Item
+          name="password"
+          rules={[{ required: true, message: '请输入密码' }]}
+        >
+          <Input.Password
+            prefix={<LockOutlined className="text-gray-400 mr-2" />}
+            placeholder="密码"
+            className="hover:border-blue-400 focus:border-blue-500 rounded-xl"
+          />
+        </Form.Item>
+
+        <div className="flex justify-between items-center mb-6">
+          <Form.Item name="remember" valuePropName="checked" noStyle>
+            <Checkbox className="text-xs text-gray-500">记住我</Checkbox>
+          </Form.Item>
+          <a
+            className="text-xs text-blue-600 hover:text-blue-500 font-medium"
+            href="#"
+          >
+            忘记密码?
+          </a>
+        </div>
+
+        <Form.Item className="mb-4">
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={loading}
+            className="w-full h-12 text-base font-semibold shadow-lg shadow-blue-100 rounded-xl border-none bg-blue-600 hover:bg-blue-500 active:scale-[0.98] transition-all"
+          >
+            立即登录
+          </Button>
+        </Form.Item>
+      </Form>
+    </AuthCardLayout>
+  );
+}
