@@ -29,11 +29,9 @@ class ManagerUserController(
     @GetMapping("/list")
     suspend fun listUsers(@ModelAttribute pageQuery: PageQuery): ApiResponse<*> {
         return ApiResponse.success(
-            userService.getRepository().findAll(
-                Pageable
-                    .ofSize(pageQuery.pageSize)
-                    .withPage(pageQuery.page - 1)
-            ).toPaginatedResponseData()
+            userService
+                .listByPage(pageQuery.page, pageQuery.pageSize)
+                .toPaginatedResponseData()
         )
     }
 

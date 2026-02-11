@@ -13,12 +13,15 @@ import com.lovelycatv.sakurachat.controller.manager.dto.UpdateChatModelDTO
 import com.lovelycatv.sakurachat.entity.ChatModelEntity
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedChatModelEntity
 import com.lovelycatv.sakurachat.repository.ChatModelRepository
+import com.lovelycatv.sakurachat.request.PaginatedResponseData
 import com.lovelycatv.sakurachat.service.ChatModelService
 import com.lovelycatv.sakurachat.service.CredentialService
 import com.lovelycatv.sakurachat.service.ProviderService
 import com.lovelycatv.sakurachat.utils.SnowIdGenerator
+import com.lovelycatv.sakurachat.utils.toPaginatedResponseData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
 @Service
@@ -123,5 +126,20 @@ class ChatModelServiceImpl(
                 )
             )
         }
+    }
+
+    override suspend fun search(keyword: String): PaginatedResponseData<ChatModelEntity> {
+        if (keyword.isBlank()) {
+            return this.listByPage(1, 20).toPaginatedResponseData()
+        }
+
+        return withContext(Dispatchers.IO) {
+            getRepository().findAllByNameLikeOrDescriptionLikeOrQualifiedNameLike(
+                "%$keyword%",
+                "%$keyword%",
+                "%$keyword%",
+                Pageable.ofSize(20).withPage(0)
+            )
+        }.toPaginatedResponseData()
     }
 }

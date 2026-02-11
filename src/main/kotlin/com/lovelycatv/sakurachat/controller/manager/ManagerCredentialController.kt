@@ -29,11 +29,9 @@ class ManagerCredentialController(
     @GetMapping("/list")
     suspend fun listCredentials(@ModelAttribute pageQuery: PageQuery): ApiResponse<*> {
         return ApiResponse.success(
-            credentialService.getRepository().findAll(
-                Pageable
-                    .ofSize(pageQuery.pageSize)
-                    .withPage(pageQuery.page - 1)
-            ).toPaginatedResponseData()
+            credentialService
+                .listByPage(pageQuery.page, pageQuery.pageSize)
+                .toPaginatedResponseData()
         )
     }
 
@@ -50,7 +48,7 @@ class ManagerCredentialController(
     @GetMapping("/getById")
     suspend fun getCredentialById(@RequestParam("id") id: Long): ApiResponse<*> {
         return ApiResponse.success(
-            credentialService.getRepository().findById(id).orElse(null)
+            credentialService.getByIdOrThrow(id)
         )
     }
 

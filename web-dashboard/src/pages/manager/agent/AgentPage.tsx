@@ -41,11 +41,11 @@ export function AgentPage() {
         const res = await searchChatModels(keyword);
         if (res.data) {
             const modelMap: Record<string, {name: string, qualifiedName: string}> = {};
-            res.data.forEach(m => {
+            res.data.records.forEach(m => {
                 modelMap[m.id] = {name: m.name, qualifiedName: m.qualifiedName};
             });
             setChatModels(modelMap);
-            return res.data;
+            return res.data.records;
         }
         return [];
     };

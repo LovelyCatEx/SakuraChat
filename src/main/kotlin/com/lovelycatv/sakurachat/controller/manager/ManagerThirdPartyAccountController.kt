@@ -29,11 +29,9 @@ class ManagerThirdPartyAccountController(
     @GetMapping("/list")
     suspend fun listThirdPartyAccounts(@ModelAttribute pageQuery: PageQuery): ApiResponse<*> {
         return ApiResponse.success(
-            thirdPartyAccountService.getRepository().findAll(
-                Pageable
-                    .ofSize(pageQuery.pageSize)
-                    .withPage(pageQuery.page - 1)
-            ).toPaginatedResponseData()
+            thirdPartyAccountService
+                .listByPage(pageQuery.page, pageQuery.pageSize)
+                .toPaginatedResponseData()
         )
     }
 

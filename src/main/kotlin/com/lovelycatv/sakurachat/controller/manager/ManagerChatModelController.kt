@@ -29,29 +29,21 @@ class ManagerChatModelController(
     @GetMapping("/list")
     suspend fun listChatModels(@ModelAttribute pageQuery: PageQuery): ApiResponse<*> {
         return ApiResponse.success(
-            chatModelService.getRepository().findAll(
-                Pageable
-                    .ofSize(pageQuery.pageSize)
-                    .withPage(pageQuery.page - 1)
-            ).toPaginatedResponseData()
+            chatModelService
+                .listByPage(pageQuery.page, pageQuery.pageSize)
+                .toPaginatedResponseData()
         )
     }
 
     @GetMapping("/search")
     suspend fun searchChatModels(@RequestParam("keyword") keyword: String): ApiResponse<*> {
-        return ApiResponse.success(
-            chatModelService.getRepository().findAll().filter {
-                keyword.isBlank() ||
-                it.name.contains(keyword, ignoreCase = true) ||
-                it.qualifiedName.contains(keyword, ignoreCase = true)
-            }
-        )
+        return ApiResponse.success(chatModelService.search(keyword))
     }
 
     @GetMapping("/getById")
     suspend fun getChatModelById(@RequestParam("id") id: Long): ApiResponse<*> {
         return ApiResponse.success(
-            chatModelService.getRepository().findById(id).orElse(null)
+            chatModelService.getByIdOrThrow(id)
         )
     }
 

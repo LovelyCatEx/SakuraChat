@@ -29,11 +29,9 @@ class ManagerAgentController(
     @GetMapping("/list")
     suspend fun listAgents(@ModelAttribute pageQuery: PageQuery): ApiResponse<*> {
         return ApiResponse.success(
-            agentService.getRepository().findAll(
-                Pageable
-                    .ofSize(pageQuery.pageSize)
-                    .withPage(pageQuery.page - 1)
-            ).toPaginatedResponseData()
+            agentService
+                .listByPage(pageQuery.page, pageQuery.pageSize)
+                .toPaginatedResponseData()
         )
     }
 

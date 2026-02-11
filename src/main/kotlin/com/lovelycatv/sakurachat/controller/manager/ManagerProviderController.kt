@@ -29,11 +29,9 @@ class ManagerProviderController(
     @GetMapping("/list")
     suspend fun listProviders(@ModelAttribute pageQuery: PageQuery): ApiResponse<*> {
         return ApiResponse.success(
-            providerService.getRepository().findAll(
-                Pageable
-                    .ofSize(pageQuery.pageSize)
-                    .withPage(pageQuery.page - 1)
-            ).toPaginatedResponseData()
+            providerService
+                .listByPage(pageQuery.page, pageQuery.pageSize)
+                .toPaginatedResponseData()
         )
     }
 
@@ -51,7 +49,7 @@ class ManagerProviderController(
     @GetMapping("/getById")
     suspend fun getProviderById(@RequestParam("id") id: Long): ApiResponse<*> {
         return ApiResponse.success(
-            providerService.getRepository().findById(id).orElse(null)
+            providerService.getByIdOrThrow(id)
         )
     }
 

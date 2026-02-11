@@ -6,7 +6,7 @@ export function getChatModelList(query: PageQuery) {
 }
 
 export function searchChatModels(keyword: string) {
-    return doGet<ChatModel[]>('/api/manager/chat-model/search', { keyword });
+    return doGet<PaginatedResponseData<ChatModel>>('/api/manager/chat-model/search', { keyword });
 }
 
 export function getChatModelById(id: string) {
