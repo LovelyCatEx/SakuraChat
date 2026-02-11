@@ -8,6 +8,7 @@
 
 package com.lovelycatv.sakurachat.controller.manager
 
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateProviderDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.UpdateProviderDTO
 import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.request.PageQuery
@@ -39,6 +40,12 @@ class ManagerProviderController(
                     .withPage(pageQuery.page - 1)
             ).toPaginatedResponseData()
         )
+    }
+
+    @PostMapping("/create")
+    suspend fun createProvider(@ModelAttribute managerCreateProviderDTO: ManagerCreateProviderDTO): ApiResponse<*> {
+        providerService.createProvider(managerCreateProviderDTO)
+        return ApiResponse.success(null)
     }
 
     @PostMapping("/update")

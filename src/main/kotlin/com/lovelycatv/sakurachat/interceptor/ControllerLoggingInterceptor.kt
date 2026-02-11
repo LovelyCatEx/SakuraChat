@@ -95,8 +95,13 @@ class ControllerLoggingInterceptor(
             val method = request.method
             val clientIp = request.remoteAddr
 
-
             val code = request.getAttribute("code")
+
+            val startTime = try {
+                request.getAttribute("startTime") as? Long?
+            } catch (_: Exception) {
+                null
+            } ?: System.currentTimeMillis()
 
             val headers = objectMapper
                 .writerWithDefaultPrettyPrinter()
@@ -114,7 +119,7 @@ class ControllerLoggingInterceptor(
                     logger.info("- [{}] {}", code, it)
                 }
             }
-            logger.info("- [{}] Costs: {}ms", code, System.currentTimeMillis() - (request.getAttribute("startTime") as? Long? ?: System.currentTimeMillis()))
+            logger.info("- [{}] Costs: {}ms", code, System.currentTimeMillis() - startTime)
             logger.info("- [{}] ===========================================================", code)
         }
     }
