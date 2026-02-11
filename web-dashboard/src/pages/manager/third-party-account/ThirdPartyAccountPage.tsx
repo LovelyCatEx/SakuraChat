@@ -5,11 +5,11 @@ import {
     Col,
     Form,
     Input,
-    InputNumber,
     message,
     Modal,
     Popconfirm,
     Row,
+    Select,
     Space,
     Table,
     Tag
@@ -133,7 +133,13 @@ export function ThirdPartyAccountPage() {
             dataIndex: 'platform',
             key: 'platform',
             width: 80,
-            render: (platform: number) => <Tag color="green" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">{platform}</Tag>
+            render: (platform: number) => {
+                const platformMap: Record<number, string> = {
+                    1: 'NapCat OICQ',
+                    2: 'Lark'
+                };
+                return <Tag color="green" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">{platformMap[platform] ?? platform}</Tag>
+            }
         },
         {
             title: '创建时间',
@@ -239,7 +245,10 @@ export function ThirdPartyAccountPage() {
                         </Col>
                         <Col span={12}>
                             <Form.Item name="platform" label="平台" rules={[{ required: true }]}>
-                                <InputNumber className="w-full rounded-lg h-10 flex items-center" placeholder="1" />
+                                <Select className="w-full rounded-lg h-10 flex items-center" placeholder="选择平台">
+                                    <Select.Option value={1}>NapCat OICQ</Select.Option>
+                                    <Select.Option value={2}>Lark</Select.Option>
+                                </Select>
                             </Form.Item>
                         </Col>
                     </Row>

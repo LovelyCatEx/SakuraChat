@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Button, Card, Col, Form, Input, InputNumber, message, Modal, Popconfirm, Row, Space, Table, Tag} from 'antd';
+import {Button, Card, Col, Form, Input, InputNumber, message, Modal, Popconfirm, Row, Select, Space, Table, Tag} from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from '@ant-design/icons';
 import type {Provider} from "../../../types/provider.types.ts";
 import {createProvider, deleteProvider, getProviderList, updateProvider} from "../../../api/provider.api.ts";
@@ -111,11 +111,25 @@ export function ProviderPage() {
             ),
         },
         {
+            title: '描述',
+            dataIndex: 'description',
+            key: 'description',
+            width: 200,
+            render: (description: string | null) => <span className="text-gray-500">{description || '-'}</span>
+        },
+        {
             title: 'API 类型',
             dataIndex: 'apiType',
             key: 'apiType',
             width: 100,
-            render: (apiType: number) => <span className="text-gray-600">{apiType}</span>
+            render: (apiType: number) => {
+                const apiTypeMap: Record<number, string> = {
+                    0: 'OpenAI',
+                    1: 'Claude',
+                    2: 'Gemini'
+                };
+                return <span className="text-gray-600">{apiTypeMap[apiType] ?? apiType}</span>
+            }
         },
         {
             title: 'API URL',
@@ -123,13 +137,6 @@ export function ProviderPage() {
             key: 'chatCompletionsUrl',
             width: 300,
             render: (url: string) => <span className="text-gray-600 font-mono text-sm">{url}</span>
-        },
-        {
-            title: '描述',
-            dataIndex: 'description',
-            key: 'description',
-            width: 200,
-            render: (description: string | null) => <span className="text-gray-500">{description || '-'}</span>
         },
         {
             title: '创建时间',
@@ -235,7 +242,11 @@ export function ProviderPage() {
                         </Col>
                         <Col span={12}>
                             <Form.Item name="apiType" label="API 类型" rules={[{ required: true }]}>
-                                <InputNumber className="w-full rounded-lg h-10 flex items-center" placeholder="1" />
+                                <Select className="w-full rounded-lg h-10 flex items-center" placeholder="选择API类型">
+                                    <Select.Option value={0}>OpenAI</Select.Option>
+                                    <Select.Option value={1}>Claude</Select.Option>
+                                    <Select.Option value={2}>Gemini</Select.Option>
+                                </Select>
                             </Form.Item>
                         </Col>
                     </Row>

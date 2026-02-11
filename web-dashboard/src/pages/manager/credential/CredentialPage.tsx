@@ -5,11 +5,11 @@ import {
     Col,
     Form,
     Input,
-    InputNumber,
     message,
     Modal,
     Popconfirm,
     Row,
+    Select,
     Space,
     Switch,
     Table,
@@ -145,13 +145,19 @@ export function CredentialPage() {
             key: 'data',
             fixed: 'start',
             width: 250,
-            render: (data: string, record: Credential) => (
-                <Space orientation='vertical' size={0}>
-                    <span className="font-bold text-gray-800">类型: {record.type}</span>
-                    <span className="text-xs text-gray-400 font-mono truncate max-w-[200px]">{data}</span>
-                    <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {record.id}</Tag>
-                </Space>
-            ),
+            render: (data: string, record: Credential) => {
+                const credentialTypeMap: Record<number, string> = {
+                    0: 'Authorization Bearer',
+                    1: 'Authorization Basic'
+                };
+                return (
+                    <Space orientation='vertical' size={0}>
+                        <span className="font-bold text-gray-800">类型: {credentialTypeMap[record.type] ?? record.type}</span>
+                        <span className="text-xs text-gray-400 font-mono truncate max-w-[200px]">{data}</span>
+                        <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {record.id}</Tag>
+                    </Space>
+                );
+            },
         },
         {
             title: '状态',
@@ -261,7 +267,10 @@ export function CredentialPage() {
                     <Row gutter={16}>
                         <Col span={24}>
                             <Form.Item name="type" label="凭证类型" rules={[{ required: true }]}>
-                                <InputNumber className="w-full rounded-lg h-10 flex items-center" placeholder="1" />
+                                <Select className="w-full rounded-lg h-10 flex items-center" placeholder="选择凭证类型">
+                                    <Select.Option value={0}>Authorization Bearer</Select.Option>
+                                    <Select.Option value={1}>Authorization Basic</Select.Option>
+                                </Select>
                             </Form.Item>
                         </Col>
                     </Row>
