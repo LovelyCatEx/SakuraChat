@@ -21,6 +21,10 @@ import type {ChatModel} from "../../../types/chat-model.types.ts";
 import {createChatModel, deleteChatModel, getChatModelList, updateChatModel} from "../../../api/chat-model.api.ts";
 import {formatTimestamp} from "../../../utils/datetime.utils.ts";
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
+import {EntitySelector} from "../../../components/common/EntitySelector.tsx";
+import {getProviderById, searchProviders} from "../../../api/provider.api.ts";
+import {getCredentialById, searchCredentials} from "../../../api/credential.api.ts";
+import {getUrlHostname} from "../../../utils/url.utils.ts";
 
 const { TextArea } = Input;
 
@@ -64,17 +68,81 @@ export function ChatModelPage() {
     const [total, setTotal] = useState(0);
 
     const [models, setModels] = useState<ChatModel[]>([]);
+    const [providers, setProviders] = useState<Record<string, {name: string, chatCompletionsUrl: string}>>({});
+    const [credentials, setCredentials] = useState<Record<string, {data: string, type: number}>>({});
+
+    const fetchProviders = async (keyword: string) => {
+        const res = await searchProviders(keyword);
+        if (res.data) {
+            const providerMap: Record<string, {name: string, chatCompletionsUrl: string}> = {};
+            res.data.forEach(p => {
+                providerMap[p.id] = {name: p.name, chatCompletionsUrl: p.chatCompletionsUrl};
+            });
+            setProviders(providerMap);
+            return res.data;
+        }
+        return [];
+    };
+
+    const fetchCredentials = async (keyword: string) => {
+        const res = await searchCredentials(keyword);
+        if (res.data) {
+            const credentialMap: Record<string, {data: string, type: number}> = {};
+            res.data.forEach(c => {
+                credentialMap[c.id] = {data: c.data, type: c.type};
+            });
+            setCredentials(credentialMap);
+            return res.data;
+        }
+        return [];
+    };
 
     const refreshData = () => {
         setRefreshing(true);
 
-        getChatModelList({
-            page: 1,
-            pageSize: 20,
-        }).then((res) => {
-            if (res.data) {
-                setModels(res.data.records);
-                setTotal(res.data.total);
+        Promise.all([
+            getChatModelList({page: currentPage, pageSize: currentPageSize})
+        ]).then(([modelRes]) => {
+            if (modelRes.data) {
+                setModels(modelRes.data.records);
+                setTotal(modelRes.data.total);
+                
+                const providerIds = new Set<string>();
+                const credentialIds = new Set<string>();
+                modelRes.data.records.forEach(m => {
+                    providerIds.add(m.providerId);
+                    credentialIds.add(m.credentialId);
+                });
+
+                const providerPromises = Array.from(providerIds).map(id => getProviderById(id));
+                const credentialPromises = Array.from(credentialIds).map(id => getCredentialById(id));
+
+                if (providerPromises.length === 0 && credentialPromises.length === 0) {
+                    setProviders({});
+                    setCredentials({});
+                    return;
+                }
+
+                Promise.all([
+                    providerPromises.length > 0 ? Promise.all(providerPromises) : Promise.resolve([]),
+                    credentialPromises.length > 0 ? Promise.all(credentialPromises) : Promise.resolve([])
+                ]).then(([providerResults, credentialResults]) => {
+                    const providerMap: Record<string, {name: string, chatCompletionsUrl: string}> = {};
+                    providerResults.forEach((res: any) => {
+                        if (res.data) {
+                            providerMap[res.data.id] = {name: res.data.name, chatCompletionsUrl: res.data.chatCompletionsUrl};
+                        }
+                    });
+                    setProviders(providerMap);
+
+                    const credentialMap: Record<string, {data: string, type: number}> = {};
+                    credentialResults.forEach((res: any) => {
+                        if (res.data) {
+                            credentialMap[res.data.id] = {data: res.data.data, type: res.data.type};
+                        }
+                    });
+                    setCredentials(credentialMap);
+                });
             }
         }).finally(() => {
             setRefreshing(false);
@@ -173,18 +241,28 @@ export function ChatModelPage() {
             ),
         },
         {
-            title: '提供商 ID',
+            title: '提供商',
             dataIndex: 'providerId',
             key: 'providerId',
-            width: 80,
-            render: (id: string) => <span className="text-gray-600">#{id}</span>
+            width: 200,
+            render: (id: string) => (
+                <Space orientation="vertical" size={0}>
+                    <span className="text-gray-600">{providers[id]?.name ?? `#${id}`}</span>
+                    <span className="text-xs text-gray-400 truncate max-w-[100px]">{getUrlHostname(providers[id]?.chatCompletionsUrl ?? '')}</span>
+                </Space>
+            )
         },
         {
-            title: '凭证 ID',
+            title: '凭证',
             dataIndex: 'credentialId',
             key: 'credentialId',
-            width: 80,
-            render: (id: string) => <span className="text-gray-400">#{id}</span>
+            width: 280,
+            render: (id: string) => (
+                <Space orientation="vertical" size={0}>
+                    <span className="text-gray-600">凭证 #{id}</span>
+                    <span className="text-xs text-gray-400 truncate w-full">{credentials[id]?.data.substring(0, 20) ?? ''}...</span>
+                </Space>
+            )
         },
         {
             title: '最大上下文长度',
@@ -348,13 +426,35 @@ export function ChatModelPage() {
 
                     <Row gutter={16}>
                         <Col span={12}>
-                            <Form.Item name="providerId" label="提供商 ID" rules={[{ required: true }]}>
-                                <InputNumber className="w-full rounded-lg h-10 flex items-center" placeholder="1" />
+                            <Form.Item name="providerId" label="提供商" rules={[{ required: true }]}>
+                                <EntitySelector
+                                    placeholder="选择提供商"
+                                    fetchOptions={fetchProviders}
+                                    fetchById={async (id) => {
+                                        const res = await getProviderById(id);
+                                        return res.data || null;
+                                    }}
+                                    renderLabel={(provider) => provider.name}
+                                    renderExtra={(provider) => (
+                                        <span className="text-xs text-gray-400">{provider.chatCompletionsUrl}</span>
+                                    )}
+                                />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="credentialId" label="凭证 ID" rules={[{ required: true }]}>
-                                <InputNumber className="w-full rounded-lg h-10 flex items-center" placeholder="101" />
+                            <Form.Item name="credentialId" label="凭证" rules={[{ required: true }]}>
+                                <EntitySelector
+                                    placeholder="选择凭证"
+                                    fetchOptions={fetchCredentials}
+                                    fetchById={async (id) => {
+                                        const res = await getCredentialById(id);
+                                        return res.data || null;
+                                    }}
+                                    renderLabel={(credential) => `凭证 #${credential.id}`}
+                                    renderExtra={(credential) => (
+                                        <span className="text-xs text-gray-400">{credential.data.substring(0, 30)}...</span>
+                                    )}
+                                />
                             </Form.Item>
                         </Col>
                     </Row>

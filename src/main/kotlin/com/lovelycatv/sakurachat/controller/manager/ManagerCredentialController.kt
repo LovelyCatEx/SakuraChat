@@ -37,6 +37,23 @@ class ManagerCredentialController(
         )
     }
 
+    @GetMapping("/search")
+    suspend fun searchCredentials(@RequestParam("keyword") keyword: String): ApiResponse<*> {
+        return ApiResponse.success(
+            credentialService.getRepository().findAll().filter {
+                keyword.isBlank() ||
+                it.data.contains(keyword, ignoreCase = true)
+            }
+        )
+    }
+
+    @GetMapping("/getById")
+    suspend fun getCredentialById(@RequestParam("id") id: Long): ApiResponse<*> {
+        return ApiResponse.success(
+            credentialService.getRepository().findById(id).orElse(null)
+        )
+    }
+
     @PostMapping("/create")
     suspend fun createCredential(@ModelAttribute managerCreateCredentialDTO: ManagerCreateCredentialDTO): ApiResponse<*> {
         credentialService.createCredential(managerCreateCredentialDTO)

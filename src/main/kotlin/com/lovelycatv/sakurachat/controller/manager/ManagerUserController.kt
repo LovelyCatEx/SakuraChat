@@ -37,6 +37,25 @@ class ManagerUserController(
         )
     }
 
+    @GetMapping("/search")
+    suspend fun searchUsers(@RequestParam("keyword") keyword: String): ApiResponse<*> {
+        return ApiResponse.success(
+            userService.getRepository().findAll().filter {
+                keyword.isBlank() ||
+                it.username.contains(keyword, ignoreCase = true) ||
+                it.nickname.contains(keyword, ignoreCase = true) ||
+                it.email.contains(keyword, ignoreCase = true)
+            }
+        )
+    }
+
+    @GetMapping("/getById")
+    suspend fun getUserById(@RequestParam("id") id: Long): ApiResponse<*> {
+        return ApiResponse.success(
+            userService.getRepository().findById(id).orElse(null)
+        )
+    }
+
     @PostMapping("/create")
     suspend fun createUser(@ModelAttribute managerCreateUserDTO: ManagerCreateUserDTO): ApiResponse<*> {
         userService.createUser(managerCreateUserDTO)

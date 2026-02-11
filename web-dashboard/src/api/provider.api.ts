@@ -5,6 +5,14 @@ export async function getProviderList(query: PageQuery): Promise<ApiResponse<Pag
     return doGet<PaginatedResponseData<Provider>>('/api/manager/provider/list', {...query});
 }
 
+export async function searchProviders(keyword: string): Promise<ApiResponse<Provider[]>> {
+    return doGet<Provider[]>('/api/manager/provider/search', { keyword });
+}
+
+export async function getProviderById(id: string): Promise<ApiResponse<Provider>> {
+    return doGet<Provider>('/api/manager/provider/getById', { id });
+}
+
 export async function deleteProvider(id: string): Promise<ApiResponse<void>> {
     return doPost('/api/manager/provider/delete', { id });
 }

@@ -35,8 +35,8 @@ export function ThirdPartyAccountPage() {
         setRefreshing(true);
 
         getThirdPartyAccountList({
-            page: 1,
-            pageSize: 20,
+            page: currentPage,
+            pageSize: currentPageSize,
         }).then((res) => {
             if (res.data) {
                 setAccounts(res.data.records);

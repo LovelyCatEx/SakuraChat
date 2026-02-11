@@ -2,17 +2,17 @@ import React, {type JSX, useMemo, useState} from 'react';
 import {Route, Routes, useLocation, useNavigate} from 'react-router-dom';
 import {Avatar, Button, ConfigProvider, Divider, Dropdown, Layout, Menu, Space,} from 'antd';
 import {
-  CloudServerOutlined,
-  DashboardOutlined,
-  DatabaseOutlined,
-  KeyOutlined,
-  LogoutOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  RobotOutlined,
-  SettingOutlined,
-  TeamOutlined,
-  UserOutlined,
+    CloudServerOutlined,
+    DashboardOutlined,
+    DatabaseOutlined,
+    KeyOutlined,
+    LogoutOutlined,
+    MenuFoldOutlined,
+    MenuUnfoldOutlined,
+    RobotOutlined,
+    SettingOutlined,
+    TeamOutlined,
+    UserOutlined,
 } from '@ant-design/icons';
 import {DashboardPage} from './manager/dashboard/DashboardPage.tsx';
 import {AgentPage} from './manager/agent/AgentPage.tsx';

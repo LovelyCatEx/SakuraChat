@@ -68,8 +68,8 @@ export function CredentialPage() {
         setRefreshing(true);
 
         getCredentialList({
-            page: 1,
-            pageSize: 20,
+            page: currentPage,
+            pageSize: currentPageSize,
         }).then((res) => {
             if (res.data) {
                 setCredentials(res.data.records);

@@ -1,24 +1,13 @@
 import {useEffect, useState} from 'react';
-import {
-    Button,
-    Card,
-    Col,
-    Form,
-    Input,
-    InputNumber,
-    message,
-    Modal,
-    Popconfirm,
-    Row,
-    Space,
-    Table,
-    Tag
-} from 'antd';
+import {Button, Card, Col, Form, Input, message, Modal, Popconfirm, Row, Space, Table, Tag} from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from '@ant-design/icons';
 import type {Agent} from "../../../types/agent.types.ts";
 import {createAgent, deleteAgent, getAgentList, updateAgent} from "../../../api/agent.api.ts";
 import {formatTimestamp} from "../../../utils/datetime.utils.ts";
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
+import {EntitySelector} from "../../../components/common/EntitySelector.tsx";
+import {getUserById, searchUsers} from "../../../api/user.api.ts";
+import {getChatModelById, searchChatModels} from "../../../api/chat-model.api.ts";
 
 const { TextArea } = Input;
 
@@ -32,17 +21,81 @@ export function AgentPage() {
     const [total, setTotal] = useState(0);
 
     const [agents, setAgents] = useState<Agent[]>([]);
+    const [users, setUsers] = useState<Record<string, {username: string, nickname: string}>>({});
+    const [chatModels, setChatModels] = useState<Record<string, {name: string, qualifiedName: string}>>({});
+
+    const fetchUsers = async (keyword: string) => {
+        const res = await searchUsers(keyword);
+        if (res.data) {
+            const userMap: Record<string, {username: string, nickname: string}> = {};
+            res.data.forEach(u => {
+                userMap[u.id] = {username: u.username, nickname: u.nickname};
+            });
+            setUsers(userMap);
+            return res.data;
+        }
+        return [];
+    };
+
+    const fetchChatModels = async (keyword: string) => {
+        const res = await searchChatModels(keyword);
+        if (res.data) {
+            const modelMap: Record<string, {name: string, qualifiedName: string}> = {};
+            res.data.forEach(m => {
+                modelMap[m.id] = {name: m.name, qualifiedName: m.qualifiedName};
+            });
+            setChatModels(modelMap);
+            return res.data;
+        }
+        return [];
+    };
 
     const refreshData = () => {
         setRefreshing(true);
 
-        getAgentList({
-            page: 1,
-            pageSize: 20,
-        }).then((res) => {
-            if (res.data) {
-                setAgents(res.data.records);
-                setTotal(res.data.total);
+        Promise.all([
+            getAgentList({page: currentPage, pageSize: currentPageSize})
+        ]).then(([agentRes]) => {
+            if (agentRes.data) {
+                setAgents(agentRes.data.records);
+                setTotal(agentRes.data.total);
+                
+                const userIds = new Set<string>();
+                const chatModelIds = new Set<string>();
+                agentRes.data.records.forEach(a => {
+                    userIds.add(a.userId);
+                    chatModelIds.add(a.chatModelId);
+                });
+
+                const userPromises = Array.from(userIds).map(id => getUserById(id));
+                const modelPromises = Array.from(chatModelIds).map(id => getChatModelById(id));
+
+                if (userPromises.length === 0 && modelPromises.length === 0) {
+                    setUsers({});
+                    setChatModels({});
+                    return;
+                }
+
+                Promise.all([
+                    userPromises.length > 0 ? Promise.all(userPromises) : Promise.resolve([]),
+                    modelPromises.length > 0 ? Promise.all(modelPromises) : Promise.resolve([])
+                ]).then(([userResults, modelResults]) => {
+                    const userMap: Record<string, {username: string, nickname: string}> = {};
+                    userResults.forEach(res => {
+                        if (res.data) {
+                            userMap[res.data.id] = {username: res.data.username, nickname: res.data.nickname};
+                        }
+                    });
+                    setUsers(userMap);
+
+                    const modelMap: Record<string, {name: string, qualifiedName: string}> = {};
+                    modelResults.forEach(res => {
+                        if (res.data) {
+                            modelMap[res.data.id] = {name: res.data.name, qualifiedName: res.data.qualifiedName};
+                        }
+                    });
+                    setChatModels(modelMap);
+                });
             }
         }).finally(() => {
             setRefreshing(false);
@@ -137,18 +190,28 @@ export function AgentPage() {
             render: (description: string | null) => description || <span className="text-gray-400">无</span>
         },
         {
-            title: '用户 ID',
+            title: '用户',
             dataIndex: 'userId',
             key: 'userId',
-            width: 80,
-            render: (id: string) => <span className="text-gray-600">#{id}</span>
+            width: 120,
+            render: (id: string) => (
+                <Space direction="vertical" size={0}>
+                    <span className="text-gray-600">{users[id]?.nickname ?? `#${id}`}</span>
+                    <span className="text-xs text-gray-400">@{users[id]?.username ?? ''}</span>
+                </Space>
+            )
         },
         {
-            title: '模型 ID',
+            title: '模型',
             dataIndex: 'chatModelId',
             key: 'chatModelId',
-            width: 80,
-            render: (id: string) => <span className="text-gray-600">#{id}</span>
+            width: 120,
+            render: (id: string) => (
+                <Space direction="vertical" size={0}>
+                    <span className="text-gray-600">{chatModels[id]?.name ?? `#${id}`}</span>
+                    <span className="text-xs text-gray-400">{chatModels[id]?.qualifiedName ?? ''}</span>
+                </Space>
+            )
         },
         {
             title: '分隔符',
@@ -268,21 +331,43 @@ export function AgentPage() {
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="userId" label="用户 ID" rules={[{ required: true }]}>
-                                <InputNumber className="w-full rounded-lg h-10 flex items-center" placeholder="1" />
+                            <Form.Item name="delimiter" label="分隔符">
+                                <Input placeholder="例如: |||" className="rounded-lg h-10" />
                             </Form.Item>
                         </Col>
                     </Row>
 
                     <Row gutter={16}>
                         <Col span={12}>
-                            <Form.Item name="chatModelId" label="模型 ID" rules={[{ required: true }]}>
-                                <InputNumber className="w-full rounded-lg h-10 flex items-center" placeholder="1" />
+                            <Form.Item name="userId" label="用户" rules={[{ required: true }]}>
+                                <EntitySelector
+                                    placeholder="选择用户"
+                                    fetchOptions={fetchUsers}
+                                    fetchById={async (id) => {
+                                        const res = await getUserById(id);
+                                        return res.data || null;
+                                    }}
+                                    renderLabel={(user) => user.nickname}
+                                    renderExtra={(user) => (
+                                        <span className="text-xs text-gray-400">@{user.username}</span>
+                                    )}
+                                />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="delimiter" label="分隔符">
-                                <Input placeholder="例如: |||" className="rounded-lg h-10" />
+                            <Form.Item name="chatModelId" label="模型" rules={[{ required: true }]}>
+                                <EntitySelector
+                                    placeholder="选择模型"
+                                    fetchOptions={fetchChatModels}
+                                    fetchById={async (id) => {
+                                        const res = await getChatModelById(id);
+                                        return res.data || null;
+                                    }}
+                                    renderLabel={(model) => model.name}
+                                    renderExtra={(model) => (
+                                        <span className="text-xs text-gray-400">{model.qualifiedName}</span>
+                                    )}
+                                />
                             </Form.Item>
                         </Col>
                     </Row>

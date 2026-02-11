@@ -37,6 +37,24 @@ class ManagerProviderController(
         )
     }
 
+    @GetMapping("/search")
+    suspend fun searchProviders(@RequestParam("keyword") keyword: String): ApiResponse<*> {
+        return ApiResponse.success(
+            providerService.getRepository().findAll().filter {
+                keyword.isBlank() ||
+                it.name.contains(keyword, ignoreCase = true) ||
+                it.chatCompletionsUrl.contains(keyword, ignoreCase = true)
+            }
+        )
+    }
+
+    @GetMapping("/getById")
+    suspend fun getProviderById(@RequestParam("id") id: Long): ApiResponse<*> {
+        return ApiResponse.success(
+            providerService.getRepository().findById(id).orElse(null)
+        )
+    }
+
     @PostMapping("/create")
     suspend fun createProvider(@ModelAttribute managerCreateProviderDTO: ManagerCreateProviderDTO): ApiResponse<*> {
         providerService.createProvider(managerCreateProviderDTO)

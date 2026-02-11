@@ -10,6 +10,14 @@ export function getUserList(query: PageQuery) {
     return doGet<PaginatedResponseData<User>>('/api/manager/user/list', {...query});
 }
 
+export function searchUsers(keyword: string) {
+    return doGet<User[]>('/api/manager/user/search', { keyword });
+}
+
+export function getUserById(id: string) {
+    return doGet<User>('/api/manager/user/getById', { id });
+}
+
 export function deleteUser(id: string) {
     return doPost<unknown>('/api/manager/user/delete', { id: id });
 }

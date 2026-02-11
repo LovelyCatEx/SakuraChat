@@ -19,3 +19,8 @@ export const removeQueryParam = (name: string, url = window.location.href) => {
     urlObj.searchParams.delete(name);
     return urlObj.toString();
 };
+
+export const getUrlHostname = (url: string) => {
+    const match = url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:/\n?]+)/);
+    return match ? match[1] : '';
+}

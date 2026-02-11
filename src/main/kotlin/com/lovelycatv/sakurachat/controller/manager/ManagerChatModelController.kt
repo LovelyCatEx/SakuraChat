@@ -37,6 +37,24 @@ class ManagerChatModelController(
         )
     }
 
+    @GetMapping("/search")
+    suspend fun searchChatModels(@RequestParam("keyword") keyword: String): ApiResponse<*> {
+        return ApiResponse.success(
+            chatModelService.getRepository().findAll().filter {
+                keyword.isBlank() ||
+                it.name.contains(keyword, ignoreCase = true) ||
+                it.qualifiedName.contains(keyword, ignoreCase = true)
+            }
+        )
+    }
+
+    @GetMapping("/getById")
+    suspend fun getChatModelById(@RequestParam("id") id: Long): ApiResponse<*> {
+        return ApiResponse.success(
+            chatModelService.getRepository().findById(id).orElse(null)
+        )
+    }
+
     @PostMapping("/create")
     suspend fun createChatModel(@ModelAttribute createChatModelDTO: ManagerCreateChatModelDTO): ApiResponse<*> {
         chatModelService.createChatModel(createChatModelDTO)

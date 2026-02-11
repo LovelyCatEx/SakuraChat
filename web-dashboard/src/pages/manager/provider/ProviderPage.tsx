@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Button, Card, Col, Form, Input, InputNumber, message, Modal, Popconfirm, Row, Select, Space, Table, Tag} from 'antd';
+import {Button, Card, Col, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Table, Tag} from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from '@ant-design/icons';
 import type {Provider} from "../../../types/provider.types.ts";
 import {createProvider, deleteProvider, getProviderList, updateProvider} from "../../../api/provider.api.ts";
@@ -23,8 +23,8 @@ export function ProviderPage() {
         setRefreshing(true);
 
         getProviderList({
-            page: 1,
-            pageSize: 20,
+            page: currentPage,
+            pageSize: currentPageSize,
         }).then((res) => {
             if (res.data) {
                 setProviders(res.data.records);

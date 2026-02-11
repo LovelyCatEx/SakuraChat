@@ -5,6 +5,14 @@ export function getChatModelList(query: PageQuery) {
     return doGet<PaginatedResponseData<ChatModel>>('/api/manager/chat-model/list', {...query});
 }
 
+export function searchChatModels(keyword: string) {
+    return doGet<ChatModel[]>('/api/manager/chat-model/search', { keyword });
+}
+
+export function getChatModelById(id: string) {
+    return doGet<ChatModel>('/api/manager/chat-model/getById', { id });
+}
+
 export function deleteChatModel(id: string) {
     return doPost<unknown>('/api/manager/chat-model/delete', { id: id });
 }
