@@ -33,6 +33,50 @@ export function EntitySelector<T extends Entity>({
     const [modalData, setModalData] = useState<T[]>([]);
     const [modalSearchKeyword, setModalSearchKeyword] = useState('');
     const [modalLoading, setModalLoading] = useState(false);
+    const [focused, setFocused] = useState(false);
+    const [displayLabel, setDisplayLabel] = useState<string>('');
+
+    const updateDisplayLabel = async (id: string) => {
+        if (id && fetchById) {
+            try {
+                const item = await fetchById(id);
+                if (item) {
+                    setDisplayLabel(renderLabel(item));
+                }
+            } catch (error) {
+                console.error('Fetch by id failed:', error);
+                setDisplayLabel(id);
+            }
+        } else {
+            setDisplayLabel('');
+        }
+    };
+
+    React.useEffect(() => {
+        updateDisplayLabel(value || '');
+    }, [value]);
+
+    const handleFocus = () => {
+        setFocused(true);
+        if (value) {
+            handleSearch('');
+        }
+    };
+
+    const handleBlur = async () => {
+        setFocused(false);
+        if (value && fetchById) {
+            try {
+                const item = await fetchById(value);
+                if (item) {
+                    setOptions([{value: item.id, label: renderLabel(item)}]);
+                    setDisplayLabel(renderLabel(item));
+                }
+            } catch (error) {
+                console.error('Fetch by id failed:', error);
+            }
+        }
+    };
 
     const handleSearch = async (keyword: string) => {
         setSearching(true);
@@ -47,19 +91,6 @@ export function EntitySelector<T extends Entity>({
             setOptions([]);
         } finally {
             setSearching(false);
-        }
-    };
-
-    const handleBlur = async () => {
-        if (value && fetchById) {
-            try {
-                const item = await fetchById(value);
-                if (item) {
-                    setOptions([{value: item.id, label: renderLabel(item)}]);
-                }
-            } catch (error) {
-                console.error('Fetch by id failed:', error);
-            }
         }
     };
 
@@ -107,7 +138,7 @@ export function EntitySelector<T extends Entity>({
             title: '名称',
             key: 'name',
             render: (_: unknown, record: T) => (
-                <Space direction="vertical" size={0}>
+                <Space orientation="vertical" size={0}>
                     <span className="font-medium">{renderLabel(record)}</span>
                     {renderExtra && renderExtra(record)}
                 </Space>
@@ -133,23 +164,39 @@ export function EntitySelector<T extends Entity>({
     return (
         <>
             <Space.Compact style={{width: '100%'}}>
-                <AutoComplete
-                    value={value}
-                    onChange={onChange}
-                    onSearch={handleSearch}
-                    onBlur={handleBlur}
-                    options={options}
-                    placeholder={placeholder}
-                    disabled={disabled}
-                    notFoundContent={searching ? '搜索中...' : '无结果'}
-                    allowClear
-                    style={{flex: 1}}
-                    filterOption={false}
-                />
+                {focused ? (
+                    <AutoComplete
+                        value={value}
+                        onChange={onChange}
+                        onFocus={handleFocus}
+                        onSearch={handleSearch}
+                        onBlur={handleBlur}
+                        options={options}
+                        placeholder={placeholder}
+                        disabled={disabled}
+                        notFoundContent={searching ? '搜索中...' : '无结果'}
+                        allowClear
+                        style={{flex: 1}}
+                        filterOption={false}
+                        autoFocus
+                    />
+                ) : (
+                    <div
+                        onClick={() => !disabled && setFocused(true)}
+                        className="flex-1 flex items-center px-3 py-1 bg-white border border-gray-300 rounded-l-md cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-100 min-h-8 transition-all duration-300 hover:border-blue-500 hover:z-10 -mr-px"
+                    >
+                        {displayLabel ? (
+                            <Tag color="blue" className="m-0">{displayLabel}</Tag>
+                        ) : (
+                            <span className="text-gray-400">{placeholder}</span>
+                        )}
+                    </div>
+                )}
                 <Button
                     icon={<SearchOutlined />}
                     onClick={handleOpenModal}
                     disabled={disabled}
+                    className="hover:z-10"
                 />
             </Space.Compact>
 
