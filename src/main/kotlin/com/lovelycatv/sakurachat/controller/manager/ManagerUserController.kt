@@ -8,6 +8,7 @@
 
 package com.lovelycatv.sakurachat.controller.manager
 
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateUserDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.UpdateUserDTO
 import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.request.PageQuery
@@ -39,6 +40,12 @@ class ManagerUserController(
                     .withPage(pageQuery.page - 1)
             ).toPaginatedResponseData()
         )
+    }
+
+    @PostMapping("/create")
+    suspend fun createUser(@ModelAttribute managerCreateUserDTO: ManagerCreateUserDTO): ApiResponse<*> {
+        userService.createUser(managerCreateUserDTO)
+        return ApiResponse.success(null)
     }
 
     @PostMapping("/update")

@@ -1,6 +1,6 @@
 package com.lovelycatv.sakurachat.service
 
-import com.lovelycatv.sakurachat.controller.manager.dto.CreateChatModelDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateChatModelDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.UpdateChatModelDTO
 import com.lovelycatv.sakurachat.entity.ChatModelEntity
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedChatModelEntity
@@ -11,5 +11,5 @@ interface ChatModelService : BaseService<ChatModelRepository, ChatModelEntity, L
 
     suspend fun updateChatModel(updateChatModelDTO: UpdateChatModelDTO)
 
-    suspend fun createChatModel(createChatModelDTO: CreateChatModelDTO)
+    suspend fun createChatModel(managerCreateChatModelDTO: ManagerCreateChatModelDTO)
 }

@@ -8,7 +8,7 @@
 
 package com.lovelycatv.sakurachat.service.impl
 
-import com.lovelycatv.sakurachat.controller.manager.dto.CreateChatModelDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateChatModelDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.UpdateChatModelDTO
 import com.lovelycatv.sakurachat.entity.ChatModelEntity
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedChatModelEntity
@@ -103,22 +103,22 @@ class ChatModelServiceImpl(
         }
     }
 
-    override suspend fun createChatModel(createChatModelDTO: CreateChatModelDTO) {
+    override suspend fun createChatModel(managerCreateChatModelDTO: ManagerCreateChatModelDTO) {
         withContext(Dispatchers.IO) {
             getRepository().save(
                 ChatModelEntity(
                     id = snowIdGenerator.nextId(),
-                    name = createChatModelDTO.name,
-                    qualifiedName = createChatModelDTO.qualifiedName,
-                    description = createChatModelDTO.description,
-                    providerId = createChatModelDTO.providerId,
-                    credentialId = createChatModelDTO.credentialId,
-                    maxContextTokens = createChatModelDTO.maxContextTokens,
-                    maxTokens = createChatModelDTO.maxTokens,
-                    temperature = createChatModelDTO.temperature,
-                    inputTokenPointRate = createChatModelDTO.inputTokenPointRate,
-                    outputTokenPointRate = createChatModelDTO.outputTokenPointRate,
-                    cachedInputTokenPointRate = createChatModelDTO.cachedInputTokenPointRate,
+                    name = managerCreateChatModelDTO.name,
+                    qualifiedName = managerCreateChatModelDTO.qualifiedName,
+                    description = managerCreateChatModelDTO.description,
+                    providerId = managerCreateChatModelDTO.providerId,
+                    credentialId = managerCreateChatModelDTO.credentialId,
+                    maxContextTokens = managerCreateChatModelDTO.maxContextTokens,
+                    maxTokens = managerCreateChatModelDTO.maxTokens,
+                    temperature = managerCreateChatModelDTO.temperature,
+                    inputTokenPointRate = managerCreateChatModelDTO.inputTokenPointRate,
+                    outputTokenPointRate = managerCreateChatModelDTO.outputTokenPointRate,
+                    cachedInputTokenPointRate = managerCreateChatModelDTO.cachedInputTokenPointRate,
                     active = true
                 )
             )

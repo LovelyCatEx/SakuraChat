@@ -8,6 +8,7 @@
 
 package com.lovelycatv.sakurachat.controller.manager
 
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateUserRoleDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.UpdateUserRoleDTO
 import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.request.PageQuery
@@ -39,6 +40,12 @@ class ManagerUserRoleController(
                     .withPage(pageQuery.page - 1)
             ).toPaginatedResponseData()
         )
+    }
+
+    @PostMapping("/create")
+    suspend fun createUserRole(@ModelAttribute managerCreateUserRoleDTO: ManagerCreateUserRoleDTO): ApiResponse<*> {
+        userRoleService.createUserRole(managerCreateUserRoleDTO)
+        return ApiResponse.success(null)
     }
 
     @PostMapping("/update")

@@ -8,6 +8,7 @@
 
 package com.lovelycatv.sakurachat.controller.manager
 
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateThirdPartyAccountDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.UpdateThirdPartyAccountDTO
 import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.request.PageQuery
@@ -39,6 +40,12 @@ class ManagerThirdPartyAccountController(
                     .withPage(pageQuery.page - 1)
             ).toPaginatedResponseData()
         )
+    }
+
+    @PostMapping("/create")
+    suspend fun createThirdPartyAccount(@ModelAttribute managerCreateThirdPartyAccountDTO: ManagerCreateThirdPartyAccountDTO): ApiResponse<*> {
+        thirdPartyAccountService.createThirdPartyAccount(managerCreateThirdPartyAccountDTO)
+        return ApiResponse.success(null)
     }
 
     @PostMapping("/update")

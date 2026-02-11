@@ -7,6 +7,7 @@
  */
 package com.lovelycatv.sakurachat.service.impl
 
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateUserDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.UpdateUserDTO
 import com.lovelycatv.sakurachat.entity.UserEntity
 import com.lovelycatv.sakurachat.exception.BusinessException
@@ -150,6 +151,37 @@ class UserServiceImpl : UserService {
 
         withContext(Dispatchers.IO) {
             getRepository().save(existing)
+        }
+    }
+
+    override suspend fun createUser(managerCreateUserDTO: ManagerCreateUserDTO) {
+        val userByName = withContext(Dispatchers.IO) {
+            userRepository.findByUsername(managerCreateUserDTO.username)
+        }
+
+        if (userByName != null) {
+            throw BusinessException("user ${managerCreateUserDTO.username} already registered")
+        }
+
+        val userByEmail = withContext(Dispatchers.IO) {
+            userRepository.findByEmail(managerCreateUserDTO.email)
+        }
+
+        if (userByEmail != null) {
+            throw BusinessException("user ${managerCreateUserDTO.email} already registered")
+        }
+
+        withContext(Dispatchers.IO) {
+            getRepository().save(
+                UserEntity(
+                    id = snowIdGenerator.nextId(),
+                    username = managerCreateUserDTO.username,
+                    password = passwordEncoder.encode(managerCreateUserDTO.password),
+                    nickname = managerCreateUserDTO.nickname,
+                    email = managerCreateUserDTO.email,
+                    points = managerCreateUserDTO.points
+                )
+            )
         }
     }
 

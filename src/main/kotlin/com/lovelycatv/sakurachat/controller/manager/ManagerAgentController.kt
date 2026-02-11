@@ -8,6 +8,7 @@
 
 package com.lovelycatv.sakurachat.controller.manager
 
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateAgentDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.UpdateAgentDTO
 import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.request.PageQuery
@@ -39,6 +40,12 @@ class ManagerAgentController(
                     .withPage(pageQuery.page - 1)
             ).toPaginatedResponseData()
         )
+    }
+
+    @PostMapping("/create")
+    suspend fun createAgent(@ModelAttribute managerCreateAgentDTO: ManagerCreateAgentDTO): ApiResponse<*> {
+        agentService.createAgent(managerCreateAgentDTO)
+        return ApiResponse.success(null)
     }
 
     @PostMapping("/update")

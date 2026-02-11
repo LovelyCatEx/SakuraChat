@@ -9,6 +9,7 @@
 package com.lovelycatv.sakurachat.service.impl
 
 import com.lovelycatv.sakurachat.adapters.thirdparty.account.ThirdPartyAccountAdapter
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateThirdPartyAccountDTO
 import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.exception.BusinessException
 import com.lovelycatv.sakurachat.repository.ThirdPartyAccountRepository
@@ -16,6 +17,8 @@ import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import com.lovelycatv.sakurachat.utils.SnowIdGenerator
 import com.lovelycatv.vertex.log.logger
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.springframework.beans.factory.getBeansOfType
 import org.springframework.context.ApplicationContext
 import org.springframework.stereotype.Service
@@ -113,8 +116,21 @@ class ThirdPartyAccountServiceImpl(
             existing.platform = updateThirdPartyAccountDTO.platform
         }
 
-        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        withContext(Dispatchers.IO) {
             getRepository().save(existing)
+        }
+    }
+
+    override suspend fun createThirdPartyAccount(managerCreateThirdPartyAccountDTO: ManagerCreateThirdPartyAccountDTO) {
+        withContext(Dispatchers.IO) {
+            getRepository().save(
+                ThirdPartyAccountEntity(
+                    id = snowIdGenerator.nextId(),
+                    accountId = managerCreateThirdPartyAccountDTO.accountId,
+                    nickname = managerCreateThirdPartyAccountDTO.nickname,
+                    platform = managerCreateThirdPartyAccountDTO.platform
+                )
+            )
         }
     }
 }

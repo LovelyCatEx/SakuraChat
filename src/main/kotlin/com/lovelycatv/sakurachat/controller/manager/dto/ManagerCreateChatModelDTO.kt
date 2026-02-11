@@ -13,7 +13,7 @@ import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 
-class CreateChatModelDTO(
+class ManagerCreateChatModelDTO(
     @field:NotBlank(message = "model name cannot be empty")
     val name: String,
     val description: String?,

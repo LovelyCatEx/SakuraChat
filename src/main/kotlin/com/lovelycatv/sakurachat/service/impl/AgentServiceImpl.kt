@@ -8,6 +8,7 @@
 
 package com.lovelycatv.sakurachat.service.impl
 
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateAgentDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.UpdateAgentDTO
 import com.lovelycatv.sakurachat.entity.AgentEntity
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
@@ -18,7 +19,10 @@ import com.lovelycatv.sakurachat.service.AgentService
 import com.lovelycatv.sakurachat.service.ChatModelService
 import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
+import com.lovelycatv.sakurachat.utils.SnowIdGenerator
 import com.lovelycatv.vertex.log.logger
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Service
 
 @Service
@@ -26,7 +30,8 @@ class AgentServiceImpl(
     private val agentRepository: AgentRepository,
     private val thirdPartyAccountService: ThirdPartyAccountService,
     private val agentThirdPartyAccountRelationRepository: AgentThirdPartyAccountRelationRepository,
-    private val chatModelService: ChatModelService
+    private val chatModelService: ChatModelService,
+    private val snowIdGenerator: SnowIdGenerator
 ) : AgentService {
     private val logger = logger()
 
@@ -104,8 +109,24 @@ class AgentServiceImpl(
             existing.chatModelId = updateAgentDTO.chatModelId
         }
 
-        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        withContext(Dispatchers.IO) {
             getRepository().save(existing)
+        }
+    }
+
+    override suspend fun createAgent(managerCreateAgentDTO: ManagerCreateAgentDTO) {
+        withContext(Dispatchers.IO) {
+            getRepository().save(
+                AgentEntity(
+                    id = snowIdGenerator.nextId(),
+                    name = managerCreateAgentDTO.name,
+                    description = managerCreateAgentDTO.description,
+                    prompt = managerCreateAgentDTO.prompt,
+                    delimiter = managerCreateAgentDTO.delimiter,
+                    userId = managerCreateAgentDTO.userId,
+                    chatModelId = managerCreateAgentDTO.chatModelId
+                )
+            )
         }
     }
 }

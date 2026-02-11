@@ -8,6 +8,7 @@
 
 package com.lovelycatv.sakurachat.controller.manager
 
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateCredentialDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.UpdateCredentialDTO
 import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.request.PageQuery
@@ -39,6 +40,12 @@ class ManagerCredentialController(
                     .withPage(pageQuery.page - 1)
             ).toPaginatedResponseData()
         )
+    }
+
+    @PostMapping("/create")
+    suspend fun createCredential(@ModelAttribute managerCreateCredentialDTO: ManagerCreateCredentialDTO): ApiResponse<*> {
+        credentialService.createCredential(managerCreateCredentialDTO)
+        return ApiResponse.success(null)
     }
 
     @PostMapping("/update")

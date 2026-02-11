@@ -8,14 +8,20 @@
 
 package com.lovelycatv.sakurachat.service.impl
 
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateCredentialDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.UpdateCredentialDTO
+import com.lovelycatv.sakurachat.entity.CredentialEntity
 import com.lovelycatv.sakurachat.repository.CredentialRepository
 import com.lovelycatv.sakurachat.service.CredentialService
+import com.lovelycatv.sakurachat.utils.SnowIdGenerator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Service
 
 @Service
 class CredentialServiceImpl(
-    private val credentialRepository: CredentialRepository
+    private val credentialRepository: CredentialRepository,
+    private val snowIdGenerator: SnowIdGenerator
 ) : CredentialService {
     override fun getRepository(): CredentialRepository {
         return this.credentialRepository
@@ -36,8 +42,21 @@ class CredentialServiceImpl(
             existing.active = updateCredentialDTO.active
         }
 
-        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        withContext(Dispatchers.IO) {
             getRepository().save(existing)
+        }
+    }
+
+    override suspend fun createCredential(managerCreateCredentialDTO: ManagerCreateCredentialDTO) {
+        withContext(Dispatchers.IO) {
+            getRepository().save(
+                CredentialEntity(
+                    id = snowIdGenerator.nextId(),
+                    type = managerCreateCredentialDTO.type,
+                    data = managerCreateCredentialDTO.data,
+                    active = managerCreateCredentialDTO.active
+                )
+            )
         }
     }
 }

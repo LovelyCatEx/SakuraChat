@@ -30,7 +30,7 @@ class ThirdPartyAccountEntity(
     var platform: Int = 0,
     override val createdTime: Long = System.currentTimeMillis(),
     override var modifiedTime: Long = System.currentTimeMillis(),
-    override var deletedTime: Long?
+    override var deletedTime: Long? = null
 ) : BaseEntity() {
     fun getPlatformType() = ThirdPartyPlatform.getByPlatformId(this.platform)
         ?: throw IllegalArgumentException("Third Party Platform ${this.platform} Not Found")
