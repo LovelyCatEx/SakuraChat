@@ -1,6 +1,6 @@
 import { Button, Checkbox, Form, Input, message } from 'antd';
 import { LockOutlined, MailOutlined } from '@ant-design/icons';
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthCardLayout } from './AuthorizationPage.tsx';
 import {login} from "../../api/auth.api.ts";
@@ -10,6 +10,10 @@ import {getQueryString} from "../../utils/url.utils.ts";
 export function LoginPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = '登录 - SakuraChat'
+  }, []);
 
   const onFinish = (values: {
     username: string,

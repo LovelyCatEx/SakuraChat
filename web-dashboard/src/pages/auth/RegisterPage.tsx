@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Form, Input, message } from 'antd';
 import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
@@ -7,6 +7,10 @@ import { AuthCardLayout } from './AuthorizationPage.tsx';
 export function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = '注册 - SakuraChat'
+  }, []);
 
   const onFinish = (values: any) => {
     setLoading(true);

@@ -1,4 +1,4 @@
-import React, {type JSX, useMemo, useState} from 'react';
+import React, {type JSX, useEffect, useMemo, useState} from 'react';
 import {Route, Routes, useLocation, useNavigate} from 'react-router-dom';
 import {Avatar, Button, ConfigProvider, Divider, Dropdown, Layout, Menu, Space,} from 'antd';
 import {
@@ -62,8 +62,18 @@ export function MainContainer() {
     const matchedKey = menuItems.find((item) =>
         currentPath.startsWith(item.key)
     );
-    return matchedKey ? [matchedKey.key] : ['/'];
+
+    return matchedKey ? [matchedKey] : [{ key: '/', icon: <></>, label: '' }];
   }, [location.pathname, menuItems]);
+
+  useEffect(() => {
+    const matchedKey = selectedKeys.length > 0 ? selectedKeys[0] : null;
+    if (matchedKey) {
+      document.title = `${matchedKey.label} - SakuraChat`
+    } else {
+      document.title = 'SakuraChat'
+    }
+  }, [selectedKeys]);
 
   const loggedUser = useLoggedUser();
 
@@ -161,7 +171,7 @@ export function MainContainer() {
 
             <Menu
               mode="inline"
-              selectedKeys={selectedKeys}
+              selectedKeys={selectedKeys.map((e) => e.key)}
               items={menuItems}
               onClick={handleMenuClick}
               className="py-4 px-2 border-none"

@@ -112,7 +112,7 @@ export function AuthCardLayout({
         </div>
       </div>
 
-      {/* 底部脚注 */}
+      {/* Footer */}
       <div className="fixed bottom-6 text-gray-400 text-xs z-0">
         © 2025 SakuraChat. All rights reserved.
       </div>
