@@ -12,5 +12,6 @@ enum class MessageType {
     TEXT,
     CHAIN,
     JSON,
-    QUOTE
+    QUOTE,
+    ERROR
 }

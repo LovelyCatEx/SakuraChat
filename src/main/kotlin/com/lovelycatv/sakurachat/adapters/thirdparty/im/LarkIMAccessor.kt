@@ -12,6 +12,7 @@ import com.lovelycatv.lark.LarkRestClient
 import com.lovelycatv.lark.message.LarkTextMessage
 import com.lovelycatv.lark.types.LarkIdType
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
+import com.lovelycatv.sakurachat.core.im.message.ErrorMessage
 import com.lovelycatv.sakurachat.core.im.message.TextMessage
 import com.lovelycatv.sakurachat.core.im.thirdparty.IThirdPartyIMAccessor
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
@@ -37,18 +38,30 @@ class LarkIMAccessor : IThirdPartyIMAccessor<LarkRestClient, String, String> {
             return false
         }
 
-        if (message is TextMessage) {
-            invoker.sendMessage(
-                LarkIdType.UNION_ID,
-                target,
-                LarkTextMessage(message.message)
-            )
-        } else {
-            invoker.sendMessage(
-                LarkIdType.UNION_ID,
-                target,
-                message.toJSONString()
-            )
+        when (message) {
+            is TextMessage -> {
+                invoker.sendMessage(
+                    LarkIdType.UNION_ID,
+                    target,
+                    LarkTextMessage(message.message)
+                )
+            }
+
+            is ErrorMessage -> {
+                invoker.sendMessage(
+                    LarkIdType.UNION_ID,
+                    target,
+                    LarkTextMessage(message.message)
+                )
+            }
+
+            else -> {
+                invoker.sendMessage(
+                    LarkIdType.UNION_ID,
+                    target,
+                    message.toJSONString()
+                )
+            }
         }
 
         return true

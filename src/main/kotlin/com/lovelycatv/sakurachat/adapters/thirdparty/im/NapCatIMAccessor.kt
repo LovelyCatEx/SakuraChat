@@ -9,6 +9,7 @@
 package com.lovelycatv.sakurachat.adapters.thirdparty.im
 
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
+import com.lovelycatv.sakurachat.core.im.message.ErrorMessage
 import com.lovelycatv.sakurachat.core.im.message.TextMessage
 import com.lovelycatv.sakurachat.core.im.thirdparty.IThirdPartyIMAccessor
 import com.lovelycatv.sakurachat.entity.napcat.NapCatGroupMessageEntity
@@ -49,10 +50,18 @@ class NapCatIMAccessor(
         }
 
         val msg = MsgUtils.builder().apply {
-            if (message is TextMessage) {
-                text(message.message)
-            } else {
-                text(message.toJSONString())
+            when (message) {
+                is TextMessage -> {
+                    text(message.message)
+                }
+
+                is ErrorMessage -> {
+                    text(message.message)
+                }
+
+                else -> {
+                    text(message.toJSONString())
+                }
             }
         }.build()
 

@@ -12,11 +12,14 @@ import com.lovelycatv.sakurachat.core.AbstractSakuraChatChannelMember
 import com.lovelycatv.sakurachat.core.SakuraChatMessageChannel
 import com.lovelycatv.sakurachat.core.SakuraChatMessageExtra
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
+import com.lovelycatv.sakurachat.core.im.message.ErrorMessage
 import com.lovelycatv.sakurachat.entity.channel.IMChannelMessageEntity
 import com.lovelycatv.sakurachat.repository.IMChannelMessageRepository
 import com.lovelycatv.sakurachat.service.ChannelMessageSerializationService
 import com.lovelycatv.sakurachat.service.IMChannelMessageService
 import com.lovelycatv.sakurachat.utils.SnowIdGenerator
+import com.lovelycatv.sakurachat.utils.toJSONString
+import com.lovelycatv.vertex.log.logger
 import org.springframework.stereotype.Service
 
 @Service
@@ -25,6 +28,8 @@ class IMChannelMessageServiceImpl(
     private val snowIdGenerator: SnowIdGenerator,
     private val channelMessageSerializationService: ChannelMessageSerializationService
 ) : IMChannelMessageService {
+    private val logger = logger()
+
     override fun getRepository(): IMChannelMessageRepository {
         return this.imChannelMessageRepository
     }
@@ -41,6 +46,12 @@ class IMChannelMessageServiceImpl(
             } else {
                 throw IllegalArgumentException("Null extra body cannot be cast to ${SakuraChatMessageExtra::class.qualifiedName}")
             }
+        }
+
+        // Check whether the message is ErrorMessage
+        if (message is ErrorMessage) {
+            logger.warn("An error message cannot be saved into database, message: ${message.toJSONString()}")
+            return
         }
 
         this.getRepository().save(

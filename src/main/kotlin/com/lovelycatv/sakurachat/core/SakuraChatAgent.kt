@@ -9,6 +9,7 @@
 package com.lovelycatv.sakurachat.core
 
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
+import com.lovelycatv.sakurachat.core.im.message.ErrorMessage
 import com.lovelycatv.sakurachat.core.im.message.TextMessage
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.service.AgentContextService
@@ -181,6 +182,9 @@ class SakuraChatAgent(
                 ?: throw IllegalStateException("Please check hasDelimiter before using delimiter")
         }
 
+        // Record exception may occurred in following chat completions request
+        var throwable: Throwable? = null
+
         if (chatCompletionRequest.stream) {
             // Streaming
             val chunks = mutableListOf<ChatCompletionStreamChunkResponse>()
@@ -241,15 +245,17 @@ class SakuraChatAgent(
 
                 chunks.last()
             } catch (e: Exception) {
+                throwable = e
                 logger.error("An error occurred when calling stream chat completion request, chatModel: ${agent.chatModel.toJSONString()}", e)
                 null
             }
 
             if (resp == null) {
                 return emitter.invoke(listOf(
-                    TextMessage(
+                    ErrorMessage(
                         sequence = System.currentTimeMillis(),
                         message = "Could not process your request, please try again later",
+                        internalMessage = throwable?.message,
                         extraBody = message.extraBody
                     )
                 ))
@@ -278,15 +284,17 @@ class SakuraChatAgent(
             val resp = try {
                 client.chatCompletionBlocking(chatCompletionRequest)
             } catch (e: Exception) {
+                throwable = e
                 logger.error("An error occurred when calling blocking chat completion request, chatModel: ${agent.chatModel.toJSONString()}", e)
                 null
             }
 
             if (resp == null) {
                 return emitter.invoke(listOf(
-                    TextMessage(
+                    ErrorMessage(
                         sequence = System.currentTimeMillis(),
                         message = "Could not process your request, please try again later",
+                        internalMessage = throwable?.message,
                         extraBody = message.extraBody
                     )
                 ))
