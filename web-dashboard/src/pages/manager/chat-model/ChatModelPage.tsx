@@ -14,7 +14,7 @@ import {
     Space,
     Switch,
     Table,
-    Tag
+    Tag, Tooltip
 } from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from '@ant-design/icons';
 import type {ChatModel} from "../../../types/chat-model.types.ts";
@@ -248,7 +248,9 @@ export function ChatModelPage() {
             render: (id: string) => (
                 <Space orientation="vertical" size={0}>
                     <span className="text-gray-600">{providers[id]?.name ?? `#${id}`}</span>
-                    <span className="text-xs text-gray-400 truncate max-w-[100px]">{getUrlHostname(providers[id]?.chatCompletionsUrl ?? '')}</span>
+                    <Tooltip title={providers[id]?.chatCompletionsUrl}>
+                        <span className="text-xs text-gray-400 truncate max-w-[100px]">{getUrlHostname(providers[id]?.chatCompletionsUrl ?? '')}</span>
+                    </Tooltip>
                 </Space>
             )
         },
@@ -260,7 +262,9 @@ export function ChatModelPage() {
             render: (id: string) => (
                 <Space orientation="vertical" size={0}>
                     <span className="text-gray-600">凭证 #{id}</span>
-                    <span className="text-xs text-gray-400 truncate w-full">{credentials[id]?.data.substring(0, 20) ?? ''}...</span>
+                    <Tooltip title={credentials[id]?.data}>
+                        <span className="text-xs text-gray-400 truncate w-full">{credentials[id]?.data.substring(0, 20) ?? ''}...</span>
+                    </Tooltip>
                 </Space>
             )
         },
@@ -319,14 +323,14 @@ export function ChatModelPage() {
             title: '创建时间',
             dataIndex: 'createTime',
             key: 'createTime',
-            width: 100,
+            width: 160,
             render: (_: unknown, record: ChatModel) => <span>{formatTimestamp(record.createdTime)}</span>
         },
         {
             title: '修改时间',
             dataIndex: 'modifiedTime',
             key: 'modifiedTime',
-            width: 100,
+            width: 160,
             render: (_: unknown, record: ChatModel) => <span>{formatTimestamp(record.modifiedTime)}</span>
         },
         {

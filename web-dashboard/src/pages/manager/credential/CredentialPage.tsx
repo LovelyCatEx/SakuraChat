@@ -13,7 +13,7 @@ import {
     Space,
     Switch,
     Table,
-    Tag
+    Tag, Tooltip
 } from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from '@ant-design/icons';
 import type {Credential} from '../../../types/credential.types.ts';
@@ -141,22 +141,39 @@ export function CredentialPage() {
     const columns: (ColumnGroupType<Credential> | ColumnType<Credential>)[] = [
         {
             title: '凭证信息',
-            dataIndex: 'data',
-            key: 'data',
+            dataIndex: 'id',
+            key: 'id',
             fixed: 'start',
-            width: 250,
-            render: (data: string, record: Credential) => {
+            width: 180,
+            render: (id: string, record: Credential) => {
                 const credentialTypeMap: Record<number, string> = {
                     0: 'Authorization Bearer',
                     1: 'Authorization Basic'
                 };
                 return (
                     <Space orientation='vertical' size={0}>
-                        <span className="font-bold text-gray-800">类型: {credentialTypeMap[record.type] ?? record.type}</span>
-                        <span className="text-xs text-gray-400 font-mono truncate max-w-[200px]">{data}</span>
-                        <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {record.id}</Tag>
+                        <span className="font-bold text-gray-800">{credentialTypeMap[record.type] ?? record.type}</span>
+                        <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {id}</Tag>
                     </Space>
                 );
+            },
+        },
+        {
+            title: '凭证数据',
+            dataIndex: 'data',
+            key: 'data',
+            width: 250,
+            render: (data: string) => {
+                return <Tooltip title={data}>
+                    <span className=""
+                          style={{
+                              maxWidth: '100%',
+                              display: 'inline-block',
+                              overflow: 'hidden',
+                              whiteSpace: 'nowrap',
+                              textOverflow: 'ellipsis'
+                          }}>{data}</span>
+                </Tooltip>
             },
         },
         {

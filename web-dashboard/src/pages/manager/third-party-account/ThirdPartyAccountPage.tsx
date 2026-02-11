@@ -12,7 +12,8 @@ import {
     Select,
     Space,
     Table,
-    Tag
+    Tag,
+    Tooltip,
 } from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from '@ant-design/icons';
 import type {ThirdPartyAccount} from "../../../types/third-party-account.types.ts";
@@ -112,11 +113,27 @@ export function ThirdPartyAccountPage() {
             dataIndex: 'nickname',
             key: 'nickname',
             fixed: 'start',
-            width: 150,
+            width: 160,
+            ellipsis: true,
             render: (nickname: string, record: ThirdPartyAccount) => (
-                <Space orientation='vertical' size={0}>
-                    <span className="font-bold text-gray-800">{nickname}</span>
-                    <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {record.id}</Tag>
+                <Space orientation='vertical' size={0} style={{ width: '100%' }}>
+                    <Tooltip title={nickname}>
+                        <span 
+                            className="font-bold text-gray-800" 
+                            style={{
+                                maxWidth: '100%',
+                                display: 'inline-block',
+                                overflow: 'hidden',
+                                whiteSpace: 'nowrap',
+                                textOverflow: 'ellipsis'
+                            }}
+                        >
+                            {nickname}
+                        </span>
+                    </Tooltip>
+                    <Tooltip title={record.id}>
+                        <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {record.id}</Tag>
+                    </Tooltip>
                 </Space>
             ),
         },
@@ -126,7 +143,22 @@ export function ThirdPartyAccountPage() {
             key: 'accountId',
             ellipsis: true,
             width: 200,
-            render: (accountId: string) => <span className="text-gray-600 font-mono">{accountId}</span>
+            render: (accountId: string) => (
+                <Tooltip title={accountId}>
+                    <span 
+                        className="text-gray-600 font-mono" 
+                        style={{
+                            maxWidth: '100%',
+                            display: 'inline-block',
+                            overflow: 'hidden',
+                            whiteSpace: 'nowrap',
+                            textOverflow: 'ellipsis'
+                        }}
+                    >
+                        {accountId}
+                    </span>
+                </Tooltip>
+            )
         },
         {
             title: '平台',
@@ -138,7 +170,7 @@ export function ThirdPartyAccountPage() {
                     1: 'NapCat OICQ',
                     2: 'Lark'
                 };
-                return <Tag color="green" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">{platformMap[platform] ?? platform}</Tag>
+                return <Tag color="green" className="m-0 leading-4 h-4 px-1 rounded">{platformMap[platform] ?? platform}</Tag>
             }
         },
         {
