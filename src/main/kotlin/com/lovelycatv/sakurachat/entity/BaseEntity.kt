@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
 import jakarta.persistence.Column
 import jakarta.persistence.Id
 import jakarta.persistence.MappedSuperclass
+import jakarta.persistence.PreUpdate
 
 @MappedSuperclass
 abstract class BaseEntity {
@@ -29,5 +30,10 @@ abstract class BaseEntity {
     companion object {
         const val SOFT_NON_DELETED_RESTRICTION = "deleted_time IS NULL"
         const val SOFT_DELETED_RESTRICTION = "deleted_time IS NOT NULL"
+    }
+
+    @PreUpdate
+    fun preUpdate() {
+        modifiedTime = System.currentTimeMillis()
     }
 }
