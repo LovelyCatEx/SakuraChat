@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {AutoComplete, Button, Input, Modal, Space, Table, Tag} from 'antd';
 import {SearchOutlined} from '@ant-design/icons';
 
@@ -35,6 +35,7 @@ export function EntitySelector<T extends Entity>({
     const [modalLoading, setModalLoading] = useState(false);
     const [focused, setFocused] = useState(false);
     const [displayLabel, setDisplayLabel] = useState<string>('');
+    const initializedRef = useRef(false);
 
     const updateDisplayLabel = async (id: string) => {
         if (id && fetchById) {
@@ -52,14 +53,17 @@ export function EntitySelector<T extends Entity>({
         }
     };
 
-    React.useEffect(() => {
-        updateDisplayLabel(value || '');
-    }, [value]);
+    useEffect(() => {
+        if (value && !initializedRef.current && fetchById) {
+            initializedRef.current = true;
+            void updateDisplayLabel(value);
+        }
+    }, [fetchById, updateDisplayLabel, value]);
 
     const handleFocus = () => {
         setFocused(true);
         if (value) {
-            handleSearch('');
+            void handleSearch('');
         }
     };
 
@@ -75,6 +79,14 @@ export function EntitySelector<T extends Entity>({
             } catch (error) {
                 console.error('Fetch by id failed:', error);
             }
+        }
+    };
+
+    const handleChange = (newValue: string) => {
+        onChange?.(newValue);
+        const selectedOption = options.find(opt => opt.value === newValue);
+        if (selectedOption) {
+            setDisplayLabel(selectedOption.label);
         }
     };
 
@@ -167,7 +179,7 @@ export function EntitySelector<T extends Entity>({
                 {focused ? (
                     <AutoComplete
                         value={value}
-                        onChange={onChange}
+                        onChange={handleChange}
                         onFocus={handleFocus}
                         onSearch={handleSearch}
                         onBlur={handleBlur}
