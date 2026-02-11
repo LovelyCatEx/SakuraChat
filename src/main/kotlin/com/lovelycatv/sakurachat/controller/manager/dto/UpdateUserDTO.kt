@@ -9,7 +9,6 @@
 package com.lovelycatv.sakurachat.controller.manager.dto
 
 import jakarta.validation.constraints.Min
-import jakarta.validation.constraints.NotEmpty
 
 class UpdateUserDTO(
     @field:Min(1, message = "Invalid user id")

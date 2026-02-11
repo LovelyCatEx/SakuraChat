@@ -10,19 +10,10 @@ package com.lovelycatv.napcat.utils
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.lovelycatv.napcat.message.AbstractNapCatMessage
-import com.lovelycatv.napcat.message.NapCatFaceMessage
-import com.lovelycatv.napcat.message.NapCatImageMessage
+import com.lovelycatv.napcat.message.*
 import com.lovelycatv.napcat.types.NapCatMessageType
-import com.lovelycatv.napcat.message.NapCatPokeMessage
-import com.lovelycatv.napcat.message.NapCatRecordMessage
-import com.lovelycatv.napcat.message.NapCatReplyMessage
-import com.lovelycatv.napcat.message.NapCatTextMessage
-import com.lovelycatv.napcat.message.NapCatUnknownMessage
-import com.lovelycatv.napcat.message.NapCatVideoMessage
 import com.lovelycatv.sakurachat.utils.toJSONString
 import com.mikuac.shiro.model.ArrayMsg
-import kotlin.jvm.Throws
 
 object NapCatMessageUtils {
     private val objectMapper: ObjectMapper = jacksonObjectMapper()

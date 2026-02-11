@@ -9,13 +9,7 @@
 package com.lovelycatv.sakurachat.service.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.lovelycatv.sakurachat.core.SakuraChatAgent
-import com.lovelycatv.sakurachat.core.SakuraChatUser
-import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
-import com.lovelycatv.sakurachat.core.im.message.ChainMessage
-import com.lovelycatv.sakurachat.core.im.message.JsonMessage
-import com.lovelycatv.sakurachat.core.im.message.QuoteMessage
-import com.lovelycatv.sakurachat.core.im.message.TextMessage
+import com.lovelycatv.sakurachat.core.im.message.*
 import com.lovelycatv.sakurachat.service.AgentContextService
 import com.lovelycatv.sakurachat.service.AgentService
 import com.lovelycatv.sakurachat.service.ChannelMessageSerializationService

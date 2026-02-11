@@ -10,7 +10,10 @@ package com.lovelycatv.sakurachat.entity.channel
 
 import com.lovelycatv.sakurachat.types.ChannelMemberType
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.Id
+import jakarta.persistence.Table
 
 @Entity
 @Table(name = "im_channel_messages")

@@ -8,9 +8,7 @@
 
 package com.lovelycatv.sakurachat.service.impl
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.lovelycatv.sakurachat.core.AbstractSakuraChatChannelMember
-import com.lovelycatv.sakurachat.core.ISakuraChatMessageChannelMember
 import com.lovelycatv.sakurachat.core.SakuraChatMessageChannel
 import com.lovelycatv.sakurachat.core.SakuraChatMessageExtra
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage

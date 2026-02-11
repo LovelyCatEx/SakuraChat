@@ -11,14 +11,12 @@ package com.lovelycatv.sakurachat.service.impl
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateProviderDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.UpdateProviderDTO
 import com.lovelycatv.sakurachat.entity.ProviderEntity
-import com.lovelycatv.sakurachat.exception.BusinessException
 import com.lovelycatv.sakurachat.repository.ProviderRepository
 import com.lovelycatv.sakurachat.service.ProviderService
 import com.lovelycatv.sakurachat.utils.SnowIdGenerator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Service
-import kotlin.jvm.optionals.getOrNull
 
 @Service
 class ProviderServiceImpl(
