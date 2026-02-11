@@ -10,6 +10,8 @@ package com.lovelycatv.sakurachat.entity
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
 import jakarta.persistence.Table
 import org.hibernate.annotations.SQLDelete
 import org.hibernate.annotations.SQLRestriction
@@ -19,7 +21,7 @@ import org.hibernate.annotations.SQLRestriction
 @SQLDelete(sql = "UPDATE credentials SET deleted_time = ROUND(UNIX_TIMESTAMP(CURTIME(3)) * 1000) WHERE id = ?")
 @SQLRestriction(BaseEntity.SOFT_NON_DELETED_RESTRICTION)
 class CredentialEntity(
-    override val id: Long? = null,
+    override val id: Long = 0,
     @Column(name = "type", nullable = false)
     var type: Int = CredentialType.AUTHORIZATION_BEARER.typeId,
     @Column(name = "data", nullable = false)

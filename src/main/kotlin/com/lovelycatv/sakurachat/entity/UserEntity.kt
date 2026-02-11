@@ -20,7 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails
 @SQLDelete(sql = "UPDATE users SET deleted_time = ROUND(UNIX_TIMESTAMP(CURTIME(3)) * 1000) WHERE id = ?")
 @SQLRestriction(BaseEntity.SOFT_NON_DELETED_RESTRICTION)
 class UserEntity(
-    override val id: Long? = null,
+    override val id: Long = 0,
     @Column(name = "username", length = 64, nullable = false, unique = true)
     private val username: String = "",
     @Column(name = "password", length = 128, nullable = false)

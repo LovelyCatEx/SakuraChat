@@ -8,8 +8,13 @@
 
 package com.lovelycatv.sakurachat.entity
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
 import jakarta.persistence.Table
 import org.hibernate.annotations.SQLDelete
 import org.hibernate.annotations.SQLRestriction
@@ -19,13 +24,17 @@ import org.hibernate.annotations.SQLRestriction
 @SQLDelete(sql = "UPDATE chat_models SET deleted_time = ROUND(UNIX_TIMESTAMP(CURTIME(3)) * 1000) WHERE id = ?")
 @SQLRestriction(BaseEntity.SOFT_NON_DELETED_RESTRICTION)
 class ChatModelEntity(
-    override val id: Long? = null,
+    override var id: Long = 0,
     @Column(name = "name", length = 64, nullable = false, unique = true)
     var name: String = "",
     @Column(name = "description", length = 512, nullable = true)
     var description: String? = null,
     @Column(name = "provider_id", nullable = false)
+    @get:JsonSerialize(using = ToStringSerializer::class)
     var providerId: Long = 0,
+    @Column(name = "credential_id", nullable = false)
+    @get:JsonSerialize(using = ToStringSerializer::class)
+    var credentialId: Long = 0,
     @Column(name = "qualified_name", length = 256, nullable = false)
     var qualifiedName: String = "",
     @Column(name = "max_context_tokens", nullable = false)
@@ -40,8 +49,6 @@ class ChatModelEntity(
     var outputTokenPointRate: Int = 10000,
     @Column(name = "cached_input_token_point_rate", nullable = false)
     var cachedInputTokenPointRate: Int = 10000,
-    @Column(name = "credential_id", nullable = false)
-    var credentialId: Long = 0,
     @Column(name = "active", nullable = false)
     var active: Boolean = true,
     override val createdTime: Long = System.currentTimeMillis(),

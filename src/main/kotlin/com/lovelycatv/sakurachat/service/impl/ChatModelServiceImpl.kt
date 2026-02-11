@@ -8,19 +8,25 @@
 
 package com.lovelycatv.sakurachat.service.impl
 
+import com.lovelycatv.sakurachat.controller.manager.dto.CreateChatModelDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.UpdateChatModelDTO
+import com.lovelycatv.sakurachat.entity.ChatModelEntity
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedChatModelEntity
 import com.lovelycatv.sakurachat.repository.ChatModelRepository
 import com.lovelycatv.sakurachat.service.ChatModelService
 import com.lovelycatv.sakurachat.service.CredentialService
 import com.lovelycatv.sakurachat.service.ProviderService
+import com.lovelycatv.sakurachat.utils.SnowIdGenerator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Service
 
 @Service
 class ChatModelServiceImpl(
     private val chatModelRepository: ChatModelRepository,
     private val credentialService: CredentialService,
-    private val providerService: ProviderService
+    private val providerService: ProviderService,
+    private val snowIdGenerator: SnowIdGenerator
 ) : ChatModelService {
     override fun getRepository(): ChatModelRepository {
         return this.chatModelRepository
@@ -92,8 +98,30 @@ class ChatModelServiceImpl(
             existing.active = updateChatModelDTO.active
         }
 
-        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        withContext(Dispatchers.IO) {
             getRepository().save(existing)
+        }
+    }
+
+    override suspend fun createChatModel(createChatModelDTO: CreateChatModelDTO) {
+        withContext(Dispatchers.IO) {
+            getRepository().save(
+                ChatModelEntity(
+                    id = snowIdGenerator.nextId(),
+                    name = createChatModelDTO.name,
+                    qualifiedName = createChatModelDTO.qualifiedName,
+                    description = createChatModelDTO.description,
+                    providerId = createChatModelDTO.providerId,
+                    credentialId = createChatModelDTO.credentialId,
+                    maxContextTokens = createChatModelDTO.maxContextTokens,
+                    maxTokens = createChatModelDTO.maxTokens,
+                    temperature = createChatModelDTO.temperature,
+                    inputTokenPointRate = createChatModelDTO.inputTokenPointRate,
+                    outputTokenPointRate = createChatModelDTO.outputTokenPointRate,
+                    cachedInputTokenPointRate = createChatModelDTO.cachedInputTokenPointRate,
+                    active = true
+                )
+            )
         }
     }
 }

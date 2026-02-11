@@ -21,7 +21,7 @@ import org.hibernate.annotations.SQLRestriction
 @SQLDelete(sql = "UPDATE third_party_accounts SET deleted_time = ROUND(UNIX_TIMESTAMP(CURTIME(3)) * 1000) WHERE id = ?")
 @SQLRestriction(BaseEntity.SOFT_NON_DELETED_RESTRICTION)
 class ThirdPartyAccountEntity(
-    override val id: Long? = null,
+    override val id: Long = 0,
     @Column(name = "account_id", nullable = false, length = 64)
     var accountId: String = "",
     @Column(name = "nickname", nullable = false, length = 256)

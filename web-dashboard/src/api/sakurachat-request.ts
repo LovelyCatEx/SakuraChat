@@ -8,6 +8,19 @@ export interface ApiResponse<T> {
     data: T | null;
 }
 
+export interface PageQuery {
+    page: number;
+    pageSize: number;
+}
+
+export interface PaginatedResponseData<T> {
+    page: number,
+    pageSize: number,
+    total: number,
+    totalPages: number,
+    records: T[]
+}
+
 function handleApiResponse<T>(response: ApiResponse<T>) {
     if (response.code === 200) {
         return response;

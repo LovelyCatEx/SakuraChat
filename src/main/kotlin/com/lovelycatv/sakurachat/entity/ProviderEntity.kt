@@ -19,7 +19,7 @@ import org.hibernate.annotations.SQLRestriction
 @SQLDelete(sql = "UPDATE providers SET deleted_time = ROUND(UNIX_TIMESTAMP(CURTIME(3)) * 1000) WHERE id = ?")
 @SQLRestriction(BaseEntity.SOFT_NON_DELETED_RESTRICTION)
 class ProviderEntity(
-    override val id: Long? = null,
+    override val id: Long = 0,
     @Column(name = "name", length = 32, nullable = false, unique = true)
     var name: String = "",
     @Column(name = "description", length = 512, nullable = true)

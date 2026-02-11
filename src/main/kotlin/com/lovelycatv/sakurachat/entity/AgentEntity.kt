@@ -8,8 +8,12 @@
 
 package com.lovelycatv.sakurachat.entity
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
 import jakarta.persistence.Table
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.SQLDelete
@@ -20,7 +24,7 @@ import org.hibernate.annotations.SQLRestriction
 @SQLDelete(sql = "UPDATE agents SET deleted_time = ROUND(UNIX_TIMESTAMP(CURTIME(3)) * 1000) WHERE id = ?")
 @SQLRestriction(BaseEntity.SOFT_NON_DELETED_RESTRICTION)
 class AgentEntity(
-    override val id: Long? = null,
+    override val id: Long = 0,
     @Column(name = "name", length = 32, nullable = false, unique = true)
     var name: String = "",
     @Column(name = "description", length = 512, nullable = true)
@@ -32,6 +36,7 @@ class AgentEntity(
     @Column(name = "user_id", nullable = false)
     var userId: Long = 0,
     @Column(name = "chat_model_id", nullable = false)
+    @get:JsonSerialize(using = ToStringSerializer::class)
     var chatModelId: Long = 0,
     override val createdTime: Long = System.currentTimeMillis(),
     override var modifiedTime: Long = System.currentTimeMillis(),

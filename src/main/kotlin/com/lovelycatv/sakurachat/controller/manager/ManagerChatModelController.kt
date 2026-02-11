@@ -8,6 +8,7 @@
 
 package com.lovelycatv.sakurachat.controller.manager
 
+import com.lovelycatv.sakurachat.controller.manager.dto.CreateChatModelDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.UpdateChatModelDTO
 import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.request.PageQuery
@@ -39,6 +40,12 @@ class ManagerChatModelController(
                     .withPage(pageQuery.page - 1)
             ).toPaginatedResponseData()
         )
+    }
+
+    @PostMapping("/create")
+    suspend fun createChatModel(@ModelAttribute createChatModelDTO: CreateChatModelDTO): ApiResponse<*> {
+        chatModelService.createChatModel(createChatModelDTO)
+        return ApiResponse.success(null)
     }
 
     @PostMapping("/update")

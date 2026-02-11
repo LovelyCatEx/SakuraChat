@@ -8,6 +8,8 @@
 
 package com.lovelycatv.sakurachat.entity
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
 import jakarta.persistence.Column
 import jakarta.persistence.Id
 import jakarta.persistence.MappedSuperclass
@@ -15,7 +17,8 @@ import jakarta.persistence.MappedSuperclass
 @MappedSuperclass
 abstract class BaseEntity {
     @Id
-    val id: Long? = null
+    @get:JsonSerialize(using = ToStringSerializer::class)
+    val id: Long = 0
     @Column(name = "created_time", nullable = false, updatable = false)
     val createdTime: Long = System.currentTimeMillis()
     @Column(name = "modified_time", nullable = false)

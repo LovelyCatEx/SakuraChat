@@ -17,7 +17,7 @@ import {
 import {DashboardPage} from './manager/dashboard/DashboardPage.tsx';
 import {AgentPage} from './manager/agent/AgentPage.tsx';
 import {CredentialPage} from './manager/credential/CredentialPage.tsx';
-import {ModelPage} from './manager/model/ModelPage.tsx';
+import {ChatModelPage} from './manager/chat-model/ChatModelPage.tsx';
 import {ProviderPage} from './manager/provider/ProviderPage.tsx';
 import {UserRolePage} from './manager/user/role/UserRolePage.tsx';
 import {SettingsPage} from './manager/settings/SettingsPage.tsx';
@@ -176,7 +176,7 @@ export function MainContainer() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/agents" element={<AgentPage />} />
               <Route path="/providers" element={<ProviderPage />} />
-              <Route path="/models" element={<ModelPage />} />
+              <Route path="/models" element={<ChatModelPage />} />
               <Route path="/credentials" element={<CredentialPage />} />
               <Route path="/third-party-accounts" element={<ThirdPartyAccountPage />} />
               <Route path="/users" element={<UserPage />} />
