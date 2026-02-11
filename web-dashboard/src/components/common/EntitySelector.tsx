@@ -136,6 +136,10 @@ export function EntitySelector<T extends Entity>({
         onChange?.(id);
         setIsModalVisible(false);
         setModalSearchKeyword('');
+        const selectedItem = modalData.find(item => item.id === id);
+        if (selectedItem) {
+            setDisplayLabel(renderLabel(selectedItem));
+        }
     };
 
     const columns = [
