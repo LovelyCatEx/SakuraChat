@@ -1,16 +1,16 @@
 /*
- * Copyright 2025 lovelycat
+ * Copyright 2026 lovelycat
  *
  * Use of this source code is governed by the Apache License, Version 2.0,
  * that can be found in the LICENSE file.
  *
  */
-package com.lovelycatv.sakurachat.controller
+package com.lovelycatv.sakurachat.controller.user
 
 import com.lovelycatv.sakurachat.annotations.Unauthorized
-import com.lovelycatv.sakurachat.controller.dto.UserProfileVO
-import com.lovelycatv.sakurachat.controller.dto.UserRegisterDTO
-import com.lovelycatv.sakurachat.response.ApiResponse
+import com.lovelycatv.sakurachat.controller.user.dto.UserProfileVO
+import com.lovelycatv.sakurachat.controller.user.dto.UserRegisterDTO
+import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.service.UserService
 import com.lovelycatv.sakurachat.types.UserAuthentication
 import jakarta.annotation.Resource

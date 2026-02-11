@@ -13,7 +13,7 @@ import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyGroupEntity
 import com.lovelycatv.sakurachat.repository.ThirdPartyGroupRepository
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 
-interface ThirdPartyGroupService : BaseService<ThirdPartyGroupRepository> {
+interface ThirdPartyGroupService : BaseService<ThirdPartyGroupRepository, ThirdPartyGroupEntity, Long> {
     fun getGroupByPlatformAndGroupId(
         platform: ThirdPartyPlatform,
         groupId: String

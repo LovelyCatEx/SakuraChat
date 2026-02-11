@@ -12,9 +12,10 @@ import com.lovelycatv.sakurachat.core.AbstractSakuraChatChannelMember
 import com.lovelycatv.sakurachat.core.ISakuraChatMessageChannelMember
 import com.lovelycatv.sakurachat.core.SakuraChatMessageChannel
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
+import com.lovelycatv.sakurachat.entity.channel.IMChannelMessageEntity
 import com.lovelycatv.sakurachat.repository.IMChannelMessageRepository
 
-interface IMChannelMessageService : BaseService<IMChannelMessageRepository> {
+interface IMChannelMessageService : BaseService<IMChannelMessageRepository, IMChannelMessageEntity, Long> {
     fun saveMessage(
         channel: SakuraChatMessageChannel,
         sender: AbstractSakuraChatChannelMember,

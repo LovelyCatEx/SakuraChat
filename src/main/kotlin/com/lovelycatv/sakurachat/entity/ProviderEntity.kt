@@ -10,32 +10,30 @@ package com.lovelycatv.sakurachat.entity
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
-import jakarta.persistence.Id
 import jakarta.persistence.Table
+import org.hibernate.annotations.SQLDelete
+import org.hibernate.annotations.SQLRestriction
 
 @Entity
 @Table(name = "providers")
-data class ProviderEntity(
-    @Id
-    @Column(name = "id", nullable = false)
-    val id: Long? = null,
+@SQLDelete(sql = "UPDATE providers SET deleted_time = NOW() WHERE id = ?")
+@SQLRestriction(BaseEntity.SOFT_NON_DELETED_RESTRICTION)
+class ProviderEntity(
+    override val id: Long? = null,
     @Column(name = "name", length = 32, nullable = false, unique = true)
-    val name: String = "",
+    var name: String = "",
     @Column(name = "description", length = 512, nullable = true)
-    val description: String? = null,
+    var description: String? = null,
     @Column(name = "icon", nullable = true)
-    val icon: ByteArray? = null,
+    var icon: ByteArray? = null,
     @Column(name = "api_type", nullable = false)
-    val apiType: Int = ApiType.OPEN_AI.typeId,
+    var apiType: Int = ApiType.OPEN_AI.typeId,
     @Column(name = "chat_completions_url", nullable = false)
-    val chatCompletionsUrl: String = "",
-    @Column(name = "created_time", nullable = false)
-    val createdTime: Long = System.currentTimeMillis(),
-    @Column(name = "modified_time", nullable = false)
-    val modifiedTime: Long = System.currentTimeMillis(),
-    @Column(name = "deleted_time", nullable = true)
-    val deletedTime: Long? = null
-) {
+    var chatCompletionsUrl: String = "",
+    override val createdTime: Long = System.currentTimeMillis(),
+    override var modifiedTime: Long = System.currentTimeMillis(),
+    override var deletedTime: Long?
+): BaseEntity() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is ProviderEntity) return false

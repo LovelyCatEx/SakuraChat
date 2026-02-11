@@ -13,7 +13,7 @@ import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.repository.ThirdPartyAccountRepository
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 
-interface ThirdPartyAccountService : BaseService<ThirdPartyAccountRepository> {
+interface ThirdPartyAccountService : BaseService<ThirdPartyAccountRepository, ThirdPartyAccountEntity, Long> {
     fun getAccountByPlatformAndAccountId(
         platform: ThirdPartyPlatform,
         accountId: String

@@ -20,35 +20,35 @@ data class ChatModelEntity(
     @Column(name = "id", nullable = false)
     val id: Long? = null,
     @Column(name = "name", length = 64, nullable = false, unique = true)
-    val name: String = "",
+    var name: String = "",
     @Column(name = "description", length = 512, nullable = true)
-    val description: String? = null,
+    var description: String? = null,
     @Column(name = "provider_id", nullable = false)
-    val providerId: Long = 0,
+    var providerId: Long = 0,
     @Column(name = "qualified_name", length = 256, nullable = false)
-    val qualifiedName: String = "",
+    var qualifiedName: String = "",
     @Column(name = "max_context_tokens", nullable = false)
-    val maxContextTokens: Int = -1,
+    var maxContextTokens: Int = -1,
     @Column(name = "temperature", nullable = false)
-    val temperature: Int = -1,
+    var temperature: Int = -1,
     @Column(name = "max_tokens", nullable = false)
-    val maxTokens: Int = -1,
+    var maxTokens: Int = -1,
     @Column(name = "input_token_point_rate", nullable = false)
-    val inputTokenPointRate: Int = 10000,
+    var inputTokenPointRate: Int = 10000,
     @Column(name = "output_token_point_rate", nullable = false)
     var outputTokenPointRate: Int = 10000,
     @Column(name = "cached_input_token_point_rate", nullable = false)
     var cachedInputTokenPointRate: Int = 10000,
     @Column(name = "credential_id", nullable = false)
-    val credentialId: Long = 0,
+    var credentialId: Long = 0,
     @Column(name = "active", nullable = false)
-    val active: Boolean = true,
+    var active: Boolean = true,
     @Column(name = "created_time", nullable = false)
     val createdTime: Long = System.currentTimeMillis(),
     @Column(name = "modified_time", nullable = false)
-    val modifiedTime: Long = System.currentTimeMillis(),
+    var modifiedTime: Long = System.currentTimeMillis(),
     @Column(name = "deleted_time", nullable = true)
-    val deletedTime: Long? = null
+    var deletedTime: Long? = null
 ) {
     fun getQualifiedTemperature(): Float? = this.temperature.run {
         if (this > 0) this / 100f else null

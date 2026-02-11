@@ -6,7 +6,7 @@
  *
  */
 
-package com.lovelycatv.sakurachat.controller.dto
+package com.lovelycatv.sakurachat.controller.user.dto
 
 data class UserProfileVO(
     val userId: Long,

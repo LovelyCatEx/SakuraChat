@@ -14,7 +14,7 @@ import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
-interface UserService : UserDetailsService, BaseService<UserRepository> {
+interface UserService : UserDetailsService, BaseService<UserRepository, UserEntity, Long> {
     suspend fun register(username: String, password: String, email: String, emailCode: String)
 
     suspend fun getUserByThirdPartyAccount(

@@ -13,7 +13,7 @@ import com.lovelycatv.lark.LarkWebSocketClient
 import com.lovelycatv.sakurachat.entity.LarkBotApplicationEntity
 import com.lovelycatv.sakurachat.repository.LarkBotApplicationRepository
 
-interface LarkBotApplicationService : BaseService<LarkBotApplicationRepository> {
+interface LarkBotApplicationService : BaseService<LarkBotApplicationRepository, LarkBotApplicationEntity, Long> {
     fun getLarkRestClient(application: LarkBotApplicationEntity): LarkRestClient
 
     fun getLarkWebSocketClient(application: LarkBotApplicationEntity): LarkWebSocketClient

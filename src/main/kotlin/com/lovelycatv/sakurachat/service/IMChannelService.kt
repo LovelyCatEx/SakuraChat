@@ -12,7 +12,7 @@ import com.lovelycatv.sakurachat.entity.channel.IMChannelEntity
 import com.lovelycatv.sakurachat.repository.IMChannelRepository
 import org.springframework.transaction.annotation.Transactional
 
-interface IMChannelService : BaseService<IMChannelRepository> {
+interface IMChannelService : BaseService<IMChannelRepository, IMChannelEntity, Long> {
     @Transactional
     suspend fun getOrCreatePrivateChannelByUserIdAndAgentId(
         userId: Long,

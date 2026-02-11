@@ -8,9 +8,15 @@
 
 package com.lovelycatv.sakurachat.service.impl
 
+import com.lovelycatv.sakurachat.controller.manager.dto.UpdateProviderDTO
+import com.lovelycatv.sakurachat.entity.ProviderEntity
+import com.lovelycatv.sakurachat.exception.BusinessException
 import com.lovelycatv.sakurachat.repository.ProviderRepository
 import com.lovelycatv.sakurachat.service.ProviderService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Service
+import kotlin.jvm.optionals.getOrNull
 
 @Service
 class ProviderServiceImpl(
@@ -18,5 +24,29 @@ class ProviderServiceImpl(
 ) : ProviderService {
     override fun getRepository(): ProviderRepository {
         return this.providerRepository
+    }
+
+    override suspend fun updateProvider(updateProviderDTO: UpdateProviderDTO) {
+        val existing = this.getByIdOrThrow(updateProviderDTO.id)
+
+        if (updateProviderDTO.name != null) {
+            existing.name = updateProviderDTO.name
+        }
+
+        if (updateProviderDTO.description != null) {
+            existing.description = updateProviderDTO.description
+        }
+
+        if (updateProviderDTO.chatCompletionsUrl != null) {
+            existing.chatCompletionsUrl = updateProviderDTO.chatCompletionsUrl
+        }
+
+        if (updateProviderDTO.apiType != null) {
+            existing.apiType = updateProviderDTO.apiType
+        }
+
+        withContext(Dispatchers.IO) {
+            getRepository().save(existing)
+        }
     }
 }

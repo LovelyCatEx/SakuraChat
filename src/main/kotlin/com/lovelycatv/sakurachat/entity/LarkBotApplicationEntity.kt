@@ -20,21 +20,21 @@ data class LarkBotApplicationEntity(
     @Column(name = "id", nullable = false)
     val id: Long = 0,
     @Column(name = "name", nullable = false, length = 64)
-    val name: String = "",
+    var name: String = "",
     @Column(name = "owner_user_id", nullable = false)
-    val ownerUserId: Long = 0,
+    var ownerUserId: Long = 0,
     @Column(name = "app_id", nullable = false, length = 256)
-    val appId: String = "",
+    var appId: String = "",
     @Column(name = "app_secret", nullable = false, length = 256)
-    val appSecret: String = "",
+    var appSecret: String = "",
     @Column(name = "encrypt_key", nullable = false, length = 256)
-    val encryptKey: String = "",
+    var encryptKey: String = "",
     @Column(name = "verification_token", nullable = false, length = 256)
-    val verificationToken: String = "",
+    var verificationToken: String = "",
     @Column(name = "created_time", nullable = false)
     val createdTime: Long = 0,
     @Column(name = "modified_time", nullable = false)
-    val modifiedTime: Long = 0,
+    var modifiedTime: Long = 0,
     @Column(name = "deleted_time", nullable = true)
-    val deletedTime: Long? = null
+    var deletedTime: Long? = null
 )

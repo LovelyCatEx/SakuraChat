@@ -8,7 +8,8 @@
 
 package com.lovelycatv.sakurachat.service
 
+import com.lovelycatv.sakurachat.entity.CredentialEntity
 import com.lovelycatv.sakurachat.repository.CredentialRepository
 
-interface CredentialService : BaseService<CredentialRepository> {
+interface CredentialService : BaseService<CredentialRepository, CredentialEntity, Long> {
 }

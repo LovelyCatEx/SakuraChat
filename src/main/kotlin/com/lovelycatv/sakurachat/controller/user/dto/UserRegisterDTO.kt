@@ -5,7 +5,7 @@
  * that can be found in the LICENSE file.
  *
  */
-package com.lovelycatv.sakurachat.controller.dto
+package com.lovelycatv.sakurachat.controller.user.dto
 
 data class UserRegisterDTO(
     val username: String,

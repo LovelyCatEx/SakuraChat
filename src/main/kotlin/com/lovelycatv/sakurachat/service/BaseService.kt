@@ -8,8 +8,24 @@
 
 package com.lovelycatv.sakurachat.service
 
+import com.lovelycatv.sakurachat.exception.BusinessException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.springframework.data.jpa.repository.JpaRepository
 
-interface BaseService<R: JpaRepository<*, *>> {
+interface BaseService<R: JpaRepository<T, ID>, T, ID: Any> {
     fun getRepository(): R
+
+    suspend fun getById(id: ID): T? {
+        return withContext(Dispatchers.IO) {
+            getRepository().findById(id)
+        }.orElse(null)
+    }
+
+    suspend fun getByIdOrThrow(
+        id: ID,
+        t: Throwable = BusinessException("Resource with id $id not found")
+    ): T {
+        return this.getById(id) ?: throw t
+    }
 }

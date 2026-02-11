@@ -42,9 +42,16 @@ class ControllerLoggingInterceptor(
                 .writeValueAsString(request.headerNames.toList().associateWith { request.getHeader(it) })
                 .split("\n")
 
+            val params = objectMapper
+                .writerWithDefaultPrettyPrinter()
+                .withDefaultPrettyPrinter()
+                .writeValueAsString(request.parameterMap)
+                .split("\n")
+
             logger.info("+ [{}] ===========================================================", code)
-            logger.info("+ [{}] Request: {} {}", code, method, requestURI)
+            logger.info("+ [{}] Request: {} {}?{}", code, method, requestURI, request.queryString)
             logger.info("+ [{}] Remote: {}", code, clientIp)
+
             headers.forEachIndexed { index, it ->
                 if (index == 0) {
                     logger.info("+ [{}] Headers: {}", code, it)
@@ -52,12 +59,22 @@ class ControllerLoggingInterceptor(
                     logger.info("+ [{}] {}", code, it)
                 }
             }
+
+            params.forEachIndexed { index, it ->
+                if (index == 0) {
+                    logger.info("+ [{}] Params: {}", code, it)
+                } else {
+                    logger.info("+ [{}] {}", code, it)
+                }
+            }
+
             if (handler is HandlerMethod) {
                 logger.info("+ [{}] Handler: {}", code, handler.beanType.canonicalName)
                 logger.info("+ [{}] Method: {}", code, handler.method.toString())
             } else {
                 logger.info("+ [{}] Handler: {}", code, handler::class.qualifiedName)
             }
+
             logger.info("+ [{}] ===========================================================", code)
 
             request.setAttribute("code", code)
@@ -87,18 +104,18 @@ class ControllerLoggingInterceptor(
                 .writeValueAsString(response.headerNames.toList().associateWith { request.getHeader(it) })
                 .split("\n")
 
-            logger.info("+ [{}] ===========================================================", code)
+            logger.info("- [{}] ===========================================================", code)
             logger.info("- [{}] Request: {} {}", code, method, requestURI)
             logger.info("- [{}] Remote: {}", code, clientIp)
             headers.forEachIndexed { index, it ->
                 if (index == 0) {
-                    logger.info("+ [{}] Response Headers: {}", code, it)
+                    logger.info("- [{}] Response Headers: {}", code, it)
                 } else {
-                    logger.info("+ [{}] {}", code, it)
+                    logger.info("- [{}] {}", code, it)
                 }
             }
             logger.info("- [{}] Costs: {}ms", code, System.currentTimeMillis() - (request.getAttribute("startTime") as? Long? ?: System.currentTimeMillis()))
-            logger.info("+ [{}] ===========================================================", code)
+            logger.info("- [{}] ===========================================================", code)
         }
     }
 }

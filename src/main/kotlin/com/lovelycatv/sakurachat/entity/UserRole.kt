@@ -19,13 +19,13 @@ data class UserRole(
     @Column(name = "id", nullable = false)
     val id: Long? = null,
     @Column(name = "name", length = 32, nullable = false, unique = true)
-    val username: String = "",
+    var name: String = "",
     @Column(name = "description", length = 256, nullable = true, unique = true)
-    val description: String? = null,
+    var description: String? = null,
     @Column(name = "created_time", nullable = false)
     val createdTime: Long = System.currentTimeMillis(),
     @Column(name = "modified_time", nullable = false)
-    val modifiedTime: Long = System.currentTimeMillis(),
+    var modifiedTime: Long = System.currentTimeMillis(),
     @Column(name = "deleted_time", nullable = true)
-    val deletedTime: Long? = null
+    var deletedTime: Long? = null
 )

@@ -5,7 +5,7 @@
  * that can be found in the LICENSE file.
  *
  */
-package com.lovelycatv.sakurachat.response
+package com.lovelycatv.sakurachat.request
 
 data class ApiResponse<T>(
     val code: Int,

@@ -14,7 +14,7 @@ import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.repository.AgentRepository
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 
-interface AgentService : BaseService<AgentRepository> {
+interface AgentService : BaseService<AgentRepository, AgentEntity, Long> {
     fun getAgentByThirdPartyAccount(platform: ThirdPartyPlatform, accountId: String): AgentEntity?
 
     fun getRelatedThirdPartyAccounts(agentId: Long): Map<ThirdPartyPlatform, List<ThirdPartyAccountEntity>>

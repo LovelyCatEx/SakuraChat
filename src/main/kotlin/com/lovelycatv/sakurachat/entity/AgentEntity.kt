@@ -21,21 +21,21 @@ data class AgentEntity(
     @Column(name = "id", nullable = false)
     val id: Long? = null,
     @Column(name = "name", length = 32, nullable = false, unique = true)
-    val name: String = "",
+    var name: String = "",
     @Column(name = "description", length = 512, nullable = true)
-    val description: String? = null,
+    var description: String? = null,
     @Column(name = "prompt", nullable = false)
-    val prompt: String = "",
+    var prompt: String = "",
     @Column(name = "delimiter", length = 16)
     var delimiter: String? = null,
     @Column(name = "user_id", nullable = false)
-    val userId: Long = 0,
+    var userId: Long = 0,
     @Column(name = "chat_model_id", nullable = false)
-    val chatModelId: Long = 0,
+    var chatModelId: Long = 0,
     @Column(name = "created_time", nullable = false)
     val createdTime: Long = System.currentTimeMillis(),
     @Column(name = "modified_time", nullable = false)
-    val modifiedTime: Long = System.currentTimeMillis(),
+    var modifiedTime: Long = System.currentTimeMillis(),
     @Column(name = "deleted_time", nullable = true)
-    val deletedTime: Long? = null
+    var deletedTime: Long? = null
 )

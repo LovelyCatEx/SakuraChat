@@ -8,7 +8,7 @@
 package com.lovelycatv.sakurachat.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lovelycatv.sakurachat.response.ApiResponse;
+import com.lovelycatv.sakurachat.request.ApiResponse;
 import io.jsonwebtoken.*;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -68,7 +68,11 @@ public class AuthorizationFilter extends GenericFilterBean {
  
             // e.printStackTrace();
             servletResponse.setContentType("application/json;charset=utf-8");
-            servletResponse.getWriter().write(objectMapper.writeValueAsString(ApiResponse.unauthorized(e.getMessage(), null)));
+            if (e instanceof ExpiredJwtException) {
+                servletResponse.getWriter().write(objectMapper.writeValueAsString(ApiResponse.unauthorized("Token expired", null)));
+            } else {
+                servletResponse.getWriter().write(objectMapper.writeValueAsString(ApiResponse.unauthorized(e.getMessage(), null)));
+            }
             servletResponse.getWriter().flush();
             servletResponse.getWriter().close();
         }

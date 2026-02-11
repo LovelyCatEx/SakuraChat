@@ -10,7 +10,7 @@ package com.lovelycatv.sakurachat.filter;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lovelycatv.sakurachat.response.ApiResponse;
+import com.lovelycatv.sakurachat.request.ApiResponse;
 import com.lovelycatv.sakurachat.utils.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,7 +44,7 @@ public class CustomLoginFilter extends AbstractAuthenticationProcessingFilter {
         Collection<? extends GrantedAuthority> authorities = authResult.getAuthorities();
  
         response.setContentType("application/json;charset=utf-8");
-        String userToken = JwtUtil.buildJwtToken("jwtSignKey", authorities, authResult, 15 * 60 * 1000);
+        String userToken = JwtUtil.buildJwtToken("jwtSignKey", authorities, authResult, 7 * 1440 * 60 * 1000L);
 
         LoginSuccessData data = new LoginSuccessData();
         data.token = userToken;

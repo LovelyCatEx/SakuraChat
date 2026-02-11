@@ -8,7 +8,7 @@
 
 package com.lovelycatv.sakurachat.config
 
-import com.lovelycatv.sakurachat.controller.dto.UserRegisterDTO
+import com.lovelycatv.sakurachat.controller.user.dto.UserRegisterDTO
 import org.springframework.aot.hint.annotation.RegisterReflectionForBinding
 import org.springframework.context.annotation.Configuration
 
