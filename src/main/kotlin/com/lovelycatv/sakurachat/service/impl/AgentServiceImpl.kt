@@ -8,6 +8,7 @@
 
 package com.lovelycatv.sakurachat.service.impl
 
+import com.lovelycatv.sakurachat.controller.manager.dto.UpdateAgentDTO
 import com.lovelycatv.sakurachat.entity.AgentEntity
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
@@ -74,5 +75,37 @@ class AgentServiceImpl(
             agent = agent,
             chatModel = chatModelService.getAggregatedChatModelEntityById(agent.chatModelId)
         )
+    }
+
+    override suspend fun updateAgent(updateAgentDTO: UpdateAgentDTO) {
+        val existing = this.getByIdOrThrow(updateAgentDTO.id)
+
+        if (updateAgentDTO.name != null) {
+            existing.name = updateAgentDTO.name
+        }
+
+        if (updateAgentDTO.description != null) {
+            existing.description = updateAgentDTO.description
+        }
+
+        if (updateAgentDTO.prompt != null) {
+            existing.prompt = updateAgentDTO.prompt
+        }
+
+        if (updateAgentDTO.delimiter != null) {
+            existing.delimiter = updateAgentDTO.delimiter
+        }
+
+        if (updateAgentDTO.userId != null) {
+            existing.userId = updateAgentDTO.userId
+        }
+
+        if (updateAgentDTO.chatModelId != null) {
+            existing.chatModelId = updateAgentDTO.chatModelId
+        }
+
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            getRepository().save(existing)
+        }
     }
 }

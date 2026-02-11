@@ -16,7 +16,7 @@ import org.hibernate.annotations.SQLRestriction
 
 @Entity
 @Table(name = "providers")
-@SQLDelete(sql = "UPDATE providers SET deleted_time = NOW() WHERE id = ?")
+@SQLDelete(sql = "UPDATE providers SET deleted_time = ROUND(UNIX_TIMESTAMP(CURTIME(3)) * 1000) WHERE id = ?")
 @SQLRestriction(BaseEntity.SOFT_NON_DELETED_RESTRICTION)
 class ProviderEntity(
     override val id: Long? = null,
@@ -32,7 +32,7 @@ class ProviderEntity(
     var chatCompletionsUrl: String = "",
     override val createdTime: Long = System.currentTimeMillis(),
     override var modifiedTime: Long = System.currentTimeMillis(),
-    override var deletedTime: Long?
+    override var deletedTime: Long? = null
 ): BaseEntity() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

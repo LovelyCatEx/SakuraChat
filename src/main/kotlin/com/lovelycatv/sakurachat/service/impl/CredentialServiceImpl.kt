@@ -8,6 +8,7 @@
 
 package com.lovelycatv.sakurachat.service.impl
 
+import com.lovelycatv.sakurachat.controller.manager.dto.UpdateCredentialDTO
 import com.lovelycatv.sakurachat.repository.CredentialRepository
 import com.lovelycatv.sakurachat.service.CredentialService
 import org.springframework.stereotype.Service
@@ -18,5 +19,25 @@ class CredentialServiceImpl(
 ) : CredentialService {
     override fun getRepository(): CredentialRepository {
         return this.credentialRepository
+    }
+
+    override suspend fun updateCredential(updateCredentialDTO: UpdateCredentialDTO) {
+        val existing = this.getByIdOrThrow(updateCredentialDTO.id)
+
+        if (updateCredentialDTO.type != null) {
+            existing.type = updateCredentialDTO.type
+        }
+
+        if (updateCredentialDTO.data != null) {
+            existing.data = updateCredentialDTO.data
+        }
+
+        if (updateCredentialDTO.active != null) {
+            existing.active = updateCredentialDTO.active
+        }
+
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            getRepository().save(existing)
+        }
     }
 }

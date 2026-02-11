@@ -97,4 +97,24 @@ class ThirdPartyAccountServiceImpl(
                 it.getPlatform() == platform && it.getThirdPartyAccountClass().isAssignableFrom(thirdPartyAccountClass)
             }
     }
+
+    override suspend fun updateThirdPartyAccount(updateThirdPartyAccountDTO: com.lovelycatv.sakurachat.controller.manager.dto.UpdateThirdPartyAccountDTO) {
+        val existing = this.getByIdOrThrow(updateThirdPartyAccountDTO.id)
+
+        if (updateThirdPartyAccountDTO.accountId != null) {
+            existing.accountId = updateThirdPartyAccountDTO.accountId
+        }
+
+        if (updateThirdPartyAccountDTO.nickname != null) {
+            existing.nickname = updateThirdPartyAccountDTO.nickname
+        }
+
+        if (updateThirdPartyAccountDTO.platform != null) {
+            existing.platform = updateThirdPartyAccountDTO.platform
+        }
+
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            getRepository().save(existing)
+        }
+    }
 }

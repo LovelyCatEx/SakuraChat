@@ -8,6 +8,7 @@
 
 package com.lovelycatv.sakurachat.service.impl
 
+import com.lovelycatv.sakurachat.controller.manager.dto.UpdateChatModelDTO
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedChatModelEntity
 import com.lovelycatv.sakurachat.repository.ChatModelRepository
 import com.lovelycatv.sakurachat.service.ChatModelService
@@ -38,5 +39,61 @@ class ChatModelServiceImpl(
                 .findById(chatModel.providerId)
                 .orElse(null)
         )
+    }
+
+    override suspend fun updateChatModel(updateChatModelDTO: UpdateChatModelDTO) {
+        val existing = this.getByIdOrThrow(updateChatModelDTO.id)
+
+        if (updateChatModelDTO.name != null) {
+            existing.name = updateChatModelDTO.name
+        }
+
+        if (updateChatModelDTO.description != null) {
+            existing.description = updateChatModelDTO.description
+        }
+
+        if (updateChatModelDTO.providerId != null) {
+            existing.providerId = updateChatModelDTO.providerId
+        }
+
+        if (updateChatModelDTO.qualifiedName != null) {
+            existing.qualifiedName = updateChatModelDTO.qualifiedName
+        }
+
+        if (updateChatModelDTO.maxContextTokens != null) {
+            existing.maxContextTokens = updateChatModelDTO.maxContextTokens
+        }
+
+        if (updateChatModelDTO.temperature != null) {
+            existing.temperature = updateChatModelDTO.temperature
+        }
+
+        if (updateChatModelDTO.maxTokens != null) {
+            existing.maxTokens = updateChatModelDTO.maxTokens
+        }
+
+        if (updateChatModelDTO.inputTokenPointRate != null) {
+            existing.inputTokenPointRate = updateChatModelDTO.inputTokenPointRate
+        }
+
+        if (updateChatModelDTO.outputTokenPointRate != null) {
+            existing.outputTokenPointRate = updateChatModelDTO.outputTokenPointRate
+        }
+
+        if (updateChatModelDTO.cachedInputTokenPointRate != null) {
+            existing.cachedInputTokenPointRate = updateChatModelDTO.cachedInputTokenPointRate
+        }
+
+        if (updateChatModelDTO.credentialId != null) {
+            existing.credentialId = updateChatModelDTO.credentialId
+        }
+
+        if (updateChatModelDTO.active != null) {
+            existing.active = updateChatModelDTO.active
+        }
+
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            getRepository().save(existing)
+        }
     }
 }

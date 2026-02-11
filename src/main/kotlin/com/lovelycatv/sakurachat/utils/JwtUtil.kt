@@ -5,46 +5,44 @@
  * that can be found in the LICENSE file.
  *
  */
-package com.lovelycatv.sakurachat.utils;
+package com.lovelycatv.sakurachat.utils
 
-import com.lovelycatv.sakurachat.entity.UserEntity;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
+import com.lovelycatv.sakurachat.entity.UserEntity
+import io.jsonwebtoken.Claims
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.SignatureAlgorithm
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.GrantedAuthority
+import java.util.*
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.Objects;
-
-public final class JwtUtil {
-    private JwtUtil() {
- 
-    }
-
-    public static String buildJwtToken(String signKey, Collection<? extends GrantedAuthority> authorities, Authentication authentication, long expiration) {
-        StringBuilder authorityStr = new StringBuilder();
-        for (GrantedAuthority authority : authorities) {
-            authorityStr.append(authority).append(",");
+object JwtUtil {
+    fun buildJwtToken(
+        signKey: String?,
+        authorities: MutableCollection<out GrantedAuthority?>,
+        authentication: Authentication,
+        expiration: Long
+    ): String? {
+        val authorityStr = StringBuilder()
+        for (authority in authorities) {
+            authorityStr.append(authority).append(",")
         }
- 
+
         return Jwts.builder()
-                .claim("authorities", authorityStr)
-                .claim(
-                    "userId",
-                    Objects.requireNonNull(((UserEntity) authentication.getPrincipal()).getId()).toString()
-                )
-                .setSubject(authentication.getName())
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(SignatureAlgorithm.HS512, signKey)
-                .compact();
+            .claim("authorities", authorityStr)
+            .claim(
+                "userId",
+                (authentication.principal as UserEntity).id.toString()
+            )
+            .setSubject(authentication.name)
+            .setExpiration(Date(System.currentTimeMillis() + expiration))
+            .signWith(SignatureAlgorithm.HS512, signKey)
+            .compact()
     }
 
-    public static Claims parseToken(String signKey, String token) {
+    fun parseToken(signKey: String?, token: String): Claims? {
         return Jwts.parser()
-                .setSigningKey(signKey)
-                .parseClaimsJws(token.replace("Bearer ", ""))
-                .getBody();
+            .setSigningKey(signKey)
+            .parseClaimsJws(token.replace("Bearer ", ""))
+            .getBody()
     }
 }

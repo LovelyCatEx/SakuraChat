@@ -5,76 +5,98 @@
  * that can be found in the LICENSE file.
  *
  */
-package com.lovelycatv.sakurachat.filter;
+package com.lovelycatv.sakurachat.filter
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lovelycatv.sakurachat.request.ApiResponse;
-import io.jsonwebtoken.*;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.springframework.web.filter.GenericFilterBean;
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.lovelycatv.sakurachat.request.ApiResponse
+import io.jsonwebtoken.*
+import jakarta.servlet.FilterChain
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.authority.AuthorityUtils
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.web.util.matcher.RequestMatcher
+import org.springframework.web.filter.GenericFilterBean
 
-import java.io.IOException;
-import java.util.List;
+class AuthorizationFilter(
+    private val permitAllMatchers: Iterable<RequestMatcher>
+) : GenericFilterBean() {
 
-public class AuthorizationFilter extends GenericFilterBean {
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-
-    private final Iterable<RequestMatcher> permitAllMatchers;
- 
-    public AuthorizationFilter(Iterable<RequestMatcher> permitAllMatchers) {
-        this.permitAllMatchers = permitAllMatchers;
+    private companion object {
+        val objectMapper = ObjectMapper()
+        const val JWT_SIGN_KEY = "jwtSignKey"
+        const val BEARER_PREFIX = "Bearer"
     }
- 
-    @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        HttpServletRequest request = (HttpServletRequest) servletRequest;
-        HttpServletResponse response = (HttpServletResponse) servletResponse;
- 
-        for (RequestMatcher matcher : permitAllMatchers) {
-            if (matcher.matches(request)) {
-                filterChain.doFilter(request, response);
-                return;
-            }
+
+    override fun doFilter(
+        servletRequest: jakarta.servlet.ServletRequest,
+        servletResponse: jakarta.servlet.ServletResponse,
+        filterChain: FilterChain
+    ) {
+        val request = servletRequest as HttpServletRequest
+        val response = servletResponse as HttpServletResponse
+
+        if (isPermitAllRequest(request)) {
+            filterChain.doFilter(request, response)
+            return
         }
- 
-        String tokenStr = request.getHeader("Authorization");
-        try {
-            if (tokenStr == null) {
-                throw new IllegalStateException("Token invalid");
+
+        val tokenResult = validateToken(request)
+        tokenResult.fold(
+            onSuccess = { authToken ->
+                SecurityContextHolder.getContext().authentication = authToken
+                filterChain.doFilter(request, response)
+            },
+            onFailure = { error ->
+                sendErrorResponse(response, error)
             }
-            Claims claims = Jwts.parser()
-                    .setSigningKey("jwtSignKey")
-                    .parseClaimsJws(tokenStr.replace("Bearer",""))
-                    .getBody();
-            String username = claims.getSubject();
-            List<? extends GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList((String) claims.get("authorities"));
-            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, null, authorities);
-            SecurityContextHolder.getContext().setAuthentication(token);
-            filterChain.doFilter(request, servletResponse);
-        } catch (SignatureException | ExpiredJwtException | MalformedJwtException | IllegalStateException e) {
-            // JWT signature does not match locally computed signature. JWT validity cannot be asserted and should not be trusted.
- 
-            // JWT strings must contain exactly 2 period characters. Found: 0
- 
-            // e.printStackTrace();
-            servletResponse.setContentType("application/json;charset=utf-8");
-            if (e instanceof ExpiredJwtException) {
-                servletResponse.getWriter().write(objectMapper.writeValueAsString(ApiResponse.unauthorized("Token expired", null)));
-            } else {
-                servletResponse.getWriter().write(objectMapper.writeValueAsString(ApiResponse.unauthorized(e.getMessage(), null)));
-            }
-            servletResponse.getWriter().flush();
-            servletResponse.getWriter().close();
+        )
+    }
+
+    private fun isPermitAllRequest(request: HttpServletRequest): Boolean {
+        return permitAllMatchers.any { it.matches(request) }
+    }
+
+    private fun validateToken(request: HttpServletRequest): Result<UsernamePasswordAuthenticationToken> = runCatching {
+        val tokenStr = request.getHeader("Authorization")
+            ?: throw IllegalStateException("Authorization header is missing")
+
+        val cleanToken = tokenStr.replace(BEARER_PREFIX, "").trim()
+
+        val claims = Jwts.parser()
+            .setSigningKey(JWT_SIGN_KEY)
+            .parseClaimsJws(cleanToken)
+            .body
+
+        val username = claims.subject
+        val authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(
+            claims.get("authorities", String::class.java) ?: ""
+        )
+
+        UsernamePasswordAuthenticationToken(username, null, authorities)
+    }
+
+    private fun sendErrorResponse(response: HttpServletResponse, error: Throwable) {
+        response.contentType = "application/json;charset=utf-8"
+
+        val errorMessage = when (error) {
+            is ExpiredJwtException -> "Token expired"
+            is SignatureException -> "Token signature verification failed"
+            is MalformedJwtException -> "Token malformed"
+            is IllegalStateException -> error.message ?: "Token invalid"
+            else -> error.message ?: "Authentication failed"
         }
+
+        val statusCode = when (error) {
+            is ExpiredJwtException -> HttpServletResponse.SC_UNAUTHORIZED
+            else -> HttpServletResponse.SC_UNAUTHORIZED
+        }
+
+        response.status = statusCode
+
+        val apiResponse = ApiResponse.unauthorized<Any?>(errorMessage, null)
+        objectMapper.writeValue(response.writer, apiResponse)
+        response.writer.flush()
     }
 }

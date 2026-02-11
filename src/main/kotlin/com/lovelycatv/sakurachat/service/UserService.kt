@@ -7,6 +7,7 @@
  */
 package com.lovelycatv.sakurachat.service
 
+import com.lovelycatv.sakurachat.controller.manager.dto.UpdateUserDTO
 import com.lovelycatv.sakurachat.entity.UserEntity
 import com.lovelycatv.sakurachat.repository.UserRepository
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
@@ -35,4 +36,6 @@ interface UserService : UserDetailsService, BaseService<UserRepository, UserEnti
     suspend fun consumePoints(userId: Long, points: Long): UserEntity
 
     suspend fun getUserProfileById(userId: Long): UserEntity
+
+    suspend fun updateUser(updateUserDTO: UpdateUserDTO)
 }

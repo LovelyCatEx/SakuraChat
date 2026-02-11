@@ -122,7 +122,6 @@ class LarkMessageDispatcher(
         val agent = agentService.toAggregatedAgentEntity(relatedAgent)
 
         logger.info("Agent ${agent.agent.name} found for handling this message: ${event.event.message.toJSONString()}")
-        logger.info("Agent: ${agent.copy(agent = agent.agent.copy(prompt = "<...>")).toJSONString()}")
 
         val messageChannel = when (messageType) {
             LarkChatMessageType.P2P -> {

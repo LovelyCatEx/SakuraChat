@@ -20,5 +20,5 @@ interface AgentThirdPartyAccountRelationRepository : JpaRepository<AgentThirdPar
     fun findByAgentId(@Param("agentId") agentId: Long): List<AgentThirdPartyAccountRelationEntity>
 
     @Query("SELECT r FROM AgentThirdPartyAccountRelationEntity r WHERE r.primaryKey.thirdPartyAccountId = :thirdPartyAccountId")
-    fun findByThirdPartyAccountId(@Param("thirdPartyAccountId") thirdPartyAccountId: Long): List<AgentThirdPartyAccountRelationEntity>
+    fun findByThirdPartyAccountId(@Param("thirdPartyAccountId") thirdPartyAccountId: Long?): List<AgentThirdPartyAccountRelationEntity>
 }

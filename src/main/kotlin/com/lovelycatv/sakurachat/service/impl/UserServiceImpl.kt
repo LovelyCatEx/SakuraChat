@@ -7,6 +7,7 @@
  */
 package com.lovelycatv.sakurachat.service.impl
 
+import com.lovelycatv.sakurachat.controller.manager.dto.UpdateUserDTO
 import com.lovelycatv.sakurachat.entity.UserEntity
 import com.lovelycatv.sakurachat.exception.BusinessException
 import com.lovelycatv.sakurachat.repository.UserRepository
@@ -130,6 +131,26 @@ class UserServiceImpl : UserService {
         return withContext(Dispatchers.IO) {
             getRepository().findById(userId)
         }.getOrNull() ?: throw BusinessException("User $userId not found")
+    }
+
+    override suspend fun updateUser(updateUserDTO: UpdateUserDTO) {
+        val existing = this.getByIdOrThrow(updateUserDTO.id)
+
+        if (updateUserDTO.nickname != null) {
+            existing.nickname = updateUserDTO.nickname
+        }
+
+        if (updateUserDTO.email != null) {
+            existing.email = updateUserDTO.email
+        }
+
+        if (updateUserDTO.points != null) {
+            existing.points = updateUserDTO.points
+        }
+
+        withContext(Dispatchers.IO) {
+            getRepository().save(existing)
+        }
     }
 
     override fun loadUserByUsername(username: String?): UserDetails {

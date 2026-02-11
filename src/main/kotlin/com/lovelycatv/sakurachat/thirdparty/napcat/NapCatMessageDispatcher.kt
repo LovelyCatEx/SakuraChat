@@ -228,7 +228,6 @@ class NapCatMessageDispatcher(
         val agent = agentService.toAggregatedAgentEntity(relatedAgent)
 
         logger.info("Agent ${agent.agent.name} found for handling this message: ${event.message}")
-        logger.info("Agent: ${agent.copy(agent = agent.agent.copy(prompt = "<...>")).toJSONString()}")
 
         val messageChannel = when (event) {
             is PrivateMessageEvent -> {
