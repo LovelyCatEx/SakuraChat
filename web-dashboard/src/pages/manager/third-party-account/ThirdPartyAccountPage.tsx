@@ -51,7 +51,7 @@ export function ThirdPartyAccountPage() {
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         refreshData();
-    }, []);
+    }, [currentPage, currentPageSize]);
 
     const handleAddOrUpdateEdit = (values: ThirdPartyAccount) => {
         if (editingItem) {
@@ -246,7 +246,6 @@ export function ThirdPartyAccountPage() {
                         onChange: (page: number, pageSize: number) => {
                             setCurrentPage(page);
                             setCurrentPageSize(pageSize);
-                            refreshData();
                         }
                     }}
                     loading={refreshing}

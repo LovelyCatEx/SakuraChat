@@ -38,7 +38,7 @@ export function ProviderPage() {
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         refreshData();
-    }, []);
+    }, [currentPage, currentPageSize]);
 
     const handleAddOrUpdateEdit = (values: Provider) => {
         if (editingItem) {
@@ -211,7 +211,6 @@ export function ProviderPage() {
                         onChange: (page: number, pageSize: number) => {
                             setCurrentPage(page);
                             setCurrentPageSize(pageSize);
-                            refreshData();
                         }
                     }}
                     loading={refreshing}

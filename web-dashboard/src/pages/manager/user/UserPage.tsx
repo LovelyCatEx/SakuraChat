@@ -21,8 +21,8 @@ export function UserPage() {
         setRefreshing(true);
 
         getUserList({
-            page: 1,
-            pageSize: 20,
+            page: currentPage,
+            pageSize: currentPageSize,
         }).then((res) => {
             if (res.data) {
                 setUsers(res.data.records);
@@ -36,7 +36,7 @@ export function UserPage() {
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         refreshData();
-    }, []);
+    }, [currentPage, currentPageSize]);
 
     const handleAddOrUpdateEdit = (values: User) => {
         if (editingItem) {
@@ -203,7 +203,6 @@ export function UserPage() {
                         onChange: (page: number, pageSize: number) => {
                             setCurrentPage(page);
                             setCurrentPageSize(pageSize);
-                            refreshData();
                         }
                     }}
                     loading={refreshing}

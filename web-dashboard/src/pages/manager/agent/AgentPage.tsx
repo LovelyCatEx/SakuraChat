@@ -105,7 +105,7 @@ export function AgentPage() {
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         refreshData();
-    }, []);
+    }, [currentPage, currentPageSize]);
 
     const handleAddOrUpdateEdit = (values: Agent) => {
         if (editingItem) {
@@ -301,7 +301,6 @@ export function AgentPage() {
                         onChange: (page: number, pageSize: number) => {
                             setCurrentPage(page);
                             setCurrentPageSize(pageSize);
-                            refreshData();
                         }
                     }}
                     loading={refreshing}

@@ -83,7 +83,7 @@ export function CredentialPage() {
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         refreshData();
-    }, []);
+    }, [currentPage, currentPageSize]);
 
     const handleAddOrUpdateEdit = (values: Credential) => {
         if (editingItem) {
@@ -258,7 +258,6 @@ export function CredentialPage() {
                         onChange: (page: number, pageSize: number) => {
                             setCurrentPage(page);
                             setCurrentPageSize(pageSize);
-                            refreshData();
                         }
                     }}
                     loading={refreshing}

@@ -25,6 +25,9 @@ import {EntitySelector} from "../../../components/common/EntitySelector.tsx";
 import {getProviderById, searchProviders} from "../../../api/provider.api.ts";
 import {getCredentialById, searchCredentials} from "../../../api/credential.api.ts";
 import {getUrlHostname} from "../../../utils/url.utils.ts";
+import type {Provider} from "../../../types/provider.types.ts";
+import type {Credential} from "../../../types/credential.types.ts";
+import type {ApiResponse} from "../../../api/sakurachat-request.ts";
 
 const { TextArea } = Input;
 
@@ -98,6 +101,10 @@ export function ChatModelPage() {
     };
 
     const refreshData = () => {
+        if (refreshing) {
+            return;
+        }
+
         setRefreshing(true);
 
         Promise.all([
@@ -128,7 +135,7 @@ export function ChatModelPage() {
                     credentialPromises.length > 0 ? Promise.all(credentialPromises) : Promise.resolve([])
                 ]).then(([providerResults, credentialResults]) => {
                     const providerMap: Record<string, {name: string, chatCompletionsUrl: string}> = {};
-                    providerResults.forEach((res: any) => {
+                    providerResults.forEach((res: ApiResponse<Provider>) => {
                         if (res.data) {
                             providerMap[res.data.id] = {name: res.data.name, chatCompletionsUrl: res.data.chatCompletionsUrl};
                         }
@@ -136,7 +143,7 @@ export function ChatModelPage() {
                     setProviders(providerMap);
 
                     const credentialMap: Record<string, {data: string, type: number}> = {};
-                    credentialResults.forEach((res: any) => {
+                    credentialResults.forEach((res: ApiResponse<Credential>) => {
                         if (res.data) {
                             credentialMap[res.data.id] = {data: res.data.data, type: res.data.type};
                         }
@@ -152,7 +159,7 @@ export function ChatModelPage() {
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         refreshData();
-    }, []);
+    }, [currentPage, currentPageSize]);
 
     const handleAddOrUpdateEdit = (values: ChatModel) => {
         if (editingItem) {
@@ -392,7 +399,6 @@ export function ChatModelPage() {
                         onChange: (page: number, pageSize: number) => {
                             setCurrentPage(page);
                             setCurrentPageSize(pageSize);
-                            refreshData();
                         }
                     }}
                     loading={refreshing}
