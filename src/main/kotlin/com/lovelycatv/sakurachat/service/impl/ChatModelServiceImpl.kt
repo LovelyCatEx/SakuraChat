@@ -128,9 +128,9 @@ class ChatModelServiceImpl(
         }
     }
 
-    override suspend fun search(keyword: String): PaginatedResponseData<ChatModelEntity> {
+    override suspend fun search(keyword: String, page: Int, pageSize: Int): PaginatedResponseData<ChatModelEntity> {
         if (keyword.isBlank()) {
-            return this.listByPage(1, 20).toPaginatedResponseData()
+            return this.listByPage(page, pageSize).toPaginatedResponseData()
         }
 
         return withContext(Dispatchers.IO) {
@@ -138,7 +138,7 @@ class ChatModelServiceImpl(
                 "%$keyword%",
                 "%$keyword%",
                 "%$keyword%",
-                Pageable.ofSize(20).withPage(0)
+                Pageable.ofSize(5).withPage(0)
             )
         }.toPaginatedResponseData()
     }

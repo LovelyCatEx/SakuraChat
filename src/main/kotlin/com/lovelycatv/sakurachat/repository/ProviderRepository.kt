@@ -9,9 +9,16 @@
 package com.lovelycatv.sakurachat.repository
 
 import com.lovelycatv.sakurachat.entity.ProviderEntity
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
 interface ProviderRepository : JpaRepository<ProviderEntity, Long> {
+    fun findAllByNameContainingIgnoreCaseOrChatCompletionsUrlContainingIgnoreCase(
+        name: String,
+        chatCompletionsUrl: String,
+        pageable: Pageable
+    ): Page<ProviderEntity>
 }

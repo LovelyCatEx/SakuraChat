@@ -12,9 +12,12 @@ import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateCredentialD
 import com.lovelycatv.sakurachat.controller.manager.dto.UpdateCredentialDTO
 import com.lovelycatv.sakurachat.entity.CredentialEntity
 import com.lovelycatv.sakurachat.repository.CredentialRepository
+import com.lovelycatv.sakurachat.request.PaginatedResponseData
 
 interface CredentialService : BaseService<CredentialRepository, CredentialEntity, Long> {
     suspend fun updateCredential(updateCredentialDTO: UpdateCredentialDTO)
 
     suspend fun createCredential(managerCreateCredentialDTO: ManagerCreateCredentialDTO)
+
+    suspend fun search(keyword: String, page: Int, pageSize: Int): PaginatedResponseData<CredentialEntity>
 }

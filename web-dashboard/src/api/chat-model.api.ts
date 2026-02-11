@@ -1,27 +1,31 @@
-import {doGet, doPost, type PageQuery, type PaginatedResponseData} from "./sakurachat-request.ts";
+import {doGet, doPost, type PageQuery, type PaginatedResponseData, type ApiResponse} from "./sakurachat-request.ts";
 import type {ChatModel} from "../types/chat-model.types.ts";
 
-export function getChatModelList(query: PageQuery) {
+export function getChatModelList(query: PageQuery): Promise<ApiResponse<PaginatedResponseData<ChatModel>>> {
     return doGet<PaginatedResponseData<ChatModel>>('/api/manager/chat-model/list', {...query});
 }
 
-export function searchChatModels(keyword: string) {
-    return doGet<PaginatedResponseData<ChatModel>>('/api/manager/chat-model/search', { keyword });
+export function searchChatModels(
+    keyword: string,
+    page: number = 1,
+    pageSize: number = 5
+): Promise<ApiResponse<PaginatedResponseData<ChatModel>>> {
+    return doGet<PaginatedResponseData<ChatModel>>('/api/manager/chat-model/search', { keyword, page, pageSize });
 }
 
-export function getChatModelById(id: string) {
+export function getChatModelById(id: string): Promise<ApiResponse<ChatModel>> {
     return doGet<ChatModel>('/api/manager/chat-model/getById', { id });
 }
 
-export function deleteChatModel(id: string) {
+export function deleteChatModel(id: string): Promise<ApiResponse<unknown>> {
     return doPost<unknown>('/api/manager/chat-model/delete', { id: id });
 }
 
-export function createChatModel(dto: CreateChatModelDTO) {
+export function createChatModel(dto: CreateChatModelDTO): Promise<ApiResponse<unknown>> {
     return doPost<unknown>('/api/manager/chat-model/create', {...dto});
 }
 
-export function updateChatModel(dto: UpdateChatModelDTO) {
+export function updateChatModel(dto: UpdateChatModelDTO): Promise<ApiResponse<unknown>> {
     return doPost<unknown>('/api/manager/chat-model/update', {...dto});
 }
 

@@ -14,5 +14,5 @@ interface ChatModelService : BaseService<ChatModelRepository, ChatModelEntity, L
 
     suspend fun createChatModel(managerCreateChatModelDTO: ManagerCreateChatModelDTO)
 
-    suspend fun search(keyword: String): PaginatedResponseData<ChatModelEntity>
+    suspend fun search(keyword: String, page: Int, pageSize: Int): PaginatedResponseData<ChatModelEntity>
 }

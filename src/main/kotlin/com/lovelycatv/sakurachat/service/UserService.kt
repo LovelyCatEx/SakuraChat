@@ -11,6 +11,7 @@ import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateUserDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.UpdateUserDTO
 import com.lovelycatv.sakurachat.entity.UserEntity
 import com.lovelycatv.sakurachat.repository.UserRepository
+import com.lovelycatv.sakurachat.request.PaginatedResponseData
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.transaction.annotation.Propagation
@@ -24,13 +25,6 @@ interface UserService : UserDetailsService, BaseService<UserRepository, UserEnti
         accountId: String
     ): UserEntity?
 
-    /**
-     * Check whether the user's points is positive.
-     *
-     * @param userId UserId
-     * @param minimum Points at least
-     * @return The user's points > 0
-     */
     suspend fun hasPoints(userId: Long, minimum: Long): Boolean
 
     @Transactional(propagation = Propagation.REQUIRED)
@@ -41,4 +35,6 @@ interface UserService : UserDetailsService, BaseService<UserRepository, UserEnti
     suspend fun updateUser(updateUserDTO: UpdateUserDTO)
 
     suspend fun createUser(managerCreateUserDTO: ManagerCreateUserDTO)
+
+    suspend fun search(keyword: String, page: Int, pageSize: Int): PaginatedResponseData<UserEntity>
 }

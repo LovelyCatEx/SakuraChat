@@ -36,13 +36,13 @@ class ManagerProviderController(
     }
 
     @GetMapping("/search")
-    suspend fun searchProviders(@RequestParam("keyword") keyword: String): ApiResponse<*> {
+    suspend fun searchProviders(
+        @RequestParam("keyword") keyword: String,
+        @RequestParam("page") page: Int = 1,
+        @RequestParam("pageSize") pageSize: Int = 5
+    ): ApiResponse<*> {
         return ApiResponse.success(
-            providerService.getRepository().findAll().filter {
-                keyword.isBlank() ||
-                it.name.contains(keyword, ignoreCase = true) ||
-                it.chatCompletionsUrl.contains(keyword, ignoreCase = true)
-            }
+            providerService.search(keyword, page, pageSize)
         )
     }
 

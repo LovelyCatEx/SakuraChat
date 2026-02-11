@@ -74,30 +74,30 @@ export function ChatModelPage() {
     const [providers, setProviders] = useState<Record<string, {name: string, chatCompletionsUrl: string}>>({});
     const [credentials, setCredentials] = useState<Record<string, {data: string, type: number}>>({});
 
-    const fetchProviders = async (keyword: string) => {
-        const res = await searchProviders(keyword);
+    const fetchProviders = async (keyword: string, page: number = 1, pageSize: number = 5) => {
+        const res = await searchProviders(keyword, page, pageSize);
         if (res.data) {
             const providerMap: Record<string, {name: string, chatCompletionsUrl: string}> = {};
-            res.data.forEach(p => {
+            res.data.records.forEach(p => {
                 providerMap[p.id] = {name: p.name, chatCompletionsUrl: p.chatCompletionsUrl};
             });
             setProviders(providerMap);
             return res.data;
         }
-        return [];
+        return {page: 1, pageSize: 5, total: 0, totalPages: 0, records: []};
     };
 
-    const fetchCredentials = async (keyword: string) => {
-        const res = await searchCredentials(keyword);
+    const fetchCredentials = async (keyword: string, page: number = 1, pageSize: number = 5) => {
+        const res = await searchCredentials(keyword, page, pageSize);
         if (res.data) {
             const credentialMap: Record<string, {data: string, type: number}> = {};
-            res.data.forEach(c => {
+            res.data.records.forEach(c => {
                 credentialMap[c.id] = {data: c.data, type: c.type};
             });
             setCredentials(credentialMap);
             return res.data;
         }
-        return [];
+        return {page: 1, pageSize: 5, total: 0, totalPages: 0, records: []};
     };
 
     const refreshData = () => {
@@ -113,7 +113,7 @@ export function ChatModelPage() {
             if (modelRes.data) {
                 setModels(modelRes.data.records);
                 setTotal(modelRes.data.total);
-                
+
                 const providerIds = new Set<string>();
                 const credentialIds = new Set<string>();
                 modelRes.data.records.forEach(m => {

@@ -36,12 +36,13 @@ class ManagerCredentialController(
     }
 
     @GetMapping("/search")
-    suspend fun searchCredentials(@RequestParam("keyword") keyword: String): ApiResponse<*> {
+    suspend fun searchCredentials(
+        @RequestParam("keyword") keyword: String,
+        @RequestParam("page") page: Int = 1,
+        @RequestParam("pageSize") pageSize: Int = 5
+    ): ApiResponse<*> {
         return ApiResponse.success(
-            credentialService.getRepository().findAll().filter {
-                keyword.isBlank() ||
-                it.data.contains(keyword, ignoreCase = true)
-            }
+            credentialService.search(keyword, page, pageSize)
         )
     }
 

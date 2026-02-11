@@ -36,8 +36,12 @@ class ManagerChatModelController(
     }
 
     @GetMapping("/search")
-    suspend fun searchChatModels(@RequestParam("keyword") keyword: String): ApiResponse<*> {
-        return ApiResponse.success(chatModelService.search(keyword))
+    suspend fun searchChatModels(
+        @RequestParam("keyword") keyword: String,
+        @RequestParam("page") page: Int = 1,
+        @RequestParam("pageSize") pageSize: Int = 5
+    ): ApiResponse<*> {
+        return ApiResponse.success(chatModelService.search(keyword, page, pageSize))
     }
 
     @GetMapping("/getById")

@@ -13,14 +13,17 @@ import com.lovelycatv.sakurachat.entity.UserEntity
 import com.lovelycatv.sakurachat.exception.BusinessException
 import com.lovelycatv.sakurachat.repository.UserRepository
 import com.lovelycatv.sakurachat.repository.UserThirdPartyAccountRelationRepository
+import com.lovelycatv.sakurachat.request.PaginatedResponseData
 import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
 import com.lovelycatv.sakurachat.service.UserService
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import com.lovelycatv.sakurachat.utils.SnowIdGenerator
+import com.lovelycatv.sakurachat.utils.toPaginatedResponseData
 import com.lovelycatv.vertex.log.logger
 import jakarta.annotation.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.springframework.data.domain.Pageable
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -199,5 +202,20 @@ class UserServiceImpl : UserService {
 
     override fun getRepository(): UserRepository {
         return this.userRepository
+    }
+
+    override suspend fun search(keyword: String, page: Int, pageSize: Int): PaginatedResponseData<UserEntity> {
+        if (keyword.isBlank()) {
+            return this.listByPage(page, pageSize).toPaginatedResponseData()
+        }
+
+        return withContext(Dispatchers.IO) {
+            getRepository().findAllByUsernameContainingIgnoreCaseOrNicknameContainingIgnoreCaseOrEmailContainingIgnoreCase(
+                keyword,
+                keyword,
+                keyword,
+                Pageable.ofSize(pageSize).withPage(page - 1)
+            )
+        }.toPaginatedResponseData()
     }
 }

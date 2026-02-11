@@ -24,30 +24,30 @@ export function AgentPage() {
     const [users, setUsers] = useState<Record<string, {username: string, nickname: string}>>({});
     const [chatModels, setChatModels] = useState<Record<string, {name: string, qualifiedName: string}>>({});
 
-    const fetchUsers = async (keyword: string) => {
-        const res = await searchUsers(keyword);
+    const fetchUsers = async (keyword: string, page: number = 1, pageSize: number = 5) => {
+        const res = await searchUsers(keyword, page, pageSize);
         if (res.data) {
             const userMap: Record<string, {username: string, nickname: string}> = {};
-            res.data.forEach(u => {
+            res.data.records.forEach(u => {
                 userMap[u.id] = {username: u.username, nickname: u.nickname};
             });
             setUsers(userMap);
             return res.data;
         }
-        return [];
+        return {page: 1, pageSize: 5, total: 0, totalPages: 0, records: []};
     };
 
-    const fetchChatModels = async (keyword: string) => {
-        const res = await searchChatModels(keyword);
+    const fetchChatModels = async (keyword: string, page: number = 1, pageSize: number = 5) => {
+        const res = await searchChatModels(keyword, page, pageSize);
         if (res.data) {
             const modelMap: Record<string, {name: string, qualifiedName: string}> = {};
             res.data.records.forEach(m => {
                 modelMap[m.id] = {name: m.name, qualifiedName: m.qualifiedName};
             });
             setChatModels(modelMap);
-            return res.data.records;
+            return res.data;
         }
-        return [];
+        return {page: 1, pageSize: 5, total: 0, totalPages: 0, records: []};
     };
 
     const refreshData = () => {

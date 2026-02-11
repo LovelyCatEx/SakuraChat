@@ -1,6 +1,7 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {AutoComplete, Button, Input, Modal, Space, Table, Tag} from 'antd';
+import {AutoComplete, Button, Input, Modal, Pagination, Space, Table, Tag} from 'antd';
 import {SearchOutlined} from '@ant-design/icons';
+import type {PaginatedResponseData, ApiResponse} from '../../api/sakurachat-request';
 
 interface Entity {
     id: string;
@@ -10,7 +11,7 @@ interface EntitySelectorProps<T extends Entity> {
     value?: string;
     onChange?: (value: string) => void;
     placeholder?: string;
-    fetchOptions: (keyword: string) => Promise<T[]>;
+    fetchOptions: (keyword: string, page: number, pageSize: number) => Promise<PaginatedResponseData<T> | ApiResponse<PaginatedResponseData<T>>>;
     fetchById?: (id: string) => Promise<T | null>;
     renderLabel: (item: T) => string;
     renderExtra?: (item: T) => React.ReactNode;
@@ -33,9 +34,18 @@ export function EntitySelector<T extends Entity>({
     const [modalData, setModalData] = useState<T[]>([]);
     const [modalSearchKeyword, setModalSearchKeyword] = useState('');
     const [modalLoading, setModalLoading] = useState(false);
+    const [modalPage, setModalPage] = useState(1);
+    const [modalTotal, setModalTotal] = useState(0);
     const [focused, setFocused] = useState(false);
     const [displayLabel, setDisplayLabel] = useState<string>('');
     const initializedRef = useRef(false);
+
+    const unwrapResponse = <T,>(response: PaginatedResponseData<T> | ApiResponse<PaginatedResponseData<T>>): PaginatedResponseData<T> => {
+        if ('data' in response) {
+            return response.data || {page: 1, pageSize: 5, total: 0, totalPages: 0, records: []};
+        }
+        return response;
+    };
 
     const updateDisplayLabel = async (id: string) => {
         if (id && fetchById) {
@@ -93,8 +103,8 @@ export function EntitySelector<T extends Entity>({
     const handleSearch = async (keyword: string) => {
         setSearching(true);
         try {
-            const results = await fetchOptions(keyword);
-            setOptions(results.map(item => ({
+            const results = unwrapResponse(await fetchOptions(keyword, 1, 5));
+            setOptions(results.records.map(item => ({
                 value: item.id,
                 label: renderLabel(item)
             })));
@@ -109,12 +119,15 @@ export function EntitySelector<T extends Entity>({
     const handleOpenModal = async () => {
         setIsModalVisible(true);
         setModalLoading(true);
+        setModalPage(1);
         try {
-            const results = await fetchOptions('');
-            setModalData(results);
+            const results = unwrapResponse(await fetchOptions('', 1, 5));
+            setModalData(results.records);
+            setModalTotal(results.total);
         } catch (error) {
             console.error('Fetch data failed:', error);
             setModalData([]);
+            setModalTotal(0);
         } finally {
             setModalLoading(false);
         }
@@ -123,10 +136,14 @@ export function EntitySelector<T extends Entity>({
     const handleModalSearch = async () => {
         setModalLoading(true);
         try {
-            const results = await fetchOptions(modalSearchKeyword);
-            setModalData(results);
+            const results = unwrapResponse(await fetchOptions(modalSearchKeyword, 1, 5));
+            setModalData(results.records);
+            setModalTotal(results.total);
+            setModalPage(1);
         } catch (error) {
             console.error('Search failed:', error);
+            setModalData([]);
+            setModalTotal(0);
         } finally {
             setModalLoading(false);
         }
@@ -241,12 +258,37 @@ export function EntitySelector<T extends Entity>({
                     dataSource={modalData}
                     rowKey="id"
                     loading={modalLoading}
-                    pagination={{
-                        pageSize: 10,
-                        showSizeChanger: false
-                    }}
+                    pagination={false}
                     size="small"
                 />
+                <div className="mt-4 flex justify-end">
+                    <Pagination
+                        current={modalPage}
+                        pageSize={5}
+                        total={modalTotal}
+                        onChange={(page) => {
+                            setModalLoading(true);
+                            setModalPage(page);
+                            fetchOptions(modalSearchKeyword, page, 5)
+                                .then(results => {
+                                    const unwrapped = unwrapResponse(results);
+                                    setModalData(unwrapped.records);
+                                    setModalTotal(unwrapped.total);
+                                })
+                                .catch(error => {
+                                    console.error('Pagination failed:', error);
+                                    setModalData([]);
+                                    setModalTotal(0);
+                                })
+                                .finally(() => {
+                                    setModalLoading(false);
+                                });
+                        }}
+                        showSizeChanger={false}
+                        showQuickJumper={false}
+                        showTotal={(total) => `共 ${total} 条`}
+                    />
+                </div>
             </Modal>
         </>
     );

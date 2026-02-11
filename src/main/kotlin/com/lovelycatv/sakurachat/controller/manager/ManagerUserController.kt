@@ -36,14 +36,13 @@ class ManagerUserController(
     }
 
     @GetMapping("/search")
-    suspend fun searchUsers(@RequestParam("keyword") keyword: String): ApiResponse<*> {
+    suspend fun searchUsers(
+        @RequestParam("keyword") keyword: String,
+        @RequestParam("page") page: Int = 1,
+        @RequestParam("pageSize") pageSize: Int = 5
+    ): ApiResponse<*> {
         return ApiResponse.success(
-            userService.getRepository().findAll().filter {
-                keyword.isBlank() ||
-                it.username.contains(keyword, ignoreCase = true) ||
-                it.nickname.contains(keyword, ignoreCase = true) ||
-                it.email.contains(keyword, ignoreCase = true)
-            }
+            userService.search(keyword, page, pageSize)
         )
     }
 
