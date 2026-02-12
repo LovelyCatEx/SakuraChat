@@ -64,16 +64,28 @@ class SystemSettingsServiceImpl(
     }
 
     override suspend fun setSettings(key: String, value: String?) {
+        val existingSettings = withContext(Dispatchers.IO) {
+            getRepository().findByKey(key)
+        }.getOrNull(0)
+
         withContext(Dispatchers.IO) {
-            getRepository().save(
-                SystemSettingsEntity(
-                    id = snowIdGenerator.nextId(),
-                    key = key,
-                    value = value
+            if (existingSettings != null) {
+                getRepository().save(
+                    existingSettings.apply {
+                        this.value = value
+                    }
                 )
-            ).also {
-                logger.info("System settings [$key] successfully set to [$value]")
+            } else {
+                getRepository().save(
+                    SystemSettingsEntity(
+                        id = snowIdGenerator.nextId(),
+                        key = key,
+                        value = value
+                    )
+                )
             }
+        }.also {
+            logger.info("System settings [$key] successfully set to [$value]")
         }
     }
 }
