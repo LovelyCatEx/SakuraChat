@@ -112,6 +112,8 @@ class SystemSettingsServiceImpl(
         setSettings(SystemSettings.Mail.SMTP.PASSWORD, settings.mail.smtp.password)
         setSettings(SystemSettings.Mail.SMTP.SSL, settings.mail.smtp.ssl.toString())
         setSettings(SystemSettings.Mail.SMTP.FROM_EMAIL, settings.mail.smtp.fromEmail)
+
+        this.refreshSettings()
     }
 
     private var sakuraChatSystemSettings: SakuraChatSystemSettings? = null

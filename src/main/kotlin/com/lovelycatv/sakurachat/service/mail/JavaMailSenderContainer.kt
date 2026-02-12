@@ -27,15 +27,13 @@ class JavaMailSenderContainer(
     private val logger = logger()
 
     private var mailSender: JavaMailSender? = null
-    private var systemSettings: SakuraChatSystemSettings? = null
     private var needRefresh: Boolean = true
     private val mutex = ReentrantLock()
 
     fun getInstance(): JavaMailSender {
         return mutex.withLock {
             if (this.mailSender == null || needRefresh) {
-                val settings = systemSettingsService.getAllSettings()
-                this.systemSettings = settings
+                val settings = systemSettingsService.getAllSettingsLazy()
                 logger.info("MailSenderContainer is refreshing, settings: ${settings.mail}")
                 this.mailSender = createMailSender(settings)
                 this.needRefresh = false
@@ -73,7 +71,7 @@ class JavaMailSenderContainer(
     }
 
     fun getSystemSettings(): SakuraChatSystemSettings {
-        return this.systemSettings
+        return this.systemSettingsService.getAllSettingsLazy()
             ?: throw IllegalStateException("container has not been initialized, please call getInstance() first")
     }
 }
