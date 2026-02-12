@@ -13,7 +13,7 @@ import com.lovelycatv.sakurachat.types.PointsChangesReason
 
 data class UserPointsConsumeRequest(
     val reason: PointsChangesReason,
-    val delta: Long,
+    val consumedPoints: Long,
     val associations: List<Association> = listOf()
 ) {
     data class Association(

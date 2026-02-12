@@ -48,7 +48,7 @@ export function MainContainer() {
 
   const menuItems: (MenuItem & ItemType)[] = useMemo(() => [
     { key: '/manager/dashboard', icon: <DashboardOutlined />, label: '仪表盘' },
-    { key: '/points-logs', icon: <PayCircleOutlined />, label: '积分消耗记录' },
+    { key: '/points-logs', icon: <PayCircleOutlined />, label: '积分变更记录' },
     { key: '/manager/agents', icon: <RobotOutlined />, label: '智能体' },
     { key: '/manager/providers', icon: <CloudServerOutlined />, label: '模型提供商' },
     { key: '/manager/models', icon: <DatabaseOutlined />, label: '语言模型' },

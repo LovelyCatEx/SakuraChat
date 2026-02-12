@@ -18,8 +18,6 @@ import com.lovelycatv.sakurachat.utils.SnowIdGenerator
 import com.lovelycatv.sakurachat.utils.toPageable
 import com.lovelycatv.sakurachat.utils.toPaginatedResponseData
 import com.lovelycatv.vertex.log.logger
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
@@ -44,7 +42,7 @@ class UserPointsLogServiceImpl(
         val entity = UserPointsLogEntity(
             id = snowIdGenerator.nextId(),
             userId = userId,
-            deltaPoints = request.delta,
+            deltaPoints = - request.consumedPoints,
             reasonType = request.reason.reasonId
         )
 

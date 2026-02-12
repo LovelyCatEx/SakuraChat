@@ -46,12 +46,12 @@ class UserPointsServiceImpl(
         val user = getRepository().findById(userId).getOrNull()
             ?: throw BusinessException("User $userId not found")
 
-        val consumesOrGains = request.delta >= 0
+        val consumesOrGains = request.consumedPoints >= 0
 
-        val pointsAfterConsumed = user.points - request.delta
+        val pointsAfterConsumed = user.points - request.consumedPoints
 
         if (pointsAfterConsumed < 0) {
-            throw BusinessException("Insufficient points to consume, expect ${request.delta} points but ${user.points} last")
+            throw BusinessException("Insufficient points to consume, expect ${request.consumedPoints} points but ${user.points} last")
         }
 
         userPointsLogService.record(userId, request)
@@ -62,7 +62,7 @@ class UserPointsServiceImpl(
                 this.modifiedTime = System.currentTimeMillis()
             }
         ).also {
-            logger.info("${if (consumesOrGains) "[-]" else "[+]"} User ${user.id} ${if (consumesOrGains) "consumed" else "gained"} ${request.delta} points")
+            logger.info("${if (consumesOrGains) "[-]" else "[+]"} User ${user.id} ${if (consumesOrGains) "consumed" else "gained"} ${request.consumedPoints} points")
         }
     }
 

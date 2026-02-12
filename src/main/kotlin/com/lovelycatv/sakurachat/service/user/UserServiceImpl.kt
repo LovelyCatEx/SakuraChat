@@ -24,8 +24,6 @@ import com.lovelycatv.sakurachat.types.PointsChangesReason
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import com.lovelycatv.sakurachat.utils.toPaginatedResponseData
 import com.lovelycatv.vertex.log.logger
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import okio.withLock
 import org.springframework.data.domain.Pageable
 import org.springframework.security.core.userdetails.UserDetails
@@ -34,6 +32,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.jvm.optionals.getOrNull
+import kotlin.math.abs
 
 @Service
 class UserServiceImpl(
@@ -71,7 +70,7 @@ class UserServiceImpl(
             throw BusinessException("user $email already registered")
         }
 
-        /*val correctEmailCode = registrationEmailCodeMap[email]?.let {
+        val correctEmailCode = registrationEmailCodeMap[email]?.let {
             // send time
             if (System.currentTimeMillis() - it.first > 10 * 60 * 1000L) {
                 throw BusinessException("email code is expired")
@@ -83,7 +82,7 @@ class UserServiceImpl(
 
         if (emailCode != correctEmailCode) {
             throw BusinessException("your email code is invalid")
-        }*/
+        }
 
         registrationEmailCodeMap.remove(email)
 
@@ -101,7 +100,7 @@ class UserServiceImpl(
                     userId = it.id,
                     request = UserPointsConsumeRequest(
                         reason = PointsChangesReason.REGISTER,
-                        delta = systemSettingsService.getAllSettingsLazy().userRegistration.initialPoints
+                        consumedPoints = -abs(systemSettingsService.getAllSettingsLazy().userRegistration.initialPoints)
                     )
                 )
             }
@@ -200,7 +199,7 @@ class UserServiceImpl(
                     userId = it.id,
                     request = UserPointsConsumeRequest(
                         reason = PointsChangesReason.REGISTER,
-                        delta = systemSettingsService.getAllSettingsLazy().userRegistration.initialPoints
+                        consumedPoints = -abs(systemSettingsService.getAllSettingsLazy().userRegistration.initialPoints)
                     )
                 )
             }

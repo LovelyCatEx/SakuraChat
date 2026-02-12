@@ -30,7 +30,7 @@ interface UserPointsService : BaseService<UserRepository, UserEntity, Long> {
     ): UserPointsConsumeRequest {
         return UserPointsConsumeRequest(
             reason = PointsChangesReason.AGENT_CHAT_COMPLETION,
-            delta = points,
+            consumedPoints = points,
             associations = listOf(
                 UserPointsConsumeRequest.Association(
                     tableType = DatabaseTableType.AGENTS,

@@ -96,7 +96,7 @@ export function UserPointsLogPage() {
         <>
             <div className="mb-8 flex justify-between items-end">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800 mb-2">积分消耗记录</h1>
+                    <h1 className="text-2xl font-bold text-gray-800 mb-2">积分变更记录</h1>
                     <p className="text-gray-500 mt-1">所有积分变更在此处展示</p>
                 </div>
                 <Button
