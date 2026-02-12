@@ -5,6 +5,10 @@ export function getThirdPartyAccountList(query: PageQuery) {
     return doGet<PaginatedResponseData<ThirdPartyAccount>>('/api/manager/third-party-account/list', {...query});
 }
 
+export function searchThirdPartyAccounts(keyword: string, page: number = 1, pageSize: number = 5) {
+    return doGet<PaginatedResponseData<ThirdPartyAccount>>('/api/manager/third-party-account/search', { keyword, page, pageSize });
+}
+
 export function deleteThirdPartyAccount(id: string) {
     return doPost<unknown>('/api/manager/third-party-account/delete', { id: id });
 }

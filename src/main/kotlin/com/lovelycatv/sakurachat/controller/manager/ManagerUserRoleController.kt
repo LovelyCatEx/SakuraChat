@@ -35,6 +35,17 @@ class ManagerUserRoleController(
         )
     }
 
+    @GetMapping("/search")
+    suspend fun searchUserRoles(
+        @RequestParam("keyword") keyword: String,
+        @RequestParam("page") page: Int = 1,
+        @RequestParam("pageSize") pageSize: Int = 5
+    ): ApiResponse<*> {
+        return ApiResponse.success(
+            userRoleService.search(keyword, page, pageSize)
+        )
+    }
+
     @PostMapping("/create")
     suspend fun createUserRole(@ModelAttribute managerCreateUserRoleDTO: ManagerCreateUserRoleDTO): ApiResponse<*> {
         userRoleService.createUserRole(managerCreateUserRoleDTO)

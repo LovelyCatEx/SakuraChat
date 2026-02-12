@@ -18,7 +18,7 @@ import {
 } from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from '@ant-design/icons';
 import type {ChatModel} from "../../../types/chat-model.types.ts";
-import {createChatModel, deleteChatModel, getChatModelList, updateChatModel} from "../../../api/chat-model.api.ts";
+import {createChatModel, deleteChatModel, getChatModelList, searchChatModels, updateChatModel} from "../../../api/chat-model.api.ts";
 import {formatTimestamp} from "../../../utils/datetime.utils.ts";
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
 import {EntitySelector} from "../../../components/common/EntitySelector.tsx";
@@ -69,6 +69,7 @@ export function ChatModelPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [currentPageSize, setCurrentPageSize] = useState(20);
     const [total, setTotal] = useState(0);
+    const [searchKeyword, setSearchKeyword] = useState('');
 
     const [models, setModels] = useState<ChatModel[]>([]);
     const [providers, setProviders] = useState<Record<string, {name: string, chatCompletionsUrl: string}>>({});
@@ -107,13 +108,15 @@ export function ChatModelPage() {
 
         setRefreshing(true);
 
-        Promise.all([
-            getChatModelList({page: currentPage, pageSize: currentPageSize})
-        ]).then(([modelRes]) => {
+        const apiCall = searchKeyword 
+            ? searchChatModels(searchKeyword, currentPage, currentPageSize)
+            : getChatModelList({page: currentPage, pageSize: currentPageSize});
+
+        apiCall.then((modelRes) => {
             if (modelRes.data) {
                 setModels(modelRes.data.records);
                 setTotal(modelRes.data.total);
-
+                
                 const providerIds = new Set<string>();
                 const credentialIds = new Set<string>();
                 modelRes.data.records.forEach(m => {
@@ -156,10 +159,15 @@ export function ChatModelPage() {
         })
     }
 
+    const handleSearch = (keyword: string) => {
+        setSearchKeyword(keyword);
+        setCurrentPage(1);
+    };
+
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         refreshData();
-    }, [currentPage, currentPageSize]);
+    }, [currentPage, currentPageSize, searchKeyword]);
 
     const handleAddOrUpdateEdit = (values: ChatModel) => {
         if (editingItem) {
@@ -380,6 +388,14 @@ export function ChatModelPage() {
                         placeholder="搜索模型..."
                         prefix={<SearchOutlined className="text-gray-400" />}
                         className="max-w-xs rounded-xl h-10"
+                        onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
+                        allowClear
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === '') {
+                                handleSearch('');
+                            }
+                        }}
                     />
                 </div>
                 <Table

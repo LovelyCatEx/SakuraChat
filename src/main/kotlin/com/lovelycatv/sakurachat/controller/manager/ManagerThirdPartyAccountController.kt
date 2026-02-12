@@ -35,6 +35,17 @@ class ManagerThirdPartyAccountController(
         )
     }
 
+    @GetMapping("/search")
+    suspend fun searchThirdPartyAccounts(
+        @RequestParam("keyword") keyword: String,
+        @RequestParam("page") page: Int = 1,
+        @RequestParam("pageSize") pageSize: Int = 5
+    ): ApiResponse<*> {
+        return ApiResponse.success(
+            thirdPartyAccountService.search(keyword, page, pageSize)
+        )
+    }
+
     @PostMapping("/create")
     suspend fun createThirdPartyAccount(@ModelAttribute managerCreateThirdPartyAccountDTO: ManagerCreateThirdPartyAccountDTO): ApiResponse<*> {
         thirdPartyAccountService.createThirdPartyAccount(managerCreateThirdPartyAccountDTO)

@@ -14,6 +14,7 @@ import com.lovelycatv.sakurachat.entity.AgentEntity
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.repository.AgentRepository
+import com.lovelycatv.sakurachat.request.PaginatedResponseData
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 
 interface AgentService : BaseService<AgentRepository, AgentEntity, Long> {
@@ -26,4 +27,6 @@ interface AgentService : BaseService<AgentRepository, AgentEntity, Long> {
     suspend fun updateAgent(updateAgentDTO: UpdateAgentDTO)
 
     suspend fun createAgent(managerCreateAgentDTO: ManagerCreateAgentDTO)
+
+    suspend fun search(keyword: String, page: Int, pageSize: Int): PaginatedResponseData<AgentEntity>
 }

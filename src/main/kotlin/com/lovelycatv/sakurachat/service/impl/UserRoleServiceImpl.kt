@@ -12,10 +12,13 @@ import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateUserRoleDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.UpdateUserRoleDTO
 import com.lovelycatv.sakurachat.entity.UserRole
 import com.lovelycatv.sakurachat.repository.UserRoleRepository
+import com.lovelycatv.sakurachat.request.PaginatedResponseData
 import com.lovelycatv.sakurachat.service.UserRoleService
 import com.lovelycatv.sakurachat.utils.SnowIdGenerator
+import com.lovelycatv.sakurachat.utils.toPaginatedResponseData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
 @Service
@@ -53,5 +56,19 @@ class UserRoleServiceImpl(
                 )
             )
         }
+    }
+
+    override suspend fun search(keyword: String, page: Int, pageSize: Int): PaginatedResponseData<UserRole> {
+        if (keyword.isBlank()) {
+            return this.listByPage(page, pageSize).toPaginatedResponseData()
+        }
+
+        return withContext(Dispatchers.IO) {
+            getRepository().findAllByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+                keyword,
+                keyword,
+                Pageable.ofSize(pageSize).withPage(page - 1)
+            )
+        }.toPaginatedResponseData()
     }
 }

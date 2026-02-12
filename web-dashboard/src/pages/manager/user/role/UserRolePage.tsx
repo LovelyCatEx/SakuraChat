@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {Button, Card, Col, Form, Input, message, Modal, Popconfirm, Row, Space, Table, Tag} from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from '@ant-design/icons';
 import type {UserRole} from '../../../../types/user-role.types.ts';
-import {createUserRole, deleteUserRole, getUserRoleList, updateUserRole} from '../../../../api/user-role.api.ts';
+import {createUserRole, deleteUserRole, getUserRoleList, searchUserRoles, updateUserRole} from '../../../../api/user-role.api.ts';
 import {formatTimestamp} from '../../../../utils/datetime.utils.ts';
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
 
@@ -16,16 +16,18 @@ export function UserRolePage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [currentPageSize, setCurrentPageSize] = useState(20);
     const [total, setTotal] = useState(0);
+    const [searchKeyword, setSearchKeyword] = useState('');
 
     const [userRoles, setUserRoles] = useState<UserRole[]>([]);
 
     const refreshData = () => {
         setRefreshing(true);
 
-        getUserRoleList({
-            page: 1,
-            pageSize: 20,
-        }).then((res) => {
+        const apiCall = searchKeyword 
+            ? searchUserRoles(searchKeyword, currentPage, currentPageSize)
+            : getUserRoleList({page: currentPage, pageSize: currentPageSize});
+
+        apiCall.then((res) => {
             if (res.data) {
                 setUserRoles(res.data.records);
                 setTotal(res.data.total);
@@ -35,10 +37,15 @@ export function UserRolePage() {
         })
     }
 
+    const handleSearch = (keyword: string) => {
+        setSearchKeyword(keyword);
+        setCurrentPage(1);
+    };
+
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         refreshData();
-    }, []);
+    }, [currentPage, currentPageSize, searchKeyword]);
 
     const handleAddOrUpdateEdit = (values: UserRole) => {
         if (editingItem) {
@@ -161,6 +168,14 @@ export function UserRolePage() {
                         placeholder="搜索角色..."
                         prefix={<SearchOutlined className="text-gray-400" />}
                         className="max-w-xs rounded-xl h-10"
+                        onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
+                        allowClear
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === '') {
+                                handleSearch('');
+                            }
+                        }}
                     />
                 </div>
                 <Table
@@ -180,7 +195,6 @@ export function UserRolePage() {
                         onChange: (page: number, pageSize: number) => {
                             setCurrentPage(page);
                             setCurrentPageSize(pageSize);
-                            refreshData();
                         }
                     }}
                     loading={refreshing}

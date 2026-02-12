@@ -35,6 +35,17 @@ class ManagerAgentController(
         )
     }
 
+    @GetMapping("/search")
+    suspend fun searchAgents(
+        @RequestParam("keyword") keyword: String,
+        @RequestParam("page") page: Int = 1,
+        @RequestParam("pageSize") pageSize: Int = 5
+    ): ApiResponse<*> {
+        return ApiResponse.success(
+            agentService.search(keyword, page, pageSize)
+        )
+    }
+
     @PostMapping("/create")
     suspend fun createAgent(@ModelAttribute managerCreateAgentDTO: ManagerCreateAgentDTO): ApiResponse<*> {
         agentService.createAgent(managerCreateAgentDTO)

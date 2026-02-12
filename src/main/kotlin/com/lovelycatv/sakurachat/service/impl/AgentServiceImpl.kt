@@ -15,14 +15,17 @@ import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.repository.AgentRepository
 import com.lovelycatv.sakurachat.repository.AgentThirdPartyAccountRelationRepository
+import com.lovelycatv.sakurachat.request.PaginatedResponseData
 import com.lovelycatv.sakurachat.service.AgentService
 import com.lovelycatv.sakurachat.service.ChatModelService
 import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import com.lovelycatv.sakurachat.utils.SnowIdGenerator
+import com.lovelycatv.sakurachat.utils.toPaginatedResponseData
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
 @Service
@@ -128,5 +131,19 @@ class AgentServiceImpl(
                 )
             )
         }
+    }
+
+    override suspend fun search(keyword: String, page: Int, pageSize: Int): PaginatedResponseData<AgentEntity> {
+        if (keyword.isBlank()) {
+            return this.listByPage(page, pageSize).toPaginatedResponseData()
+        }
+
+        return withContext(Dispatchers.IO) {
+            getRepository().findAllByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+                keyword,
+                keyword,
+                Pageable.ofSize(pageSize).withPage(page - 1)
+            )
+        }.toPaginatedResponseData()
     }
 }

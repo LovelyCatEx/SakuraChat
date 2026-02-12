@@ -13,14 +13,17 @@ import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateThirdPartyA
 import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.exception.BusinessException
 import com.lovelycatv.sakurachat.repository.ThirdPartyAccountRepository
+import com.lovelycatv.sakurachat.request.PaginatedResponseData
 import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import com.lovelycatv.sakurachat.utils.SnowIdGenerator
+import com.lovelycatv.sakurachat.utils.toPaginatedResponseData
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.springframework.beans.factory.getBeansOfType
 import org.springframework.context.ApplicationContext
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
 @Service
@@ -132,5 +135,19 @@ class ThirdPartyAccountServiceImpl(
                 )
             )
         }
+    }
+
+    override suspend fun search(keyword: String, page: Int, pageSize: Int): PaginatedResponseData<ThirdPartyAccountEntity> {
+        if (keyword.isBlank()) {
+            return this.listByPage(page, pageSize).toPaginatedResponseData()
+        }
+
+        return withContext(Dispatchers.IO) {
+            getRepository().findAllByNicknameContainingIgnoreCaseOrAccountIdContainingIgnoreCase(
+                keyword,
+                keyword,
+                Pageable.ofSize(pageSize).withPage(page - 1)
+            )
+        }.toPaginatedResponseData()
     }
 }

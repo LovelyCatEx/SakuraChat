@@ -17,7 +17,7 @@ import {
 } from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from '@ant-design/icons';
 import type {ThirdPartyAccount} from "../../../types/third-party-account.types.ts";
-import {createThirdPartyAccount, deleteThirdPartyAccount, getThirdPartyAccountList, updateThirdPartyAccount} from "../../../api/third-party-account.api.ts";
+import {createThirdPartyAccount, deleteThirdPartyAccount, getThirdPartyAccountList, searchThirdPartyAccounts, updateThirdPartyAccount} from "../../../api/third-party-account.api.ts";
 import {formatTimestamp} from "../../../utils/datetime.utils.ts";
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
 
@@ -29,16 +29,18 @@ export function ThirdPartyAccountPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [currentPageSize, setCurrentPageSize] = useState(20);
     const [total, setTotal] = useState(0);
+    const [searchKeyword, setSearchKeyword] = useState('');
 
     const [accounts, setAccounts] = useState<ThirdPartyAccount[]>([]);
 
     const refreshData = () => {
         setRefreshing(true);
 
-        getThirdPartyAccountList({
-            page: currentPage,
-            pageSize: currentPageSize,
-        }).then((res) => {
+        const apiCall = searchKeyword 
+            ? searchThirdPartyAccounts(searchKeyword, currentPage, currentPageSize)
+            : getThirdPartyAccountList({page: currentPage, pageSize: currentPageSize});
+
+        apiCall.then((res) => {
             if (res.data) {
                 setAccounts(res.data.records);
                 setTotal(res.data.total);
@@ -48,10 +50,15 @@ export function ThirdPartyAccountPage() {
         })
     }
 
+    const handleSearch = (keyword: string) => {
+        setSearchKeyword(keyword);
+        setCurrentPage(1);
+    };
+
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         refreshData();
-    }, [currentPage, currentPageSize]);
+    }, [currentPage, currentPageSize, searchKeyword]);
 
     const handleAddOrUpdateEdit = (values: ThirdPartyAccount) => {
         if (editingItem) {
@@ -227,6 +234,14 @@ export function ThirdPartyAccountPage() {
                         placeholder="搜索第三方账号..."
                         prefix={<SearchOutlined className="text-gray-400" />}
                         className="max-w-xs rounded-xl h-10"
+                        onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
+                        allowClear
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === '') {
+                                handleSearch('');
+                            }
+                        }}
                     />
                 </div>
                 <Table

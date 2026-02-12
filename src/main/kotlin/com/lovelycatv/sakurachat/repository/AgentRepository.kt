@@ -9,9 +9,16 @@
 package com.lovelycatv.sakurachat.repository
 
 import com.lovelycatv.sakurachat.entity.AgentEntity
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
 interface AgentRepository : JpaRepository<AgentEntity, Long> {
+    fun findAllByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+        name: String,
+        description: String,
+        pageable: Pageable
+    ): Page<AgentEntity>
 }

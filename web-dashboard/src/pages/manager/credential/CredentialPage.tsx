@@ -17,7 +17,7 @@ import {
 } from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from '@ant-design/icons';
 import type {Credential} from '../../../types/credential.types.ts';
-import {createCredential, deleteCredential, getCredentialList, updateCredential} from '../../../api/credential.api.ts';
+import {createCredential, deleteCredential, getCredentialList, searchCredentials, updateCredential} from '../../../api/credential.api.ts';
 import {formatTimestamp} from '../../../utils/datetime.utils.ts';
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
 
@@ -61,16 +61,18 @@ export function CredentialPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [currentPageSize, setCurrentPageSize] = useState(20);
     const [total, setTotal] = useState(0);
+    const [searchKeyword, setSearchKeyword] = useState('');
 
     const [credentials, setCredentials] = useState<Credential[]>([]);
 
     const refreshData = () => {
         setRefreshing(true);
 
-        getCredentialList({
-            page: currentPage,
-            pageSize: currentPageSize,
-        }).then((res) => {
+        const apiCall = searchKeyword 
+            ? searchCredentials(searchKeyword, currentPage, currentPageSize)
+            : getCredentialList({page: currentPage, pageSize: currentPageSize});
+
+        apiCall.then((res) => {
             if (res.data) {
                 setCredentials(res.data.records);
                 setTotal(res.data.total);
@@ -80,10 +82,15 @@ export function CredentialPage() {
         })
     }
 
+    const handleSearch = (keyword: string) => {
+        setSearchKeyword(keyword);
+        setCurrentPage(1);
+    };
+
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         refreshData();
-    }, [currentPage, currentPageSize]);
+    }, [currentPage, currentPageSize, searchKeyword]);
 
     const handleAddOrUpdateEdit = (values: Credential) => {
         if (editingItem) {
@@ -239,6 +246,14 @@ export function CredentialPage() {
                         placeholder="搜索凭证..."
                         prefix={<SearchOutlined className="text-gray-400" />}
                         className="max-w-xs rounded-xl h-10"
+                        onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
+                        allowClear
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === '') {
+                                handleSearch('');
+                            }
+                        }}
                     />
                 </div>
                 <Table

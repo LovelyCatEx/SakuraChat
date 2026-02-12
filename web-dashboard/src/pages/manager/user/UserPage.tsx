@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {Button, Card, Col, Form, Input, InputNumber, message, Modal, Popconfirm, Row, Space, Table, Tag} from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from '@ant-design/icons';
 import type {User} from '../../../types/user.types.ts';
-import {createUser, deleteUser, getUserList, updateUser} from '../../../api/user.api.ts';
+import {createUser, deleteUser, getUserList, searchUsers, updateUser} from '../../../api/user.api.ts';
 import {formatTimestamp} from '../../../utils/datetime.utils.ts';
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
 
@@ -14,16 +14,18 @@ export function UserPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [currentPageSize, setCurrentPageSize] = useState(20);
     const [total, setTotal] = useState(0);
+    const [searchKeyword, setSearchKeyword] = useState('');
 
     const [users, setUsers] = useState<User[]>([]);
 
     const refreshData = () => {
         setRefreshing(true);
 
-        getUserList({
-            page: currentPage,
-            pageSize: currentPageSize,
-        }).then((res) => {
+        const apiCall = searchKeyword 
+            ? searchUsers(searchKeyword, currentPage, currentPageSize)
+            : getUserList({page: currentPage, pageSize: currentPageSize});
+
+        apiCall.then((res) => {
             if (res.data) {
                 setUsers(res.data.records);
                 setTotal(res.data.total);
@@ -33,10 +35,15 @@ export function UserPage() {
         })
     }
 
+    const handleSearch = (keyword: string) => {
+        setSearchKeyword(keyword);
+        setCurrentPage(1);
+    };
+
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         refreshData();
-    }, [currentPage, currentPageSize]);
+    }, [currentPage, currentPageSize, searchKeyword]);
 
     const handleAddOrUpdateEdit = (values: User) => {
         if (editingItem) {
@@ -184,6 +191,14 @@ export function UserPage() {
                         placeholder="搜索用户..."
                         prefix={<SearchOutlined className="text-gray-400"/>}
                         className="max-w-xs rounded-xl h-10"
+                        onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
+                        allowClear
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === '') {
+                                handleSearch('');
+                            }
+                        }}
                     />
                 </div>
                 <Table

@@ -5,6 +5,10 @@ export function getAgentList(query: PageQuery) {
     return doGet<PaginatedResponseData<Agent>>('/api/manager/agent/list', {...query});
 }
 
+export function searchAgents(keyword: string, page: number = 1, pageSize: number = 5) {
+    return doGet<PaginatedResponseData<Agent>>('/api/manager/agent/search', { keyword, page, pageSize });
+}
+
 export function deleteAgent(id: string) {
     return doPost<unknown>('/api/manager/agent/delete', { id: id });
 }

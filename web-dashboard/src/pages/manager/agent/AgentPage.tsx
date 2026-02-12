@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {Button, Card, Col, Form, Input, message, Modal, Popconfirm, Row, Space, Table, Tag} from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from '@ant-design/icons';
 import type {Agent} from "../../../types/agent.types.ts";
-import {createAgent, deleteAgent, getAgentList, updateAgent} from "../../../api/agent.api.ts";
+import {createAgent, deleteAgent, getAgentList, searchAgents, updateAgent} from "../../../api/agent.api.ts";
 import {formatTimestamp} from "../../../utils/datetime.utils.ts";
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
 import {EntitySelector} from "../../../components/common/EntitySelector.tsx";
@@ -19,6 +19,7 @@ export function AgentPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const [currentPageSize, setCurrentPageSize] = useState(20);
     const [total, setTotal] = useState(0);
+    const [searchKeyword, setSearchKeyword] = useState('');
 
     const [agents, setAgents] = useState<Agent[]>([]);
     const [users, setUsers] = useState<Record<string, {username: string, nickname: string}>>({});
@@ -53,9 +54,11 @@ export function AgentPage() {
     const refreshData = () => {
         setRefreshing(true);
 
-        Promise.all([
-            getAgentList({page: currentPage, pageSize: currentPageSize})
-        ]).then(([agentRes]) => {
+        const apiCall = searchKeyword 
+            ? searchAgents(searchKeyword, currentPage, currentPageSize)
+            : getAgentList({page: currentPage, pageSize: currentPageSize});
+
+        apiCall.then((agentRes) => {
             if (agentRes.data) {
                 setAgents(agentRes.data.records);
                 setTotal(agentRes.data.total);
@@ -102,10 +105,15 @@ export function AgentPage() {
         })
     }
 
+    const handleSearch = (keyword: string) => {
+        setSearchKeyword(keyword);
+        setCurrentPage(1);
+    };
+
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         refreshData();
-    }, [currentPage, currentPageSize]);
+    }, [currentPage, currentPageSize, searchKeyword]);
 
     const handleAddOrUpdateEdit = (values: Agent) => {
         if (editingItem) {
@@ -282,6 +290,14 @@ export function AgentPage() {
                         placeholder="搜索智能体..."
                         prefix={<SearchOutlined className="text-gray-400" />}
                         className="max-w-xs rounded-xl h-10"
+                        onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
+                        allowClear
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === '') {
+                                handleSearch('');
+                            }
+                        }}
                     />
                 </div>
                 <Table
@@ -376,7 +392,7 @@ export function AgentPage() {
                     </Form.Item>
 
                     <Form.Item name="prompt" label="提示词" rules={[{ required: true }]}>
-                        <TextArea rows={4} placeholder="输入智能体提示词..." className="rounded-lg" />
+                        <TextArea rows={12} placeholder="输入智能体提示词..." className="rounded-lg" />
                     </Form.Item>
                 </Form>
             </Modal>

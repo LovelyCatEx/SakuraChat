@@ -5,6 +5,10 @@ export function getUserRoleList(query: PageQuery) {
     return doGet<PaginatedResponseData<UserRole>>('/api/manager/user-role/list', {...query});
 }
 
+export function searchUserRoles(keyword: string, page: number = 1, pageSize: number = 5) {
+    return doGet<PaginatedResponseData<UserRole>>('/api/manager/user-role/search', { keyword, page, pageSize });
+}
+
 export function deleteUserRole(id: string) {
     return doPost<unknown>('/api/manager/user-role/delete', { id: id });
 }

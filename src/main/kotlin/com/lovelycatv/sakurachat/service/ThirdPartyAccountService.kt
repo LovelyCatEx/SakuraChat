@@ -13,6 +13,7 @@ import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateThirdPartyA
 import com.lovelycatv.sakurachat.controller.manager.dto.UpdateThirdPartyAccountDTO
 import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.repository.ThirdPartyAccountRepository
+import com.lovelycatv.sakurachat.request.PaginatedResponseData
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 
 interface ThirdPartyAccountService : BaseService<ThirdPartyAccountRepository, ThirdPartyAccountEntity, Long> {
@@ -32,4 +33,6 @@ interface ThirdPartyAccountService : BaseService<ThirdPartyAccountRepository, Th
     fun getAccountIdByPlatformAccountObject(platform: ThirdPartyPlatform, platformAccount: Any): String {
         return this.getAccountAdapter(platform, platformAccount::class.java).getAccountId(platformAccount)
     }
+
+    suspend fun search(keyword: String, page: Int, pageSize: Int): PaginatedResponseData<ThirdPartyAccountEntity>
 }
