@@ -31,7 +31,7 @@ export function LoginPage() {
           void message.success('登录成功');
           if (res.data) {
             setUserAuthentication(res.data.token, res.data.expiresIn);
-            const redirectTo = getQueryString('redirectTo') || '/dashboard';
+            const redirectTo = getQueryString('redirectTo') || '/manager/dashboard';
             navigate(redirectTo);
           } else {
             void message.error('登录失败 未知错误');

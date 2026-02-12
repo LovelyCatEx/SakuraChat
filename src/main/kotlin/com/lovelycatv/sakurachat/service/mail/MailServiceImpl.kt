@@ -6,10 +6,9 @@
  *
  */
 
-package com.lovelycatv.sakurachat.service.impl
+package com.lovelycatv.sakurachat.service.mail
 
 import com.lovelycatv.sakurachat.constants.SystemSettings
-import com.lovelycatv.sakurachat.service.MailService
 import com.lovelycatv.sakurachat.service.SystemSettingsService
 import jakarta.annotation.Resource
 import jakarta.mail.internet.MimeMessage
@@ -20,18 +19,22 @@ import org.springframework.stereotype.Service
 
 @Service
 class MailServiceImpl(
-    @Resource(name = "sakuraChatMailSender")
-    private val mailSender: JavaMailSender
+    private val mailSenderContainer: JavaMailSenderContainer
 ) : MailService {
     @Autowired
     private lateinit var systemSettingsService: SystemSettingsService
+    override fun refreshSettings() {
+        mailSenderContainer.refreshSettings()
+    }
 
     override suspend fun sendMail(to: String, subject: String, content: String) {
         val from = systemSettingsService.getSettings(SystemSettings.Mail.SMTP.FROM_EMAIL) {
             "master@sakurachat.com"
-        }
+        }!!
 
-        val message: MimeMessage = mailSender.createMimeMessage()
+        val instance = mailSenderContainer.getInstance()
+
+        val message: MimeMessage = instance.createMimeMessage()
 
         MimeMessageHelper(message, true, "UTF-8").apply {
             setFrom(from)
@@ -40,7 +43,7 @@ class MailServiceImpl(
             setText(content, true)
         }
 
-        mailSender.send(message)
+        instance.send(message)
     }
 
     override suspend fun sendRegisterEmail(to: String, emailCode: String) {

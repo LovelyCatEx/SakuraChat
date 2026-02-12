@@ -6,9 +6,11 @@
  *
  */
 
-package com.lovelycatv.sakurachat.service
+package com.lovelycatv.sakurachat.service.mail
 
 interface MailService {
+    fun refreshSettings()
+
     suspend fun sendMail(to: String, subject: String, content: String)
 
     suspend fun sendRegisterEmail(to: String, emailCode: String)

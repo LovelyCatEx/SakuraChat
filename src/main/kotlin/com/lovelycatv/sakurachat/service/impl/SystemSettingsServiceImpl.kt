@@ -8,9 +8,11 @@
 
 package com.lovelycatv.sakurachat.service.impl
 
+import com.lovelycatv.sakurachat.constants.SystemSettings
 import com.lovelycatv.sakurachat.entity.SystemSettingsEntity
 import com.lovelycatv.sakurachat.repository.SystemSettingsRepository
 import com.lovelycatv.sakurachat.service.SystemSettingsService
+import com.lovelycatv.sakurachat.types.SakuraChatSystemSettings
 import com.lovelycatv.sakurachat.utils.SnowIdGenerator
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.Dispatchers
@@ -87,5 +89,34 @@ class SystemSettingsServiceImpl(
         }.also {
             logger.info("System settings [$key] successfully set to [$value]")
         }
+    }
+
+    override suspend fun getAllSettings(): SakuraChatSystemSettings{
+        return SakuraChatSystemSettings(
+            userRegistration = SakuraChatSystemSettings.UserRegistration(
+                initialPoints = getSettings(SystemSettings.UserRegistration.INITIAL_POINTS) { "0" }!!.toLong()
+            ),
+            mail = SakuraChatSystemSettings.Mail(
+                smtp = SakuraChatSystemSettings.Mail.SMTP(
+                    host = getSettings(SystemSettings.Mail.SMTP.HOST) { "127.0.0.1" } !!,
+                    port = getSettings(SystemSettings.Mail.SMTP.PORT) { "465" }!!.toInt(),
+                    username = getSettings(SystemSettings.Mail.SMTP.USERNAME) { "" }!!,
+                    password = getSettings(SystemSettings.Mail.SMTP.PASSWORD) { "" }!!,
+                    ssl = getSettings(SystemSettings.Mail.SMTP.SSL) { "true" }!!.toBoolean(),
+                    fromEmail = getSettings(SystemSettings.Mail.SMTP.FROM_EMAIL) { "user@example.com" }!!,
+                )
+            )
+        )
+    }
+
+    override suspend fun updateAllSettings(settings: SakuraChatSystemSettings) {
+        setSettings(SystemSettings.UserRegistration.INITIAL_POINTS, settings.userRegistration.initialPoints.toString())
+
+        setSettings(SystemSettings.Mail.SMTP.HOST, settings.mail.smtp.host)
+        setSettings(SystemSettings.Mail.SMTP.PORT, settings.mail.smtp.port.toString())
+        setSettings(SystemSettings.Mail.SMTP.USERNAME, settings.mail.smtp.username)
+        setSettings(SystemSettings.Mail.SMTP.PASSWORD, settings.mail.smtp.password)
+        setSettings(SystemSettings.Mail.SMTP.SSL, settings.mail.smtp.ssl.toString())
+        setSettings(SystemSettings.Mail.SMTP.FROM_EMAIL, settings.mail.smtp.fromEmail)
     }
 }

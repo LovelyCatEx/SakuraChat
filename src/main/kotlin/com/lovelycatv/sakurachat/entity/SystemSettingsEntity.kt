@@ -20,9 +20,9 @@ import org.hibernate.annotations.SQLRestriction
 @SQLRestriction(BaseEntity.SOFT_NON_DELETED_RESTRICTION)
 class SystemSettingsEntity(
     override val id: Long = 0,
-    @Column(name = "key", nullable = false)
+    @Column(name = "config_key", nullable = false)
     var key: String = "",
-    @Column(name = "value", nullable = true)
+    @Column(name = "config_value", nullable = true)
     var value: String? = null,
     override val createdTime: Long = System.currentTimeMillis(),
     override var modifiedTime: Long = System.currentTimeMillis(),
