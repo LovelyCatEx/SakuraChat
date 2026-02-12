@@ -53,7 +53,7 @@ export function MainContainer() {
     { key: '/manager/providers', icon: <CloudServerOutlined />, label: '模型提供商' },
     { key: '/manager/models', icon: <DatabaseOutlined />, label: '语言模型' },
     { key: '/manager/credentials', icon: <KeyOutlined />, label: '凭证管理' },
-    { key: '/manager/third-party-account', icon: <TeamOutlined />, label: '第三方账号' },
+    { key: '/manager/third-party-accounts', icon: <TeamOutlined />, label: '第三方账号' },
     { key: '/manager/users', icon: <UserOutlined />, label: '用户' },
     { key: '/manager/user-roles', icon: <TeamOutlined />, label: '用户角色' },
     { key: '/manager/settings', icon: <SettingOutlined />, label: '系统设置' },

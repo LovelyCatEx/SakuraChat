@@ -250,8 +250,12 @@ export function ChatModelPage() {
             render: (name: string, record: ChatModel) => (
                 <Space orientation='vertical' size={0}>
                     <span className="font-bold text-gray-800">{name}</span>
-                    <span className="text-xs text-gray-400 font-mono">{record.qualifiedName}</span>
-                    <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {record.id}</Tag>
+                    <Tooltip title={record.qualifiedName}>
+                        <span className="text-xs text-gray-400 font-mono">{record.qualifiedName}</span>
+                    </Tooltip>
+                    <Tooltip title={record.id}>
+                        <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {record.id}</Tag>
+                    </Tooltip>
                 </Space>
             ),
         },

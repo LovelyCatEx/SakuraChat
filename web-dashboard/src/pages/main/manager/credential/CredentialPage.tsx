@@ -160,7 +160,9 @@ export function CredentialPage() {
                 return (
                     <Space orientation='vertical' size={0}>
                         <span className="font-bold text-gray-800">{credentialTypeMap[record.type] ?? record.type}</span>
-                        <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {id}</Tag>
+                        <Tooltip title={record.id}>
+                            <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {id}</Tag>
+                        </Tooltip>
                     </Space>
                 );
             },

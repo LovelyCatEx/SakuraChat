@@ -1,5 +1,20 @@
 import {useEffect, useState} from 'react';
-import {Button, Card, Col, Form, Input, InputNumber, message, Modal, Popconfirm, Row, Space, Table, Tag} from 'antd';
+import {
+    Button,
+    Card,
+    Col,
+    Form,
+    Input,
+    InputNumber,
+    message,
+    Modal,
+    Popconfirm,
+    Row,
+    Space,
+    Table,
+    Tag,
+    Tooltip
+} from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from '@ant-design/icons';
 import type {User} from '../../../../types/user.types.ts';
 import {createUser, deleteUser, getUserList, searchUsers, updateUser} from '../../../../api/user.api.ts';
@@ -109,8 +124,12 @@ export function UserPage() {
             width: 120,
             render: (username: string, record: User) => (
                 <Space orientation='vertical' size={0}>
-                    <span className="font-bold text-gray-800">{username}</span>
-                    <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {record.id}</Tag>
+                    <Tooltip title={username}>
+                        <span className="font-bold text-gray-800">{username}</span>
+                    </Tooltip>
+                    <Tooltip title={record.id}>
+                        <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {record.id}</Tag>
+                    </Tooltip>
                 </Space>
             ),
         },
@@ -119,7 +138,9 @@ export function UserPage() {
             dataIndex: 'nickname',
             key: 'nickname',
             width: 120,
-            render: (nickname: string) => <span className="text-gray-600">{nickname}</span>
+            render: (nickname: string) => <Tooltip title={nickname}>
+                <span>{nickname}</span>
+            </Tooltip>
         },
         {
             title: '邮箱',
@@ -127,7 +148,9 @@ export function UserPage() {
             key: 'email',
             ellipsis: true,
             width: 200,
-            render: (email: string) => <span className="text-gray-400">{email}</span>
+            render: (email: string) => <Tooltip title={email}>
+                <span>{email}</span>
+            </Tooltip>
         },
         {
             title: '积分',
