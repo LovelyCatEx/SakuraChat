@@ -37,6 +37,8 @@ interface UserService : UserDetailsService, BaseService<UserRepository, UserEnti
 
     fun getUserProfileById(userId: Long): UserEntity
 
+    @Transactional
+
     fun updateUser(updateUserDTO: UpdateUserDTO)
 
     @Transactional

@@ -152,6 +152,7 @@ class UserServiceImpl(
             ?: throw BusinessException("User $userId not found")
     }
 
+    @Transactional
     override fun updateUser(updateUserDTO: UpdateUserDTO) {
         val existing = this.getByIdOrThrow(updateUserDTO.id)
 
@@ -164,7 +165,18 @@ class UserServiceImpl(
         }
 
         if (updateUserDTO.points != null) {
-            existing.points = updateUserDTO.points
+            val delta = updateUserDTO.points - existing.points
+            if (delta != 0L) {
+                this.userPointsService.consumePoints(
+                    userId = updateUserDTO.id,
+                    request = UserPointsConsumeRequest(
+                        reason = PointsChangesReason.ADMIN,
+                        consumedPoints = - delta
+                    )
+                )
+
+                existing.points = updateUserDTO.points
+            }
         }
 
 

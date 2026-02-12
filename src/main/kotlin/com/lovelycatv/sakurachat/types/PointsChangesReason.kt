@@ -11,7 +11,8 @@ package com.lovelycatv.sakurachat.types
 enum class PointsChangesReason(val reasonId: Int) {
     REGISTER(0),
     AGENT_CHAT_COMPLETION(1),
-    CHARGE(2);
+    CHARGE(2),
+    ADMIN(3);
 
     companion object {
         fun getByReasonId(reasonId: Int): PointsChangesReason? {
