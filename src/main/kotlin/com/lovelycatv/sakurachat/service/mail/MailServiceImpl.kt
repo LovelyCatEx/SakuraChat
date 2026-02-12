@@ -8,14 +8,9 @@
 
 package com.lovelycatv.sakurachat.service.mail
 
-import com.lovelycatv.sakurachat.constants.SystemSettings
 import com.lovelycatv.sakurachat.exception.BusinessException
-import com.lovelycatv.sakurachat.service.SystemSettingsService
 import com.lovelycatv.vertex.log.logger
-import jakarta.annotation.Resource
 import jakarta.mail.internet.MimeMessage
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
 

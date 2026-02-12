@@ -15,7 +15,6 @@ import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.service.AgentContextService
 import com.lovelycatv.sakurachat.service.IMChannelMessageService
 import com.lovelycatv.sakurachat.service.UserPointsService
-import com.lovelycatv.sakurachat.service.user.UserService
 import com.lovelycatv.sakurachat.types.ChannelMemberType
 import com.lovelycatv.sakurachat.utils.toJSONString
 import com.lovelycatv.vertex.ai.openai.ChatMessageRole

@@ -11,12 +11,10 @@ package com.lovelycatv.sakurachat.service.mail
 import com.lovelycatv.sakurachat.service.SystemSettingsService
 import com.lovelycatv.sakurachat.types.SakuraChatSystemSettings
 import com.lovelycatv.vertex.log.logger
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.stereotype.Component
-import java.util.Properties
+import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 

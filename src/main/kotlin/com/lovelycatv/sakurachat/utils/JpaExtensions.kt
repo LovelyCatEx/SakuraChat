@@ -12,7 +12,6 @@ import com.lovelycatv.sakurachat.request.PageQuery
 import com.lovelycatv.sakurachat.request.PaginatedResponseData
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 
 class JpaExtensions private constructor()
