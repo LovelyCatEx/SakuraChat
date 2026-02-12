@@ -34,8 +34,7 @@ class IMChannelServiceImpl(
     private val agentChannelRelationRepository: AgentChannelRelationRepository,
     private val thirdPartyGroupChannelRelationRepository: ThirdPartyGroupChannelRelationRepository,
     private val thirdPartyGroupService: ThirdPartyGroupService,
-    private val snowIdGenerator: SnowIdGenerator,
-    partyGroupService: ThirdPartyGroupService
+    private val snowIdGenerator: SnowIdGenerator
 ) : IMChannelService {
     private val logger = logger()
 
@@ -179,9 +178,36 @@ class IMChannelServiceImpl(
                     )
                 )
 
-                logger.info("New user $userId joined group channel: ${foundChannel.id}")
+                logger.info("New user $userId joined group channel: ${foundChannel.id}, name: ${foundChannel.channelName}")
             }
         }
+
+        channel.also { foundChannel ->
+            if (foundChannel == null) {
+                return@also
+            }
+
+            // Even though the channel is existed (created by other agent),
+            // the agent may not be in this channel
+            val agentIdsInThisChannel = agentChannelRelationRepository
+                .findByChannelId(foundChannel.id)
+                .map { it.primaryKey.agentId }
+                .toSet()
+
+            if (agentId !in agentIdsInThisChannel) {
+                agentChannelRelationRepository.save(
+                    AgentChannelRelationEntity(
+                        primaryKey = AgentChannelRelationEntity.PrimaryKey(
+                            channelId = foundChannel.id,
+                            agentId = agentId
+                        )
+                    )
+                )
+
+                logger.info("New agent $userId joined group channel: ${foundChannel.id}, name: ${foundChannel.channelName}")
+            }
+        }
+
 
         return channel
     }

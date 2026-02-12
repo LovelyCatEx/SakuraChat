@@ -35,8 +35,8 @@ class SakuraChatMessageChannelDaemon(
         agent: AggregatedAgentEntity,
         user: UserEntity,
     ): SakuraChatMessageChannel {
-        val agentId = agent.agent.id!!
-        val userId = user.id!!
+        val agentId = agent.agent.id
+        val userId = user.id
         return privateChannels[agentId]?.get(userId) ?: run {
             val channel = imChannelService.getOrCreatePrivateChannelByUserIdAndAgentId(userId, agentId)
 
@@ -71,8 +71,8 @@ class SakuraChatMessageChannelDaemon(
         agent: AggregatedAgentEntity,
         user: UserEntity
     ): SakuraChatMessageChannel {
-        val agentId = agent.agent.id!!
-        val userId = user.id!!
+        val agentId = agent.agent.id
+        val userId = user.id
 
         val channel = groupChannels[thirdPartyGroupEntityId] ?: run {
             val channel = imChannelService.getOrCreateGroupChannelByUserIdAndAgentId(

@@ -86,7 +86,7 @@ class AgentContextServiceImpl(
             ).reversed()
 
         val contextBody = if (channel.getRealChannelType() == ChannelType.PRIVATE) {
-            this.processPrivateMessages(messagesInChannel, null)
+            this.processPrivateMessages(messagesInChannel)
         } else if (channel.getRealChannelType() == ChannelType.GROUP) {
             this.processGroupMessages(agentId, messagesInChannel)
         } else {
@@ -97,8 +97,7 @@ class AgentContextServiceImpl(
     }
 
     private fun processPrivateMessages(
-        messages: List<IMChannelMessageEntity>,
-        senderIdentifier: String? = null
+        messages: List<IMChannelMessageEntity>
     ): List<ChatMessage> {
         return messages.map {
             this.buildChatMessageFromAbstractMessage(
@@ -110,7 +109,7 @@ class AgentContextServiceImpl(
                 } else {
                     throw IllegalStateException("Unknown memberId ${it.memberId} of channel ${it.channelId}, neither agent nor user.")
                 },
-                senderIdentifier = senderIdentifier
+                senderIdentifier = null
             )
         }
     }
