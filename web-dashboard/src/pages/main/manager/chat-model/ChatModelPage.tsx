@@ -17,17 +17,17 @@ import {
     Tag, Tooltip
 } from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from '@ant-design/icons';
-import type {ChatModel} from "../../../types/chat-model.types.ts";
-import {createChatModel, deleteChatModel, getChatModelList, searchChatModels, updateChatModel} from "../../../api/chat-model.api.ts";
-import {formatTimestamp} from "../../../utils/datetime.utils.ts";
+import type {ChatModel} from "../../../../types/chat-model.types.ts";
+import {createChatModel, deleteChatModel, getChatModelList, searchChatModels, updateChatModel} from "../../../../api/chat-model.api.ts";
+import {formatTimestamp} from "../../../../utils/datetime.utils.ts";
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
-import {EntitySelector} from "../../../components/common/EntitySelector.tsx";
-import {getProviderById, searchProviders} from "../../../api/provider.api.ts";
-import {getCredentialById, searchCredentials} from "../../../api/credential.api.ts";
-import {getUrlHostname} from "../../../utils/url.utils.ts";
-import type {Provider} from "../../../types/provider.types.ts";
-import type {Credential} from "../../../types/credential.types.ts";
-import type {ApiResponse} from "../../../api/sakurachat-request.ts";
+import {EntitySelector} from "../../../../components/common/EntitySelector.tsx";
+import {getProviderById, searchProviders} from "../../../../api/provider.api.ts";
+import {getCredentialById, searchCredentials} from "../../../../api/credential.api.ts";
+import {getUrlHostname} from "../../../../utils/url.utils.ts";
+import type {Provider} from "../../../../types/provider.types.ts";
+import type {Credential} from "../../../../types/credential.types.ts";
+import type {ApiResponse} from "../../../../api/sakurachat-request.ts";
 
 const { TextArea } = Input;
 

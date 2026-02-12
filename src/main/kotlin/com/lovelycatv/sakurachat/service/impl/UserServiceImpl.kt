@@ -101,36 +101,6 @@ class UserServiceImpl : UserService {
         }.orElse(null)
     }
 
-    override suspend fun hasPoints(userId: Long, minimum: Long): Boolean {
-        val user = withContext(Dispatchers.IO) {
-            userRepository.findById(userId).getOrNull()
-        } ?: return false
-
-        return user.points > minimum
-    }
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    override suspend fun consumePoints(userId: Long, points: Long): UserEntity {
-        val user = withContext(Dispatchers.IO) {
-            userRepository.findById(userId).getOrNull()
-        } ?: throw BusinessException("User $userId not found")
-
-        val pointsAfterConsumed = user.points - points
-
-        if (pointsAfterConsumed < 0) {
-            throw BusinessException("Insufficient points to consume, expect $points points but ${user.points} last")
-        }
-
-        return withContext(Dispatchers.IO) {
-            getRepository().save(
-                user.apply {
-                    this.points = pointsAfterConsumed
-                    this.modifiedTime = System.currentTimeMillis()
-                }
-            )
-        }
-    }
-
     override suspend fun getUserProfileById(userId: Long): UserEntity {
         return withContext(Dispatchers.IO) {
             getRepository().findById(userId)

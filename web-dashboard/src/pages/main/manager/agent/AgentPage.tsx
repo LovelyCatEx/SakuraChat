@@ -1,13 +1,13 @@
 import {useEffect, useState} from 'react';
 import {Button, Card, Col, Form, Input, message, Modal, Popconfirm, Row, Space, Table, Tag} from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from '@ant-design/icons';
-import type {Agent} from "../../../types/agent.types.ts";
-import {createAgent, deleteAgent, getAgentList, searchAgents, updateAgent} from "../../../api/agent.api.ts";
-import {formatTimestamp} from "../../../utils/datetime.utils.ts";
+import type {Agent} from "../../../../types/agent.types.ts";
+import {createAgent, deleteAgent, getAgentList, searchAgents, updateAgent} from "../../../../api/agent.api.ts";
+import {formatTimestamp} from "../../../../utils/datetime.utils.ts";
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
-import {EntitySelector} from "../../../components/common/EntitySelector.tsx";
-import {getUserById, searchUsers} from "../../../api/user.api.ts";
-import {getChatModelById, searchChatModels} from "../../../api/chat-model.api.ts";
+import {EntitySelector} from "../../../../components/common/EntitySelector.tsx";
+import {getUserById, searchUsers} from "../../../../api/user.api.ts";
+import {getChatModelById, searchChatModels} from "../../../../api/chat-model.api.ts";
 
 const { TextArea } = Input;
 

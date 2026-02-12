@@ -14,6 +14,7 @@ import com.lovelycatv.sakurachat.core.im.message.TextMessage
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.service.AgentContextService
 import com.lovelycatv.sakurachat.service.IMChannelMessageService
+import com.lovelycatv.sakurachat.service.UserPointsService
 import com.lovelycatv.sakurachat.service.UserService
 import com.lovelycatv.sakurachat.types.ChannelMemberType
 import com.lovelycatv.sakurachat.utils.toJSONString
@@ -28,7 +29,7 @@ import kotlin.math.ceil
 
 class SakuraChatAgent(
     val agent: AggregatedAgentEntity,
-    val userService: UserService,
+    val userPointsService: UserPointsService,
     val agentContextService: AgentContextService,
     val imChannelMessageService: IMChannelMessageService,
 ) : AbstractSakuraChatChannelMember(ChannelMemberType.AGENT) {
@@ -121,7 +122,7 @@ class SakuraChatAgent(
                 chatModelEntity.chatModel.maxTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.outputTokenPointRate)
         ).toLong()
 
-        val pointsThreshold = userService.hasPoints(sender.user.id!!, predictedPoints)
+        val pointsThreshold = userPointsService.hasPoints(sender.user.id, predictedPoints)
 
         if (!pointsThreshold) {
             return emitter.invoke(
@@ -266,7 +267,15 @@ class SakuraChatAgent(
                 val consumedPoints = resp.usage!!.promptTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.inputTokenPointRate) +
                         resp.usage!!.completionTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.outputTokenPointRate)
 
-                userService.consumePoints(sender.user.id!!, ceil(consumedPoints).toLong())
+                userPointsService.consumePoints(
+                    userId = sender.user.id,
+                    request = userPointsService.buildAgentChatCompletionsRequest(
+                        userId = sender.user.id,
+                        agentId = agent.agent.id,
+                        chatModelId = chatModelEntity.chatModel.id,
+                        points = ceil(consumedPoints).toLong()
+                    )
+                )
             } else {
                 logger.error("[ERROR]" + "=".repeat(128))
                 logger.error("StreamChatCompletion with model ${chatModelEntity.chatModel.qualifiedName} of provider " +
@@ -323,7 +332,15 @@ class SakuraChatAgent(
                 val consumedPoints = resp.usage.promptTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.inputTokenPointRate) +
                         resp.usage.completionTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.outputTokenPointRate)
 
-                userService.consumePoints(sender.user.id!!, ceil(consumedPoints).toLong())
+                userPointsService.consumePoints(
+                    userId = sender.user.id,
+                    request = userPointsService.buildAgentChatCompletionsRequest(
+                        userId = sender.user.id,
+                        agentId = agent.agent.id,
+                        chatModelId = chatModelEntity.chatModel.id,
+                        points = ceil(consumedPoints).toLong()
+                    )
+                )
             }
         }
 

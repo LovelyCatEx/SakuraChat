@@ -8,6 +8,7 @@
 
 package com.lovelycatv.sakurachat.entity
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer
 import jakarta.persistence.Column
@@ -52,10 +53,12 @@ class ChatModelEntity(
     override var modifiedTime: Long = System.currentTimeMillis(),
     override var deletedTime: Long? = null
 ) : BaseEntity() {
+    @JsonIgnore
     fun getQualifiedTemperature(): Float? = this.temperature.run {
         if (this > 0) this / 100f else null
     }
 
+    @JsonIgnore
     fun getQualifiedTokenPointRate(original: Int): Float = original.run {
         this / 10000f
     }

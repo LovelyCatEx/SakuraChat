@@ -1,9 +1,9 @@
 import {useEffect, useState} from 'react';
 import {Button, Card, Col, Form, Input, InputNumber, message, Modal, Popconfirm, Row, Space, Table, Tag} from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from '@ant-design/icons';
-import type {User} from '../../../types/user.types.ts';
-import {createUser, deleteUser, getUserList, searchUsers, updateUser} from '../../../api/user.api.ts';
-import {formatTimestamp} from '../../../utils/datetime.utils.ts';
+import type {User} from '../../../../types/user.types.ts';
+import {createUser, deleteUser, getUserList, searchUsers, updateUser} from '../../../../api/user.api.ts';
+import {formatTimestamp} from '../../../../utils/datetime.utils.ts';
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
 
 export function UserPage() {

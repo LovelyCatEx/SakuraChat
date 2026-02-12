@@ -25,11 +25,6 @@ interface UserService : UserDetailsService, BaseService<UserRepository, UserEnti
         accountId: String
     ): UserEntity?
 
-    suspend fun hasPoints(userId: Long, minimum: Long): Boolean
-
-    @Transactional(propagation = Propagation.REQUIRED)
-    suspend fun consumePoints(userId: Long, points: Long): UserEntity
-
     suspend fun getUserProfileById(userId: Long): UserEntity
 
     suspend fun updateUser(updateUserDTO: UpdateUserDTO)

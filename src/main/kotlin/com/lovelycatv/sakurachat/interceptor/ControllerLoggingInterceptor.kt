@@ -29,13 +29,15 @@ class ControllerLoggingInterceptor(
     private val logger = logger()
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
+        val requestURI = request.requestURI
+        val method = request.method
+        val clientIp = request.remoteAddr
+        val code = snowIdGenerator.nextId()
+
+        request.setAttribute("code", code)
+        request.setAttribute("startTime", System.currentTimeMillis())
+
         coroutineScope.launch {
-            val requestURI = request.requestURI
-            val method = request.method
-            val clientIp = request.remoteAddr
-
-            val code = snowIdGenerator.nextId()
-
             val headers = objectMapper
                 .writerWithDefaultPrettyPrinter()
                 .withDefaultPrettyPrinter()
@@ -76,9 +78,6 @@ class ControllerLoggingInterceptor(
             }
 
             logger.info("+ [{}] ===========================================================", code)
-
-            request.setAttribute("code", code)
-            request.setAttribute("startTime", System.currentTimeMillis())
         }
 
         return true
@@ -90,19 +89,19 @@ class ControllerLoggingInterceptor(
         handler: Any,
         ex: Exception?
     ) {
+        val requestURI = request.requestURI
+        val method = request.method
+        val clientIp = request.remoteAddr
+
+        val code = request.getAttribute("code")
+
+        val startTime = try {
+            request.getAttribute("startTime") as? Long?
+        } catch (_: Exception) {
+            null
+        } ?: System.currentTimeMillis()
+
         coroutineScope.launch {
-            val requestURI = request.requestURI
-            val method = request.method
-            val clientIp = request.remoteAddr
-
-            val code = request.getAttribute("code")
-
-            val startTime = try {
-                request.getAttribute("startTime") as? Long?
-            } catch (_: Exception) {
-                null
-            } ?: System.currentTimeMillis()
-
             val headers = objectMapper
                 .writerWithDefaultPrettyPrinter()
                 .withDefaultPrettyPrinter()

@@ -38,11 +38,10 @@ class ManagerThirdPartyAccountController(
     @GetMapping("/search")
     suspend fun searchThirdPartyAccounts(
         @RequestParam("keyword") keyword: String,
-        @RequestParam("page") page: Int = 1,
-        @RequestParam("pageSize") pageSize: Int = 5
+        @ModelAttribute pageQuery: PageQuery
     ): ApiResponse<*> {
         return ApiResponse.success(
-            thirdPartyAccountService.search(keyword, page, pageSize)
+            thirdPartyAccountService.search(keyword, pageQuery.page, pageQuery.pageSize)
         )
     }
 

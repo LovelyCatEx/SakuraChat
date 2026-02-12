@@ -8,8 +8,12 @@
 
 package com.lovelycatv.sakurachat.utils
 
+import com.lovelycatv.sakurachat.request.PageQuery
 import com.lovelycatv.sakurachat.request.PaginatedResponseData
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
 
 class JpaExtensions private constructor()
 
@@ -21,4 +25,22 @@ fun <T> Page<T>.toPaginatedResponseData(): PaginatedResponseData<T> {
         totalPages = this.totalPages,
         records = this.toList()
     )
+}
+
+fun PageQuery.toPageable(sortDirection: Sort.Direction? = null, vararg sortColumns: String): PageRequest {
+    return if (sortDirection == null || sortColumns.isEmpty()) {
+        PageRequest
+            .of(
+                this.page - 1,
+                this.pageSize
+            )
+    } else {
+        PageRequest
+            .of(
+                this.page - 1,
+                this.pageSize,
+                sortDirection,
+                *sortColumns
+            )
+    }
 }

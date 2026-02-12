@@ -38,11 +38,10 @@ class ManagerCredentialController(
     @GetMapping("/search")
     suspend fun searchCredentials(
         @RequestParam("keyword") keyword: String,
-        @RequestParam("page") page: Int = 1,
-        @RequestParam("pageSize") pageSize: Int = 5
+        @ModelAttribute pageQuery: PageQuery
     ): ApiResponse<*> {
         return ApiResponse.success(
-            credentialService.search(keyword, page, pageSize)
+            credentialService.search(keyword, pageQuery.page, pageQuery.pageSize)
         )
     }
 

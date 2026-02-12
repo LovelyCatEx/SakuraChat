@@ -1,7 +1,7 @@
 import {Route, Routes} from 'react-router-dom'
 import './App.css'
 import {AuthorizationPage} from "./pages/auth/AuthorizationPage.tsx";
-import {MainContainer} from "./pages/MainContainer.tsx";
+import {MainContainer} from "./pages/main/MainContainer.tsx";
 import {RequireAuthComponent} from "./components/auth/RequireAuthComponent.tsx";
 
 function App() {

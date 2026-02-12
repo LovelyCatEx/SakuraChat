@@ -2,17 +2,17 @@ import React, {type JSX, useEffect, useMemo, useState} from 'react';
 import {Route, Routes, useLocation, useNavigate} from 'react-router-dom';
 import {Avatar, Button, ConfigProvider, Divider, Dropdown, Layout, Menu, Space,} from 'antd';
 import {
-    CloudServerOutlined,
-    DashboardOutlined,
-    DatabaseOutlined,
-    KeyOutlined,
-    LogoutOutlined,
-    MenuFoldOutlined,
-    MenuUnfoldOutlined,
-    RobotOutlined,
-    SettingOutlined,
-    TeamOutlined,
-    UserOutlined,
+  CloudServerOutlined,
+  DashboardOutlined,
+  DatabaseOutlined,
+  KeyOutlined,
+  LogoutOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined, PayCircleOutlined,
+  RobotOutlined,
+  SettingOutlined,
+  TeamOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
 import {DashboardPage} from './manager/dashboard/DashboardPage.tsx';
 import {AgentPage} from './manager/agent/AgentPage.tsx';
@@ -25,8 +25,9 @@ import {ThirdPartyAccountPage} from './manager/third-party-account/ThirdPartyAcc
 import {UserPage} from './manager/user/UserPage.tsx';
 import './MainContainerStyles.css';
 import type {ItemType} from "antd/es/menu/interface";
-import {clearUserAuthentication} from "../utils/token.utils.ts";
-import {useLoggedUser} from "../compositions/use-logged-user.ts";
+import {clearUserAuthentication} from "../../utils/token.utils.ts";
+import {useLoggedUser} from "../../compositions/use-logged-user.ts";
+import {UserPointsLogPage} from "./user/points-log/UserPointsLogPage.tsx";
 
 const { Header, Sider, Content } = Layout;
 
@@ -46,15 +47,16 @@ export function MainContainer() {
   };
 
   const menuItems: (MenuItem & ItemType)[] = useMemo(() => [
-    { key: '/dashboard', icon: <DashboardOutlined />, label: '仪表盘' },
-    { key: '/agents', icon: <RobotOutlined />, label: '智能体' },
-    { key: '/providers', icon: <CloudServerOutlined />, label: '模型提供商' },
-    { key: '/models', icon: <DatabaseOutlined />, label: '语言模型' },
-    { key: '/credentials', icon: <KeyOutlined />, label: '凭证管理' },
-    { key: '/third-party-accounts', icon: <TeamOutlined />, label: '第三方账号' },
-    { key: '/users', icon: <UserOutlined />, label: '用户' },
-    { key: '/user-roles', icon: <TeamOutlined />, label: '用户角色' },
-    { key: '/settings', icon: <SettingOutlined />, label: '系统设置' },
+    { key: '/manager/dashboard', icon: <DashboardOutlined />, label: '仪表盘' },
+    { key: '/points-logs', icon: <PayCircleOutlined />, label: '积分消耗记录' },
+    { key: '/manager/agents', icon: <RobotOutlined />, label: '智能体' },
+    { key: '/manager/providers', icon: <CloudServerOutlined />, label: '模型提供商' },
+    { key: '/manager/models', icon: <DatabaseOutlined />, label: '语言模型' },
+    { key: '/manager/credentials', icon: <KeyOutlined />, label: '凭证管理' },
+    { key: '/manager/third-party-account', icon: <TeamOutlined />, label: '第三方账号' },
+    { key: '/manager/users', icon: <UserOutlined />, label: '用户' },
+    { key: '/manager/user-roles', icon: <TeamOutlined />, label: '用户角色' },
+    { key: '/manager/settings', icon: <SettingOutlined />, label: '系统设置' },
   ], []);
 
   const selectedKeys = useMemo(() => {
@@ -183,15 +185,16 @@ export function MainContainer() {
             className={`p-6 transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-[240px]'}`}
           >
             <Routes>
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/agents" element={<AgentPage />} />
-              <Route path="/providers" element={<ProviderPage />} />
-              <Route path="/models" element={<ChatModelPage />} />
-              <Route path="/credentials" element={<CredentialPage />} />
-              <Route path="/third-party-accounts" element={<ThirdPartyAccountPage />} />
-              <Route path="/users" element={<UserPage />} />
-              <Route path="/user-roles" element={<UserRolePage />} />
-              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/manager/dashboard" element={<DashboardPage />} />
+              <Route path="/points-logs" element={<UserPointsLogPage />} />
+              <Route path="/manager/agents" element={<AgentPage />} />
+              <Route path="/manager/providers" element={<ProviderPage />} />
+              <Route path="/manager/models" element={<ChatModelPage />} />
+              <Route path="/manager/credentials" element={<CredentialPage />} />
+              <Route path="/manager/third-party-accounts" element={<ThirdPartyAccountPage />} />
+              <Route path="/manager/users" element={<UserPage />} />
+              <Route path="/manager/user-roles" element={<UserRolePage />} />
+              <Route path="/manager/settings" element={<SettingsPage />} />
             </Routes>
           </Content>
         </Layout>

@@ -1,61 +1,16 @@
 import {useEffect, useState} from 'react';
-import {
-    Button,
-    Card,
-    Col,
-    Form,
-    Input,
-    message,
-    Modal,
-    Popconfirm,
-    Row,
-    Select,
-    Space,
-    Switch,
-    Table,
-    Tag, Tooltip
-} from 'antd';
+import {Button, Card, Col, Form, Input, message, Modal, Popconfirm, Row, Space, Table, Tag} from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from '@ant-design/icons';
-import type {Credential} from '../../../types/credential.types.ts';
-import {createCredential, deleteCredential, getCredentialList, searchCredentials, updateCredential} from '../../../api/credential.api.ts';
-import {formatTimestamp} from '../../../utils/datetime.utils.ts';
+import type {UserRole} from '../../../../../types/user-role.types.ts';
+import {createUserRole, deleteUserRole, getUserRoleList, searchUserRoles, updateUserRole} from '../../../../../api/user-role.api.ts';
+import {formatTimestamp} from '../../../../../utils/datetime.utils.ts';
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
 
 const { TextArea } = Input;
 
-function CredentialActivationSwitch({record, onSwitchChanged}: {
-    record: Credential,
-    onSwitchChanged: (success: boolean, to: boolean) => void
-}) {
-    const [requesting, setRequesting] = useState(false);
-
-    return (
-        <Switch
-            size="small"
-            checked={record.active}
-            loading={requesting}
-            onChange={(checked) => {
-                setRequesting(true);
-                updateCredential({ id: record.id, active: checked })
-                    .then(() => {
-                        void message.success(`凭证${checked ? '启用' : '禁用'}成功`)
-                        onSwitchChanged(true, checked);
-                    })
-                    .catch(() => {
-                        void message.error("更新凭证信息失败");
-                        onSwitchChanged(false, checked);
-                    })
-                    .finally(() => {
-                        setRequesting(false);
-                    })
-            }}
-        />
-    )
-}
-
-export function CredentialPage() {
+export function UserRolePage() {
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [editingItem, setEditingItem] = useState<Credential | null>(null);
+    const [editingItem, setEditingItem] = useState<UserRole | null>(null);
     const [form] = Form.useForm();
     const [refreshing, setRefreshing] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
@@ -63,18 +18,18 @@ export function CredentialPage() {
     const [total, setTotal] = useState(0);
     const [searchKeyword, setSearchKeyword] = useState('');
 
-    const [credentials, setCredentials] = useState<Credential[]>([]);
+    const [userRoles, setUserRoles] = useState<UserRole[]>([]);
 
     const refreshData = () => {
         setRefreshing(true);
 
         const apiCall = searchKeyword 
-            ? searchCredentials(searchKeyword, currentPage, currentPageSize)
-            : getCredentialList({page: currentPage, pageSize: currentPageSize});
+            ? searchUserRoles(searchKeyword, currentPage, currentPageSize)
+            : getUserRoleList({page: currentPage, pageSize: currentPageSize});
 
         apiCall.then((res) => {
             if (res.data) {
-                setCredentials(res.data.records);
+                setUserRoles(res.data.records);
                 setTotal(res.data.total);
             }
         }).finally(() => {
@@ -92,28 +47,27 @@ export function CredentialPage() {
         refreshData();
     }, [currentPage, currentPageSize, searchKeyword]);
 
-    const handleAddOrUpdateEdit = (values: Credential) => {
+    const handleAddOrUpdateEdit = (values: UserRole) => {
         if (editingItem) {
-            updateCredential({
+            updateUserRole({
                 id: values.id,
-                type: values.type,
-                data: values.data,
-                active: values.active
+                name: values.name,
+                description: values.description
             }).then(() => {
                 refreshData();
-                void message.success('更新凭证成功');
+                void message.success('更新角色成功');
             }).catch(() => {
-                void message.error('更新凭证失败');
+                void message.error('更新角色失败');
             })
         } else {
-            createCredential({
-                type: values.type,
-                data: values.data
+            createUserRole({
+                name: values.name,
+                description: values.description
             }).then(() => {
                 refreshData();
-                void message.success('新增凭证成功');
+                void message.success('新增角色成功');
             }).catch(() => {
-                void message.error('新增凭证失败');
+                void message.error('新增角色失败');
             })
         }
 
@@ -122,18 +76,18 @@ export function CredentialPage() {
         form.resetFields();
     };
 
-    const deleteCredentialItem = (id: string) => {
-        deleteCredential(id)
+    const deleteUserRoleItem = (id: string) => {
+        deleteUserRole(id)
             .then(() => {
                 refreshData();
-                void message.success('凭证已刪除');
+                void message.success('角色已刪除');
             })
             .catch(() => {
-                void message.error('删除凭证失败');
+                void message.error('删除角色失败');
             })
     };
 
-    const openModal = (item: Credential | null = null) => {
+    const openModal = (item: UserRole | null = null) => {
         setEditingItem(item);
 
         if (item) {
@@ -145,52 +99,20 @@ export function CredentialPage() {
         setIsModalVisible(true);
     };
 
-    const columns: (ColumnGroupType<Credential> | ColumnType<Credential>)[] = [
+    const columns: (ColumnGroupType<UserRole> | ColumnType<UserRole>)[] = [
         {
-            title: '凭证信息',
-            dataIndex: 'id',
-            key: 'id',
+            title: '角色信息',
+            dataIndex: 'name',
+            key: 'name',
             fixed: 'start',
-            width: 180,
-            render: (id: string, record: Credential) => {
-                const credentialTypeMap: Record<number, string> = {
-                    0: 'Authorization Bearer',
-                    1: 'Authorization Basic'
-                };
-                return (
-                    <Space orientation='vertical' size={0}>
-                        <span className="font-bold text-gray-800">{credentialTypeMap[record.type] ?? record.type}</span>
-                        <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {id}</Tag>
-                    </Space>
-                );
-            },
-        },
-        {
-            title: '凭证数据',
-            dataIndex: 'data',
-            key: 'data',
-            width: 250,
-            render: (data: string) => {
-                return <Tooltip title={data}>
-                    <span className=""
-                          style={{
-                              maxWidth: '100%',
-                              display: 'inline-block',
-                              overflow: 'hidden',
-                              whiteSpace: 'nowrap',
-                              textOverflow: 'ellipsis'
-                          }}>{data}</span>
-                </Tooltip>
-            },
-        },
-        {
-            title: '状态',
-            dataIndex: 'active',
-            key: 'active',
-            width: 80,
-            render: (_: unknown, record: Credential) => {
-                return <CredentialActivationSwitch record={record} onSwitchChanged={() => refreshData()} />;
-            },
+            width: 200,
+            render: (name: string, record: UserRole) => (
+                <Space orientation='vertical' size={0}>
+                    <span className="font-bold text-gray-800">{name}</span>
+                    <span className="text-xs text-gray-400">{record.description || '无描述'}</span>
+                    <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {record.id}</Tag>
+                </Space>
+            ),
         },
         {
             title: '创建时间',
@@ -211,10 +133,10 @@ export function CredentialPage() {
             key: 'action',
             fixed: 'end',
             width: 100,
-            render: (_: unknown, record: Credential) => (
+            render: (_: unknown, record: UserRole) => (
                 <Space>
                     <Button type="text" size="small" icon={<EditOutlined />} onClick={() => openModal(record)} />
-                    <Popconfirm title="确定要删除此凭证？" onConfirm={() => deleteCredentialItem(record.id)} okText="确认" cancelText="取消">
+                    <Popconfirm title="确定要删除此角色？" onConfirm={() => deleteUserRoleItem(record.id)} okText="确认" cancelText="取消">
                         <Button type="text" size="small" icon={<DeleteOutlined />} danger />
                     </Popconfirm>
                 </Space>
@@ -226,8 +148,8 @@ export function CredentialPage() {
         <>
             <div className="mb-8 flex justify-between items-end">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800 mb-2">凭证管理</h1>
-                    <p className="text-gray-500 mt-1">管理系统凭证信息</p>
+                    <h1 className="text-2xl font-bold text-gray-800 mb-2">用户角色管理</h1>
+                    <p className="text-gray-500 mt-1">管理系统用户角色</p>
                 </div>
                 <Button
                     type="primary"
@@ -236,14 +158,14 @@ export function CredentialPage() {
                     className="rounded-xl h-12 shadow-lg shadow-blue-100"
                     onClick={() => openModal()}
                 >
-                    新增凭证
+                    新增角色
                 </Button>
             </div>
 
             <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
                 <div className="mb-6 flex gap-4">
                     <Input
-                        placeholder="搜索凭证..."
+                        placeholder="搜索角色..."
                         prefix={<SearchOutlined className="text-gray-400" />}
                         className="max-w-xs rounded-xl h-10"
                         onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
@@ -258,7 +180,7 @@ export function CredentialPage() {
                 </div>
                 <Table
                     columns={columns}
-                    dataSource={credentials}
+                    dataSource={userRoles}
                     rowKey="id"
                     scroll={{ x: 600 }}
                     className="custom-table"
@@ -280,11 +202,11 @@ export function CredentialPage() {
             </Card>
 
             <Modal
-                title={editingItem ? "编辑凭证" : "新建凭证"}
+                title={editingItem ? "编辑角色" : "新建角色"}
                 open={isModalVisible}
                 onCancel={() => setIsModalVisible(false)}
                 onOk={() => form.submit()}
-                width={600}
+                width={500}
                 centered
                 okButtonProps={{ className: "rounded-lg h-10 px-6" }}
                 cancelButtonProps={{ className: "rounded-lg h-10 px-6" }}
@@ -297,27 +219,16 @@ export function CredentialPage() {
 
                     <Row gutter={16}>
                         <Col span={24}>
-                            <Form.Item name="type" label="凭证类型" rules={[{ required: true }]}>
-                                <Select className="w-full rounded-lg h-10 flex items-center" placeholder="选择凭证类型">
-                                    <Select.Option value={0}>Authorization Bearer</Select.Option>
-                                    <Select.Option value={1}>Authorization Basic</Select.Option>
-                                </Select>
+                            <Form.Item name="name" label="角色名称" rules={[{ required: true }]}>
+                                <Input placeholder="输入角色名称" className="rounded-lg h-10" />
                             </Form.Item>
                         </Col>
                     </Row>
 
                     <Row gutter={16}>
                         <Col span={24}>
-                            <Form.Item name="data" label="凭证数据" rules={[{ required: true }]}>
-                                <TextArea rows={4} placeholder="输入凭证数据..." className="rounded-lg" />
-                            </Form.Item>
-                        </Col>
-                    </Row>
-
-                    <Row gutter={16}>
-                        <Col span={24}>
-                            <Form.Item name="active" label="状态" initialValue={true}>
-                                <Switch />
+                            <Form.Item name="description" label="角色描述">
+                                <TextArea rows={3} placeholder="输入角色描述..." className="rounded-lg" />
                             </Form.Item>
                         </Col>
                     </Row>

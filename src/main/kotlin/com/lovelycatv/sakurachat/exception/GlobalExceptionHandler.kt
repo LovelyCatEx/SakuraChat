@@ -8,6 +8,7 @@
 package com.lovelycatv.sakurachat.exception
 
 import com.lovelycatv.sakurachat.request.ApiResponse
+import com.lovelycatv.vertex.log.logger
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 
 @RestControllerAdvice
 class GlobalExceptionHandler {
+    private val logger = logger()
+
     @ExceptionHandler(BusinessException::class)
     fun handleBusinessException(e: BusinessException): ResponseEntity<ApiResponse<*>?> {
         val response: ApiResponse<*> = ApiResponse.badRequest<Any?>(
@@ -34,6 +37,8 @@ class GlobalExceptionHandler {
             (if (e.message != null) e.message else "no error message")!!,
             null
         )
+
+        logger.error("An error occurred while processing request", e)
 
         return ResponseEntity
             .status(HttpStatus.INTERNAL_SERVER_ERROR)

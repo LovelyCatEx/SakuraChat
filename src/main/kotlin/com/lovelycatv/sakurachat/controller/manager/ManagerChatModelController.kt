@@ -38,10 +38,9 @@ class ManagerChatModelController(
     @GetMapping("/search")
     suspend fun searchChatModels(
         @RequestParam("keyword") keyword: String,
-        @RequestParam("page") page: Int = 1,
-        @RequestParam("pageSize") pageSize: Int = 5
+        @ModelAttribute pageQuery: PageQuery
     ): ApiResponse<*> {
-        return ApiResponse.success(chatModelService.search(keyword, page, pageSize))
+        return ApiResponse.success(chatModelService.search(keyword, pageQuery.page, pageQuery.pageSize))
     }
 
     @GetMapping("/getById")

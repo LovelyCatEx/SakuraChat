@@ -38,11 +38,10 @@ class ManagerUserRoleController(
     @GetMapping("/search")
     suspend fun searchUserRoles(
         @RequestParam("keyword") keyword: String,
-        @RequestParam("page") page: Int = 1,
-        @RequestParam("pageSize") pageSize: Int = 5
+        @ModelAttribute pageQuery: PageQuery
     ): ApiResponse<*> {
         return ApiResponse.success(
-            userRoleService.search(keyword, page, pageSize)
+            userRoleService.search(keyword, pageQuery.page, pageQuery.pageSize)
         )
     }
 

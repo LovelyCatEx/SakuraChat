@@ -38,11 +38,10 @@ class ManagerUserController(
     @GetMapping("/search")
     suspend fun searchUsers(
         @RequestParam("keyword") keyword: String,
-        @RequestParam("page") page: Int = 1,
-        @RequestParam("pageSize") pageSize: Int = 5
+        @ModelAttribute pageQuery: PageQuery
     ): ApiResponse<*> {
         return ApiResponse.success(
-            userService.search(keyword, page, pageSize)
+            userService.search(keyword, pageQuery.page, pageQuery.pageSize)
         )
     }
 

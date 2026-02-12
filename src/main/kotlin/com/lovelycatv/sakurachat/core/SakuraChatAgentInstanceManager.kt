@@ -11,14 +11,14 @@ package com.lovelycatv.sakurachat.core
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.service.AgentContextService
 import com.lovelycatv.sakurachat.service.IMChannelMessageService
-import com.lovelycatv.sakurachat.service.UserService
+import com.lovelycatv.sakurachat.service.UserPointsService
 import org.springframework.stereotype.Component
 
 @Component
 class SakuraChatAgentInstanceManager(
-    private val userService: UserService,
     private val agentContextService: AgentContextService,
-    private val imChannelMessageService: IMChannelMessageService
+    private val imChannelMessageService: IMChannelMessageService,
+    private val userPointsService: UserPointsService
 ) {
     private val instances = mutableMapOf<Long, SakuraChatAgent>()
 
@@ -35,7 +35,7 @@ class SakuraChatAgentInstanceManager(
         return this.addAgent(
             SakuraChatAgent(
                 agent = agent,
-                userService = userService,
+                userPointsService = userPointsService,
                 agentContextService = agentContextService,
                 imChannelMessageService = imChannelMessageService
             )

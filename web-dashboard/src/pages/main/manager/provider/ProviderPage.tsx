@@ -1,29 +1,16 @@
 import {useEffect, useState} from 'react';
-import {
-    Button,
-    Card,
-    Col,
-    Form,
-    Input,
-    message,
-    Modal,
-    Popconfirm,
-    Row,
-    Select,
-    Space,
-    Table,
-    Tag,
-    Tooltip,
-} from 'antd';
+import {Button, Card, Col, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Table, Tag} from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from '@ant-design/icons';
-import type {ThirdPartyAccount} from "../../../types/third-party-account.types.ts";
-import {createThirdPartyAccount, deleteThirdPartyAccount, getThirdPartyAccountList, searchThirdPartyAccounts, updateThirdPartyAccount} from "../../../api/third-party-account.api.ts";
-import {formatTimestamp} from "../../../utils/datetime.utils.ts";
+import type {Provider} from "../../../../types/provider.types.ts";
+import {createProvider, deleteProvider, getProviderList, searchProviders, updateProvider} from "../../../../api/provider.api.ts";
+import {formatTimestamp} from "../../../../utils/datetime.utils.ts";
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
 
-export function ThirdPartyAccountPage() {
+const { TextArea } = Input;
+
+export function ProviderPage() {
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [editingItem, setEditingItem] = useState<ThirdPartyAccount | null>(null);
+    const [editingItem, setEditingItem] = useState<Provider | null>(null);
     const [form] = Form.useForm();
     const [refreshing, setRefreshing] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
@@ -31,18 +18,18 @@ export function ThirdPartyAccountPage() {
     const [total, setTotal] = useState(0);
     const [searchKeyword, setSearchKeyword] = useState('');
 
-    const [accounts, setAccounts] = useState<ThirdPartyAccount[]>([]);
+    const [providers, setProviders] = useState<Provider[]>([]);
 
     const refreshData = () => {
         setRefreshing(true);
 
         const apiCall = searchKeyword 
-            ? searchThirdPartyAccounts(searchKeyword, currentPage, currentPageSize)
-            : getThirdPartyAccountList({page: currentPage, pageSize: currentPageSize});
+            ? searchProviders(searchKeyword, currentPage, currentPageSize)
+            : getProviderList({page: currentPage, pageSize: currentPageSize});
 
         apiCall.then((res) => {
             if (res.data) {
-                setAccounts(res.data.records);
+                setProviders(res.data.records);
                 setTotal(res.data.total);
             }
         }).finally(() => {
@@ -60,29 +47,31 @@ export function ThirdPartyAccountPage() {
         refreshData();
     }, [currentPage, currentPageSize, searchKeyword]);
 
-    const handleAddOrUpdateEdit = (values: ThirdPartyAccount) => {
+    const handleAddOrUpdateEdit = (values: Provider) => {
         if (editingItem) {
-            updateThirdPartyAccount({
+            updateProvider({
                 id: values.id,
-                accountId: values.accountId,
-                nickname: values.nickname,
-                platform: values.platform
+                name: values.name,
+                description: values.description,
+                chatCompletionsUrl: values.chatCompletionsUrl,
+                apiType: values.apiType
             }).then(() => {
                 refreshData();
-                void message.success('更新第三方账号成功');
+                void message.success('更新供应商成功');
             }).catch(() => {
-                void message.error('更新第三方账号失败');
+                void message.error('更新供应商失败');
             })
         } else {
-            createThirdPartyAccount({
-                accountId: values.accountId,
-                nickname: values.nickname,
-                platform: values.platform,
+            createProvider({
+                name: values.name,
+                description: values.description,
+                chatCompletionsUrl: values.chatCompletionsUrl,
+                apiType: values.apiType
             }).then(() => {
                 refreshData();
-                void message.success('新增第三方账号成功');
+                void message.success('新增供应商成功');
             }).catch(() => {
-                void message.error('新增第三方账号失败');
+                void message.error('新增供应商失败');
             })
         }
 
@@ -91,18 +80,18 @@ export function ThirdPartyAccountPage() {
         form.resetFields();
     };
 
-    const deleteAccount = (id: string) => {
-        deleteThirdPartyAccount(id)
+    const deleteProviderItem = (id: string) => {
+        deleteProvider(id)
             .then(() => {
                 refreshData();
-                void message.success('第三方账号已刪除');
+                void message.success('供应商已刪除');
             })
             .catch(() => {
-                void message.error('删除第三方账号失败');
+                void message.error('删除供应商失败');
             })
     };
 
-    const openModal = (item: ThirdPartyAccount | null = null) => {
+    const openModal = (item: Provider | null = null) => {
         setEditingItem(item);
 
         if (item) {
@@ -114,95 +103,71 @@ export function ThirdPartyAccountPage() {
         setIsModalVisible(true);
     };
 
-    const columns: (ColumnGroupType<ThirdPartyAccount> | ColumnType<ThirdPartyAccount>)[] = [
+    const columns: (ColumnGroupType<Provider> | ColumnType<Provider>)[] = [
         {
-            title: '账号名称',
-            dataIndex: 'nickname',
-            key: 'nickname',
+            title: '供应商信息',
+            dataIndex: 'name',
+            key: 'name',
             fixed: 'start',
-            width: 160,
-            ellipsis: true,
-            render: (nickname: string, record: ThirdPartyAccount) => (
-                <Space orientation='vertical' size={0} style={{ width: '100%' }}>
-                    <Tooltip title={nickname}>
-                        <span 
-                            className="font-bold text-gray-800" 
-                            style={{
-                                maxWidth: '100%',
-                                display: 'inline-block',
-                                overflow: 'hidden',
-                                whiteSpace: 'nowrap',
-                                textOverflow: 'ellipsis'
-                            }}
-                        >
-                            {nickname}
-                        </span>
-                    </Tooltip>
-                    <Tooltip title={record.id}>
-                        <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {record.id}</Tag>
-                    </Tooltip>
+            width: 200,
+            render: (name: string, record: Provider) => (
+                <Space orientation='vertical' size={0}>
+                    <span className="font-bold text-gray-800">{name}</span>
+                    <Tag color="blue" className="m-0 text-[10px] leading-4 h-4 px-1 rounded">ID: {record.id}</Tag>
                 </Space>
             ),
         },
         {
-            title: '账号 ID',
-            dataIndex: 'accountId',
-            key: 'accountId',
-            ellipsis: true,
+            title: '描述',
+            dataIndex: 'description',
+            key: 'description',
             width: 200,
-            render: (accountId: string) => (
-                <Tooltip title={accountId}>
-                    <span 
-                        className="text-gray-600 font-mono" 
-                        style={{
-                            maxWidth: '100%',
-                            display: 'inline-block',
-                            overflow: 'hidden',
-                            whiteSpace: 'nowrap',
-                            textOverflow: 'ellipsis'
-                        }}
-                    >
-                        {accountId}
-                    </span>
-                </Tooltip>
-            )
+            render: (description: string | null) => <span className="text-gray-500">{description || '-'}</span>
         },
         {
-            title: '平台',
-            dataIndex: 'platform',
-            key: 'platform',
-            width: 80,
-            render: (platform: number) => {
-                const platformMap: Record<number, string> = {
-                    1: 'NapCat OICQ',
-                    2: 'Lark'
+            title: 'API 类型',
+            dataIndex: 'apiType',
+            key: 'apiType',
+            width: 100,
+            render: (apiType: number) => {
+                const apiTypeMap: Record<number, string> = {
+                    0: 'OpenAI',
+                    1: 'Claude',
+                    2: 'Gemini'
                 };
-                return <Tag color="green" className="m-0 leading-4 h-4 px-1 rounded">{platformMap[platform] ?? platform}</Tag>
+                return <span className="text-gray-600">{apiTypeMap[apiType] ?? apiType}</span>
             }
+        },
+        {
+            title: 'API URL',
+            dataIndex: 'chatCompletionsUrl',
+            key: 'chatCompletionsUrl',
+            width: 300,
+            render: (url: string) => <span className="text-gray-600 font-mono text-sm">{url}</span>
         },
         {
             title: '创建时间',
             dataIndex: 'createdTime',
             key: 'createdTime',
-            width: 120,
-            render: (time: number) => <span>{formatTimestamp(time)}</span>
+            width: 100,
+            render: (createdTime: number) => <span>{formatTimestamp(createdTime)}</span>
         },
         {
             title: '修改时间',
             dataIndex: 'modifiedTime',
             key: 'modifiedTime',
-            width: 120,
-            render: (time: number) => <span>{formatTimestamp(time)}</span>
+            width: 100,
+            render: (modifiedTime: number) => <span>{formatTimestamp(modifiedTime)}</span>
         },
         {
             title: '操作',
             key: 'action',
             fixed: 'end',
             width: 100,
-            render: (_: unknown, record: ThirdPartyAccount) => (
+            render: (_: unknown, record: Provider) => (
                 <Space>
                     <Button type="text" size="small" icon={<EditOutlined />} onClick={() => openModal(record)} />
-                    <Popconfirm title="确定要删除此第三方账号？" onConfirm={() => deleteAccount(record.id)} okText="确认" cancelText="取消">
+                    <Popconfirm title="确定要删除此供应商？" onConfirm={() => deleteProviderItem(record.id)} okText="确认" cancelText="取消">
                         <Button type="text" size="small" icon={<DeleteOutlined />} danger />
                     </Popconfirm>
                 </Space>
@@ -214,8 +179,8 @@ export function ThirdPartyAccountPage() {
         <>
             <div className="mb-8 flex justify-between items-end">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800 mb-2">第三方账号管理</h1>
-                    <p className="text-gray-500 mt-1">管理系统第三方账号</p>
+                    <h1 className="text-2xl font-bold text-gray-800 mb-2">模型供应商管理</h1>
+                    <p className="text-gray-500 mt-1">配置模型服务提供商</p>
                 </div>
                 <Button
                     type="primary"
@@ -224,14 +189,14 @@ export function ThirdPartyAccountPage() {
                     className="rounded-xl h-12 shadow-lg shadow-blue-100"
                     onClick={() => openModal()}
                 >
-                    新增账号
+                    新增供应商
                 </Button>
             </div>
 
             <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
                 <div className="mb-6 flex gap-4">
                     <Input
-                        placeholder="搜索第三方账号..."
+                        placeholder="搜索供应商..."
                         prefix={<SearchOutlined className="text-gray-400" />}
                         className="max-w-xs rounded-xl h-10"
                         onPressEnter={(e) => handleSearch((e.target as HTMLInputElement).value)}
@@ -246,9 +211,9 @@ export function ThirdPartyAccountPage() {
                 </div>
                 <Table
                     columns={columns}
-                    dataSource={accounts}
+                    dataSource={providers}
                     rowKey="id"
-                    scroll={{ x: 800 }}
+                    scroll={{ x: 1000 }}
                     className="custom-table"
                     pagination={{
                         showSizeChanger: true,
@@ -268,11 +233,11 @@ export function ThirdPartyAccountPage() {
             </Card>
 
             <Modal
-                title={editingItem ? "编辑第三方账号" : "新建第三方账号"}
+                title={editingItem ? "编辑供应商配置" : "新建供应商配置"}
                 open={isModalVisible}
                 onCancel={() => setIsModalVisible(false)}
                 onOk={() => form.submit()}
-                width={600}
+                width={700}
                 centered
                 okButtonProps={{ className: "rounded-lg h-10 px-6" }}
                 cancelButtonProps={{ className: "rounded-lg h-10 px-6" }}
@@ -285,22 +250,27 @@ export function ThirdPartyAccountPage() {
 
                     <Row gutter={16}>
                         <Col span={12}>
-                            <Form.Item name="nickname" label="昵称" rules={[{ required: true }]}>
-                                <Input placeholder="例如: 用户昵称" className="rounded-lg h-10" />
+                            <Form.Item name="name" label="供应商名称" rules={[{ required: true }]}>
+                                <Input placeholder="例如: OpenAI" className="rounded-lg h-10" />
                             </Form.Item>
                         </Col>
                         <Col span={12}>
-                            <Form.Item name="platform" label="平台" rules={[{ required: true }]}>
-                                <Select className="w-full rounded-lg h-10 flex items-center" placeholder="选择平台">
-                                    <Select.Option value={1}>NapCat OICQ</Select.Option>
-                                    <Select.Option value={2}>Lark</Select.Option>
+                            <Form.Item name="apiType" label="API 类型" rules={[{ required: true }]}>
+                                <Select className="w-full rounded-lg h-10 flex items-center" placeholder="选择API类型">
+                                    <Select.Option value={0}>OpenAI</Select.Option>
+                                    <Select.Option value={1}>Claude</Select.Option>
+                                    <Select.Option value={2}>Gemini</Select.Option>
                                 </Select>
                             </Form.Item>
                         </Col>
                     </Row>
 
-                    <Form.Item name="accountId" label="账号 ID" rules={[{ required: true }]}>
-                        <Input placeholder="例如: 12345678" className="rounded-lg h-10" />
+                    <Form.Item name="chatCompletionsUrl" label="Chat Completions URL" rules={[{ required: true }]}>
+                        <Input placeholder="例如: https://api.openai.com/v1/chat/completions" className="rounded-lg h-10" />
+                    </Form.Item>
+
+                    <Form.Item name="description" label="描述信息">
+                        <TextArea rows={2} placeholder="输入供应商描述..." className="rounded-lg" />
                     </Form.Item>
                 </Form>
             </Modal>

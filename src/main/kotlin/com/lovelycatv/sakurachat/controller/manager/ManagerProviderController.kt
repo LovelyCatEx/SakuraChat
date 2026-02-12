@@ -38,11 +38,10 @@ class ManagerProviderController(
     @GetMapping("/search")
     suspend fun searchProviders(
         @RequestParam("keyword") keyword: String,
-        @RequestParam("page") page: Int = 1,
-        @RequestParam("pageSize") pageSize: Int = 5
+        @ModelAttribute pageQuery: PageQuery
     ): ApiResponse<*> {
         return ApiResponse.success(
-            providerService.search(keyword, page, pageSize)
+            providerService.search(keyword, pageQuery.page, pageQuery.pageSize)
         )
     }
 
