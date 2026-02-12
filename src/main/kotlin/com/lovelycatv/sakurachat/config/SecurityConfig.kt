@@ -12,6 +12,7 @@ import com.lovelycatv.sakurachat.filter.AuthorizationFilter
 import com.lovelycatv.sakurachat.filter.CustomLoginFilter
 import com.lovelycatv.vertex.log.logger
 import jakarta.annotation.Resource
+import org.springframework.aop.framework.AopProxyUtils
 import org.springframework.beans.factory.getBeansWithAnnotation
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
@@ -107,14 +108,14 @@ class SecurityConfig {
         val controllerBeans = applicationContext.getBeansWithAnnotation<RestController>()
 
         controllerBeans.values.forEach { bean ->
-            val beanType = bean.javaClass
+            // Fix: annotations will be lost in proxy class object,
+            // use ultimateTargetClass to find the original object
+            val beanType = AopProxyUtils.ultimateTargetClass(bean)
 
             val classUnauthorized = beanType.getAnnotation(Unauthorized::class.java)
 
             val classRequestMapping = beanType.getAnnotation(RequestMapping::class.java)
             val classPathPrefixes = classRequestMapping?.value?.toList() ?: listOf("")
-
-            val a = beanType.declaredMethods
 
             beanType.declaredMethods.forEach { method ->
                 val methodUnauthorized = method.getAnnotation(Unauthorized::class.java)

@@ -42,10 +42,9 @@ class UserPointsServiceImpl(
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    override suspend fun consumePoints(userId: Long, request: UserPointsConsumeRequest): UserEntity {
-        val user = withContext(Dispatchers.IO) {
-            getRepository().findById(userId).getOrNull()
-        } ?: throw BusinessException("User $userId not found")
+    override fun consumePoints(userId: Long, request: UserPointsConsumeRequest): UserEntity {
+        val user = getRepository().findById(userId).getOrNull()
+            ?: throw BusinessException("User $userId not found")
 
         val consumesOrGains = request.delta >= 0
 
@@ -55,17 +54,15 @@ class UserPointsServiceImpl(
             throw BusinessException("Insufficient points to consume, expect ${request.delta} points but ${user.points} last")
         }
 
-        return withContext(Dispatchers.IO) {
-            userPointsLogService.record(userId, request)
+        userPointsLogService.record(userId, request)
 
-            getRepository().save(
-                user.apply {
-                    this.points = pointsAfterConsumed
-                    this.modifiedTime = System.currentTimeMillis()
-                }
-            ).also {
-                logger.info("${if (consumesOrGains) "[-]" else "[+]"} User ${user.id} ${if (consumesOrGains) "consumed" else "gained"} ${request.delta} points")
+        return getRepository().save(
+            user.apply {
+                this.points = pointsAfterConsumed
+                this.modifiedTime = System.currentTimeMillis()
             }
+        ).also {
+            logger.info("${if (consumesOrGains) "[-]" else "[+]"} User ${user.id} ${if (consumesOrGains) "consumed" else "gained"} ${request.delta} points")
         }
     }
 

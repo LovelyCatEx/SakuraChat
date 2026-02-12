@@ -12,10 +12,13 @@ import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.service.SystemSettingsService
 import com.lovelycatv.sakurachat.service.mail.MailService
 import com.lovelycatv.sakurachat.types.SakuraChatSystemSettings
+import jakarta.validation.constraints.Email
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/manager/settings")
+@Validated
 class ManagerSettingsController(
     private val systemSettingsService: SystemSettingsService,
     private val mailService: MailService,
@@ -31,7 +34,11 @@ class ManagerSettingsController(
     }
 
     @PostMapping("/sendTestEmail")
-    suspend fun sendTestEmail(@RequestParam("email") email: String): ApiResponse<*> {
+    suspend fun sendTestEmail(
+        @RequestParam("email")
+        @Email(message = "Must be a valid email address")
+        email: String
+    ): ApiResponse<*> {
         mailService.refreshSettings()
         mailService.sendMail(email, "SakuraChat", "SakuraChat TestEmail")
 

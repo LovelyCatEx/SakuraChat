@@ -18,7 +18,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 interface BaseService<R: JpaRepository<T, ID>, T, ID: Any> {
     fun getRepository(): R
 
-    suspend fun listByPage(page: Int, size: Int): Page<T> {
+    fun listByPage(page: Int, size: Int): Page<T> {
         return this.getRepository().findAll(
             Pageable
                 .ofSize(size)
@@ -26,13 +26,11 @@ interface BaseService<R: JpaRepository<T, ID>, T, ID: Any> {
         )
     }
 
-    suspend fun getById(id: ID): T? {
-        return withContext(Dispatchers.IO) {
-            getRepository().findById(id)
-        }.orElse(null)
+    fun getById(id: ID): T? {
+        return getRepository().findById(id).orElse(null)
     }
 
-    suspend fun getByIdOrThrow(
+    fun getByIdOrThrow(
         id: ID,
         t: Throwable = BusinessException("Resource with id $id not found")
     ): T {

@@ -30,13 +30,11 @@ class SystemSettingsServiceImpl(
         return this.systemSettingsRepository
     }
 
-    override suspend fun getSettings(
+    override fun getSettings(
         key: String,
         onAbsentOrNull: ((absentOrNull: Boolean) -> String?)?
     ): String? {
-        val settings = withContext(Dispatchers.IO) {
-            getRepository().findByKey(key)
-        }.getOrNull(0)
+        val settings = getRepository().findByKey(key).getOrNull(0)
 
         if (settings != null) {
             if (settings.value == null && onAbsentOrNull != null) {
@@ -65,33 +63,29 @@ class SystemSettingsServiceImpl(
         return absentValue
     }
 
-    override suspend fun setSettings(key: String, value: String?) {
-        val existingSettings = withContext(Dispatchers.IO) {
-            getRepository().findByKey(key)
-        }.getOrNull(0)
+    override fun setSettings(key: String, value: String?) {
+        val existingSettings = getRepository().findByKey(key).getOrNull(0)
 
-        withContext(Dispatchers.IO) {
-            if (existingSettings != null) {
-                getRepository().save(
-                    existingSettings.apply {
-                        this.value = value
-                    }
+        (if (existingSettings != null) {
+            getRepository().save(
+                existingSettings.apply {
+                    this.value = value
+                }
+            )
+        } else {
+            getRepository().save(
+                SystemSettingsEntity(
+                    id = snowIdGenerator.nextId(),
+                    key = key,
+                    value = value
                 )
-            } else {
-                getRepository().save(
-                    SystemSettingsEntity(
-                        id = snowIdGenerator.nextId(),
-                        key = key,
-                        value = value
-                    )
-                )
-            }
-        }.also {
+            )
+        }).also {
             logger.info("System settings [$key] successfully set to [$value]")
         }
     }
 
-    override suspend fun getAllSettings(): SakuraChatSystemSettings{
+    override fun getAllSettings(): SakuraChatSystemSettings{
         return SakuraChatSystemSettings(
             userRegistration = SakuraChatSystemSettings.UserRegistration(
                 initialPoints = getSettings(SystemSettings.UserRegistration.INITIAL_POINTS) { "0" }!!.toLong()
@@ -109,7 +103,7 @@ class SystemSettingsServiceImpl(
         )
     }
 
-    override suspend fun updateAllSettings(settings: SakuraChatSystemSettings) {
+    override fun updateAllSettings(settings: SakuraChatSystemSettings) {
         setSettings(SystemSettings.UserRegistration.INITIAL_POINTS, settings.userRegistration.initialPoints.toString())
 
         setSettings(SystemSettings.Mail.SMTP.HOST, settings.mail.smtp.host)
@@ -118,5 +112,19 @@ class SystemSettingsServiceImpl(
         setSettings(SystemSettings.Mail.SMTP.PASSWORD, settings.mail.smtp.password)
         setSettings(SystemSettings.Mail.SMTP.SSL, settings.mail.smtp.ssl.toString())
         setSettings(SystemSettings.Mail.SMTP.FROM_EMAIL, settings.mail.smtp.fromEmail)
+    }
+
+    private var sakuraChatSystemSettings: SakuraChatSystemSettings? = null
+    private var needRefreshSettings = true
+    override fun getAllSettingsLazy(): SakuraChatSystemSettings {
+        if (sakuraChatSystemSettings == null || needRefreshSettings) {
+            this.sakuraChatSystemSettings = this.getAllSettings()
+        }
+
+        return this.sakuraChatSystemSettings!!
+    }
+
+    override fun refreshSettings() {
+        this.needRefreshSettings = true
     }
 }

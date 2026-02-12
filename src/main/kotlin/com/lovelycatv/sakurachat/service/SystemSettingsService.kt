@@ -13,14 +13,18 @@ import com.lovelycatv.sakurachat.repository.SystemSettingsRepository
 import com.lovelycatv.sakurachat.types.SakuraChatSystemSettings
 
 interface SystemSettingsService : BaseService<SystemSettingsRepository, SystemSettingsEntity, Long> {
-    suspend fun getSettings(
+    fun getSettings(
         key: String,
         onAbsentOrNull: ((absentOrNull: Boolean) -> String?)? = null
     ): String?
 
-    suspend fun setSettings(key: String, value: String?)
+    fun setSettings(key: String, value: String?)
 
-    suspend fun getAllSettings(): SakuraChatSystemSettings
+    fun getAllSettings(): SakuraChatSystemSettings
 
-    suspend fun updateAllSettings(settings: SakuraChatSystemSettings)
+    fun updateAllSettings(settings: SakuraChatSystemSettings)
+
+    fun getAllSettingsLazy(): SakuraChatSystemSettings
+
+    fun refreshSettings()
 }

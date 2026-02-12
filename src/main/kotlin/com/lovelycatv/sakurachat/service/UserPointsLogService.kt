@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional
 
 interface UserPointsLogService : BaseService<UserPointsLogRepository, UserPointsLogEntity, Long> {
     @Transactional(propagation = Propagation.REQUIRED)
-    suspend fun record(userId: Long, request: UserPointsConsumeRequest): UserPointsLogEntity
+    fun record(userId: Long, request: UserPointsConsumeRequest): UserPointsLogEntity
 
-    suspend fun listUserPointsLogs(userId: Long, query: PageQuery): PaginatedResponseData<UserPointsLogEntity>
+    fun listUserPointsLogs(userId: Long, query: PageQuery): PaginatedResponseData<UserPointsLogEntity>
 }

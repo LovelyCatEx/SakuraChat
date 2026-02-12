@@ -12,7 +12,7 @@ import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateUserDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.UpdateUserDTO
 import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.request.PageQuery
-import com.lovelycatv.sakurachat.service.UserService
+import com.lovelycatv.sakurachat.service.user.UserService
 import com.lovelycatv.sakurachat.utils.toPaginatedResponseData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

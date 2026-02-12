@@ -19,7 +19,7 @@ import com.lovelycatv.sakurachat.daemon.SakuraChatMessageChannelDaemon
 import com.lovelycatv.sakurachat.service.AgentService
 import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
 import com.lovelycatv.sakurachat.service.ThirdPartyGroupService
-import com.lovelycatv.sakurachat.service.UserService
+import com.lovelycatv.sakurachat.service.user.UserService
 import com.lovelycatv.sakurachat.thirdparty.AbstractThirdPartyMessageDispatcher
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 import com.lovelycatv.sakurachat.utils.toJSONString

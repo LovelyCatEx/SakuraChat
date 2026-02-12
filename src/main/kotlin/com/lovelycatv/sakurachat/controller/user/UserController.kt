@@ -11,22 +11,38 @@ import com.lovelycatv.sakurachat.annotations.Unauthorized
 import com.lovelycatv.sakurachat.controller.user.dto.UserProfileVO
 import com.lovelycatv.sakurachat.controller.user.dto.UserRegisterDTO
 import com.lovelycatv.sakurachat.request.ApiResponse
-import com.lovelycatv.sakurachat.service.UserService
+import com.lovelycatv.sakurachat.service.user.UserService
 import com.lovelycatv.sakurachat.types.UserAuthentication
 import jakarta.annotation.Resource
+import jakarta.validation.constraints.Email
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/user")
+@Validated
 class UserController {
     @Resource
     private lateinit var userService: UserService
 
+    @Unauthorized
     @PostMapping("/register")
     suspend fun register(dto: UserRegisterDTO): ApiResponse<*> {
         userService.register(dto.username, dto.password, dto.email, dto.emailCode)
 
-        return ApiResponse.success(null, "")
+        return ApiResponse.success(null, dto.email)
+    }
+
+    @Unauthorized
+    @PostMapping("/requestRegisterEmailCode")
+    suspend fun requestRegisterEmailCode(
+        @RequestParam("email")
+        @Email(message = "Must be a valid email address")
+        email: String
+    ): ApiResponse<*> {
+        userService.sendRegisterEmail(email)
+
+        return ApiResponse.success(null)
     }
 
     @Unauthorized
@@ -50,7 +66,7 @@ class UserController {
 
         return ApiResponse.success(
             UserProfileVO(
-                userId = user.id!!,
+                userId = user.id,
                 username = user.username,
                 nickname = user.nickname,
                 email = if (isSelf) user.email else null,

@@ -7,4 +7,4 @@
  */
 package com.lovelycatv.sakurachat.exception
 
-open class BusinessException(message: String) : Throwable(message)
+open class BusinessException(message: String) : RuntimeException(message)

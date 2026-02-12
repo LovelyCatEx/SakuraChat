@@ -9,7 +9,9 @@
 package com.lovelycatv.sakurachat.service.mail
 
 import com.lovelycatv.sakurachat.constants.SystemSettings
+import com.lovelycatv.sakurachat.exception.BusinessException
 import com.lovelycatv.sakurachat.service.SystemSettingsService
+import com.lovelycatv.vertex.log.logger
 import jakarta.annotation.Resource
 import jakarta.mail.internet.MimeMessage
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,32 +23,35 @@ import org.springframework.stereotype.Service
 class MailServiceImpl(
     private val mailSenderContainer: JavaMailSenderContainer
 ) : MailService {
-    @Autowired
-    private lateinit var systemSettingsService: SystemSettingsService
+    private val logger = logger()
+
     override fun refreshSettings() {
         mailSenderContainer.refreshSettings()
     }
 
-    override suspend fun sendMail(to: String, subject: String, content: String) {
-        val from = systemSettingsService.getSettings(SystemSettings.Mail.SMTP.FROM_EMAIL) {
-            "master@sakurachat.com"
-        }!!
+    override fun sendMail(to: String, subject: String, content: String) {
+        try {
+            val instance = mailSenderContainer.getInstance()
 
-        val instance = mailSenderContainer.getInstance()
+            val from = mailSenderContainer.getSystemSettings().mail.smtp.fromEmail
 
-        val message: MimeMessage = instance.createMimeMessage()
+            val message: MimeMessage = instance.createMimeMessage()
 
-        MimeMessageHelper(message, true, "UTF-8").apply {
-            setFrom(from)
-            setTo(to)
-            setSubject(subject)
-            setText(content, true)
+            MimeMessageHelper(message, true, "UTF-8").apply {
+                setFrom(from)
+                setTo(to)
+                setSubject(subject)
+                setText(content, true)
+            }
+
+            instance.send(message)
+        } catch (e: Exception) {
+            logger.error("Send email to $to failed, subject: $subject, content: $content", e)
+            throw BusinessException("Send email to $to failed, message: ${e.message}")
         }
-
-        instance.send(message)
     }
 
-    override suspend fun sendRegisterEmail(to: String, emailCode: String) {
+    override fun sendRegisterEmail(to: String, emailCode: String) {
         this.sendMail(
             to = to,
             subject = "SakuraChat Registration",

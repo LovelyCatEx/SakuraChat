@@ -17,6 +17,8 @@ import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.JavaMailSenderImpl
 import org.springframework.stereotype.Component
 import java.util.Properties
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 @Component
 class JavaMailSenderContainer(
@@ -25,13 +27,15 @@ class JavaMailSenderContainer(
     private val logger = logger()
 
     private var mailSender: JavaMailSender? = null
+    private var systemSettings: SakuraChatSystemSettings? = null
     private var needRefresh: Boolean = true
-    private val mutex = Mutex()
+    private val mutex = ReentrantLock()
 
-    suspend fun getInstance(): JavaMailSender {
+    fun getInstance(): JavaMailSender {
         return mutex.withLock {
             if (this.mailSender == null || needRefresh) {
                 val settings = systemSettingsService.getAllSettings()
+                this.systemSettings = settings
                 logger.info("MailSenderContainer is refreshing, settings: ${settings.mail}")
                 this.mailSender = createMailSender(settings)
                 this.needRefresh = false
@@ -66,5 +70,10 @@ class JavaMailSenderContainer(
                 this["mail.smtp.ssl.timeout"] = "$timeout"
             }
         }
+    }
+
+    fun getSystemSettings(): SakuraChatSystemSettings {
+        return this.systemSettings
+            ?: throw IllegalStateException("container has not been initialized, please call getInstance() first")
     }
 }

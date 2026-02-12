@@ -37,7 +37,7 @@ class UserPointsLogServiceImpl(
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    override suspend fun record(
+    override fun record(
         userId: Long,
         request: UserPointsConsumeRequest
     ): UserPointsLogEntity {
@@ -76,25 +76,21 @@ class UserPointsLogServiceImpl(
             }
         }
 
-        return withContext(Dispatchers.IO) {
-            getRepository().save(entity)
-        }.also {
+        return getRepository().save(entity).also {
             logger.info("User points log saved, user: $userId, request: $request")
         }
     }
 
-    override suspend fun listUserPointsLogs(
+    override fun listUserPointsLogs(
         userId: Long,
         query: PageQuery
     ): PaginatedResponseData<UserPointsLogEntity> {
-        return withContext(Dispatchers.IO) {
-            getRepository().findAllByUserId(
-                userId,
-                query.toPageable(
-                    Sort.Direction.DESC,
-                    "createdTime",
-                ),
-            )
-        }.toPaginatedResponseData()
+        return getRepository().findAllByUserId(
+            userId,
+            query.toPageable(
+                Sort.Direction.DESC,
+                "createdTime",
+            ),
+        ).toPaginatedResponseData()
     }
 }

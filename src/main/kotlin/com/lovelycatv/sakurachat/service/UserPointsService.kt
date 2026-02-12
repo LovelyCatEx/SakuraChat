@@ -20,7 +20,7 @@ interface UserPointsService : BaseService<UserRepository, UserEntity, Long> {
     suspend fun hasPoints(userId: Long, minimum: Long): Boolean
 
     @Transactional(propagation = Propagation.REQUIRED)
-    suspend fun consumePoints(userId: Long, request: UserPointsConsumeRequest): UserEntity
+    fun consumePoints(userId: Long, request: UserPointsConsumeRequest): UserEntity
 
     fun buildAgentChatCompletionsRequest(
         userId: Long,
