@@ -13,7 +13,7 @@ import com.lovelycatv.vertex.ai.openai.ChatMessageRole
 import com.lovelycatv.vertex.ai.openai.message.ChatMessage
 
 interface AgentContextService {
-    suspend fun getContextForChatCompletions(
+    fun getContextForChatCompletions(
         userId: Long,
         agentId: Long,
         channelId: Long
@@ -21,6 +21,7 @@ interface AgentContextService {
 
     fun buildChatMessageFromAbstractMessage(
         message: AbstractMessage,
-        role: ChatMessageRole
+        role: ChatMessageRole,
+        senderIdentifier: String?
     ): ChatMessage
 }

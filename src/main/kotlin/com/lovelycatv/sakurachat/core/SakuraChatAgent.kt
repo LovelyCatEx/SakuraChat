@@ -35,7 +35,7 @@ class SakuraChatAgent(
 ) : AbstractSakuraChatChannelMember(ChannelMemberType.AGENT) {
     private val logger = logger()
 
-    override val id: Long get() = this.agent.agent.id!!
+    override val id: Long get() = this.agent.agent.id
 
     // Supervisor job prevents exception blocking message handler tasks
     private val supervisorJob = SupervisorJob()
@@ -59,7 +59,7 @@ class SakuraChatAgent(
 
         coroutineScope.launch {
             if (sender is SakuraChatUser) {
-                val agentMember = channel.getAgentMember(agent.agent.id!!)!!
+                val agentMember = channel.getAgentMember(agent.agent.id)!!
 
                 getMessageToResponse(channel, sender, message, true) {
                     it.forEach {
@@ -88,7 +88,7 @@ class SakuraChatAgent(
 
         coroutineScope.launch {
             if (sender is SakuraChatUser) {
-                val agentMember = channel.getAgentMember(agent.agent.id!!)!!
+                val agentMember = channel.getAgentMember(agent.agent.id)!!
                 getMessageToResponse(channel, sender, message, true) {
                     if (it.isNotEmpty()) {
                         it.forEach {
@@ -157,14 +157,17 @@ class SakuraChatAgent(
                 null
             },
             messages = agentContextService.getContextForChatCompletions(
-                userId = sender.user.id!!,
-                agentId = agent.agent.id!!,
+                userId = sender.user.id,
+                agentId = agent.agent.id,
                 channelId = channel.channelId
             ) + listOf(
                 // User input
                 agentContextService.buildChatMessageFromAbstractMessage(
                     message,
-                    ChatMessageRole.USER
+                    ChatMessageRole.USER,
+                    // getContextForChatCompletions() has processed seder
+                    // so the parameter here should be null
+                    null
                 )
             ),
             temperature = chatModelEntity.chatModel.getQualifiedTemperature(),

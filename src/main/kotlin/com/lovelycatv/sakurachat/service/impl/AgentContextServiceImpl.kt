@@ -8,18 +8,21 @@
 
 package com.lovelycatv.sakurachat.service.impl
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.lovelycatv.sakurachat.core.im.message.*
+import com.lovelycatv.sakurachat.entity.channel.IMChannelEntity
+import com.lovelycatv.sakurachat.entity.channel.IMChannelMessageEntity
+import com.lovelycatv.sakurachat.repository.AgentChannelRelationRepository
+import com.lovelycatv.sakurachat.repository.UserChannelRelationRepository
 import com.lovelycatv.sakurachat.service.AgentContextService
 import com.lovelycatv.sakurachat.service.AgentService
 import com.lovelycatv.sakurachat.service.ChannelMessageSerializationService
 import com.lovelycatv.sakurachat.service.IMChannelMessageService
+import com.lovelycatv.sakurachat.service.IMChannelService
 import com.lovelycatv.sakurachat.types.ChannelMemberType
+import com.lovelycatv.sakurachat.types.ChannelType
 import com.lovelycatv.vertex.ai.openai.ChatMessageRole
 import com.lovelycatv.vertex.ai.openai.message.ChatMessage
 import com.lovelycatv.vertex.log.logger
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -27,47 +30,77 @@ import kotlin.jvm.optionals.getOrNull
 
 @Service
 class AgentContextServiceImpl(
-    private val IMChannelMessageService: IMChannelMessageService,
+    private val imChannelMessageService: IMChannelMessageService,
+    private val imChannelService: IMChannelService,
     private val agentService: AgentService,
-    private val objectMapper: ObjectMapper,
     private val channelMessageSerializationService: ChannelMessageSerializationService,
+    private val agentChannelRelationRepository: AgentChannelRelationRepository,
+    private val userChannelRelationRepository: UserChannelRelationRepository,
 ) : AgentContextService {
     private val logger = logger()
 
-    override suspend fun getContextForChatCompletions(
+    override fun getContextForChatCompletions(
         userId: Long,
         agentId: Long,
         channelId: Long
     ): List<ChatMessage> {
-        val agent = withContext(Dispatchers.IO) {
-            agentService.getRepository().findById(agentId)
-        }.getOrNull()
+        val agent = agentService.getRepository().findById(agentId).getOrNull()
 
         if (agent == null) {
             logger.error("Could build context for chat completions, because agent with id $agentId not found")
             throw IllegalArgumentException("Agent with id $agentId not found")
         }
 
-        val messages = withContext(Dispatchers.IO) {
-            IMChannelMessageService
-                .getRepository()
-                .findByChannelId(
-                    channelId,
-                    PageRequest.of(
-                        0,
-                        128,
-                        Sort.Direction.DESC,
-                        "createdTime"
-                    )
-                )
-        }.reversed()
+        val channel = imChannelService.getByIdOrThrow(channelId)
 
-        return listOf(
+        val prompt = listOf(
             ChatMessage(
                 role = ChatMessageRole.SYSTEM,
-                content = agent.prompt
+                content = agent.prompt + """
+                    If a user message starts with [?], it means you are now conversing with a different user.  
+                    The text inside the brackets [] is the unique identifier of that user.
+
+                    You must primarily respond based on the message from the user you are currently speaking with: **[$userId]**.  
+                    Messages from other users may be used as contextual reference only.
+
+                    **Important: You are only allowed to reply to the message from user [$userId].**
+                    **Do not respond to messages from any other users.**
+                    **Important: You are only allowed to reply to the message from user [$userId].**
+                    **Do not respond to messages from any other users.**
+                    **Important: You are only allowed to reply to the message from user [$userId].**
+                    **Do not respond to messages from any other users.**
+                """.trimIndent()
             )
-        ) + messages.map {
+        )
+
+        val messagesInChannel = imChannelMessageService
+            .getRepository()
+            .findByChannelId(
+                channelId,
+                PageRequest.of(
+                    0,
+                    128,
+                    Sort.Direction.DESC,
+                    "createdTime"
+                )
+            ).reversed()
+
+        val contextBody = if (channel.getRealChannelType() == ChannelType.PRIVATE) {
+            this.processPrivateMessages(messagesInChannel, null)
+        } else if (channel.getRealChannelType() == ChannelType.GROUP) {
+            this.processGroupMessages(agentId, messagesInChannel)
+        } else {
+            throw IllegalArgumentException("Unsupported channel type ${channel.getRealChannelType().name}")
+        }
+
+        return prompt + contextBody
+    }
+
+    private fun processPrivateMessages(
+        messages: List<IMChannelMessageEntity>,
+        senderIdentifier: String? = null
+    ): List<ChatMessage> {
+        return messages.map {
             this.buildChatMessageFromAbstractMessage(
                 message = channelMessageSerializationService.fromJSONString(it.content),
                 role = if (it.getRealMemberType() == ChannelMemberType.AGENT) {
@@ -77,29 +110,60 @@ class AgentContextServiceImpl(
                 } else {
                     throw IllegalStateException("Unknown memberId ${it.memberId} of channel ${it.channelId}, neither agent nor user.")
                 },
+                senderIdentifier = senderIdentifier
+            )
+        }
+    }
+
+    private fun processGroupMessages(agentId: Long, messages: List<IMChannelMessageEntity>): List<ChatMessage> {
+        return messages.map {
+            val role = if (it.getRealMemberType() == ChannelMemberType.AGENT) {
+                // the message may be sent by other AGENT in group though the memberType is AGENT
+                if (it.memberId == agentId) {
+                    // only when the memberId is the current agentId
+                    ChatMessageRole.ASSISTANT
+                } else {
+                    // otherwise the role should be recognized as USER
+                    ChatMessageRole.USER
+                }
+            } else if (it.getRealMemberType() == ChannelMemberType.USER) {
+                ChatMessageRole.USER
+            } else {
+                throw IllegalStateException("Unknown memberId ${it.memberId} of channel ${it.channelId}, neither agent nor user.")
+            }
+
+            this.buildChatMessageFromAbstractMessage(
+                message = channelMessageSerializationService.fromJSONString(it.content),
+                role = role,
+                senderIdentifier = if (role == ChatMessageRole.USER)
+                    "[${it.memberId}]"
+                else
+                    null
             )
         }
     }
 
     override fun buildChatMessageFromAbstractMessage(
         message: AbstractMessage,
-        role: ChatMessageRole
+        role: ChatMessageRole,
+        senderIdentifier: String?
     ): ChatMessage {
         return if (message is ChainMessage) {
-            buildChatMessageFromChainMessage(message, role)
+            buildChatMessageFromChainMessage(message, role, senderIdentifier)
         } else {
-            buildChatMessageFromAtomicMessage(message, role)
+            buildChatMessageFromAtomicMessage(message, role, senderIdentifier)
         }
     }
 
     private fun buildChatMessageFromChainMessage(
         chainMessage: ChainMessage,
-        role: ChatMessageRole
+        role: ChatMessageRole,
+        senderIdentifier: String?
     ): ChatMessage {
         return ChatMessage(
             role = role,
             content = chainMessage.messages.map {
-                buildChatMessageFromAtomicMessage(it, role)
+                buildChatMessageFromAtomicMessage(it, role, senderIdentifier)
             }.joinToString(separator = " ", prefix = "", postfix = "") {
                 it.content
             }
@@ -108,20 +172,21 @@ class AgentContextServiceImpl(
 
     private fun buildChatMessageFromAtomicMessage(
         atomicMessage: AbstractMessage,
-        role: ChatMessageRole
+        role: ChatMessageRole,
+        senderIdentifier: String?
     ): ChatMessage {
         if (!atomicMessage.isAtomic()) {
             throw IllegalArgumentException("Message ${atomicMessage.type} must be atomic")
         }
 
-        return when (atomicMessage) {
+        val raw = when (atomicMessage) {
             is TextMessage -> ChatMessage(
                 role = role,
                 content = atomicMessage.message
             )
 
             is QuoteMessage -> {
-                val raw = buildChatMessageFromAbstractMessage(atomicMessage.message, role)
+                val raw = buildChatMessageFromAbstractMessage(atomicMessage.message, role, senderIdentifier)
                 raw.copy(
                     content = "[quote:${raw.content}]"
                 )
@@ -133,6 +198,12 @@ class AgentContextServiceImpl(
             )
 
             else -> throw IllegalArgumentException("Unsupported message type ${atomicMessage.javaClass}")
+        }
+
+        return if (senderIdentifier != null) {
+           raw.copy(content = senderIdentifier + raw.content)
+        } else {
+            raw
         }
     }
 }
