@@ -14,9 +14,13 @@ import com.lovelycatv.sakurachat.types.PointsChangesReason
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Table
+import org.hibernate.annotations.SQLDelete
+import org.hibernate.annotations.SQLRestriction
 
 @Entity
-@Table(name = "user_points_logs", schema = "sakurachat")
+@Table(name = "user_points_logs")
+@SQLDelete(sql = "UPDATE user_points_logs SET deleted_time = ROUND(UNIX_TIMESTAMP(CURTIME(3)) * 1000) WHERE id = ?")
+@SQLRestriction(BaseEntity.SOFT_NON_DELETED_RESTRICTION)
 class UserPointsLogEntity(
     override var id: Long = 0,
     @Column(name = "user_id", nullable = false)
