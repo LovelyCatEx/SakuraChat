@@ -30,7 +30,7 @@ export function UserPointsLogPage() {
                 void message.warning("查询积分消耗记录失败")
             }
 
-            if (pointsRes.data) {
+            if (pointsRes.data !== undefined && pointsRes.data !== null) {
                 setMyPoints(pointsRes.data);
             } else {
                 void message.warning("查询积分余额失败")
