@@ -61,7 +61,7 @@ const ChatPreview = () => {
                     <span className="ml-4 text-xs text-gray-400 font-medium">SakuraChat WebUI v1.0.0</span>
                 </div>
 
-                <div className="p-6 space-y-4 h-[380px] bg-white overflow-y-auto">
+                <div className="p-6 space-y-4 md:h-[380px] bg-white overflow-y-auto pr-4">
                     {messages.map((msg) => (
                         <div key={msg.id} className={`flex items-start space-x-3 ${msg.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
                             <div className={`w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center text-white text-[10px] ${msg.type === 'ai' ? 'bg-pink-400' : 'bg-gray-200'}`}>
@@ -276,7 +276,6 @@ const MainPage = () => {
             title: '功能',
             dataIndex: 'feature',
             key: 'feature',
-            width: 280,
             align: 'center'
         },
         {
@@ -291,7 +290,7 @@ const MainPage = () => {
             key: 'status',
             render: (status: DevelopmentStatus, record: FeatureSupportItem) => renderStatus(status, record.tooltips),
             align: 'center',
-            width: 200.
+            width: 150
         }
     ];
 
@@ -499,7 +498,7 @@ const MainPage = () => {
                                 dataSource={featureSupportData}
                                 columns={featureSupportColumns}
                                 pagination={false}
-                                scroll={{ x: 800 }}
+                                scroll={{ x: 0 }}
                                 className="ant-table-custom"
                             />
                         </Card>
@@ -519,7 +518,7 @@ const MainPage = () => {
                                 dataSource={platformMessageSupportData}
                                 columns={platformMessageSupportColumns}
                                 pagination={false}
-                                scroll={{ x: 600 }}
+                                scroll={{ x: 0 }}
                                 className="ant-table-custom"
                             />
                         </Card>
