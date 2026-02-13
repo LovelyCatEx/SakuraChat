@@ -1,7 +1,17 @@
 import {useEffect, useState} from 'react';
 import {Link, useNavigate} from 'react-router-dom';
-import {Badge, Button, Card, Col, Layout, Row} from 'antd';
-import {GithubOutlined, MenuOutlined, MessageOutlined, SyncOutlined, UserOutlined} from '@ant-design/icons';
+import {Badge, Button, Card, Col, Layout, Row, Table, Tooltip} from 'antd';
+import {
+    CheckCircleFilled,
+    ClockCircleFilled,
+    CloseCircleFilled,
+    GithubOutlined,
+    MenuOutlined,
+    MessageOutlined,
+    SyncOutlined,
+    UserOutlined
+} from '@ant-design/icons';
+import type {ColumnGroupType, ColumnType} from "antd/es/table";
 
 const { Header, Content, Footer } = Layout;
 
@@ -89,6 +99,154 @@ const MainPage = () => {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
         }, []);
+
+    type DevelopmentStatus = 'supported' | 'developing' | 'planned' | 'not-supported';
+    interface PlatformMessageSupportItem {
+        key: string;
+        type: string;
+        qq: DevelopmentStatus;
+        qqTooltips?: string;
+        lark: DevelopmentStatus;
+        larkTooltips?: string;
+        web: DevelopmentStatus;
+        webTooltips?: string;
+    }
+
+    const renderStatus = (status: DevelopmentStatus, tooltips?: string) => {
+        const getStatusConfig = (status: DevelopmentStatus) => {
+            switch (status) {
+                case 'supported':
+                    return {
+                        className: 'bg-green-100 text-green-800',
+                        icon: <CheckCircleFilled className="text-xs" />,
+                        text: '支持'
+                    };
+                case 'developing':
+                    return {
+                        className: 'bg-orange-100 text-yellow-800',
+                        icon: <ClockCircleFilled className="text-xs" />,
+                        text: '开发中'
+                    };
+                case 'planned':
+                    return {
+                        className: 'bg-blue-50 text-blue-400',
+                        icon: <ClockCircleFilled className="text-xs" />,
+                        text: '计划中'
+                    };
+                case 'not-supported':
+                    return {
+                        className: 'bg-red-50 text-red-600',
+                        icon: <CloseCircleFilled className="text-xs" />,
+                        text: '不支持'
+                    };
+                default:
+                    return null;
+            }
+        };
+
+        const config = getStatusConfig(status);
+
+        if (!config) {
+            return status;
+        }
+
+        const content = (
+            <span className={`px-2 py-1 ${config.className} rounded-full inline-flex items-center justify-center gap-1`}>
+            {config.icon}
+                {config.text}
+        </span>
+        );
+
+        return tooltips ? (
+            <Tooltip title={tooltips}>
+                {content}
+            </Tooltip>
+        ) : content;
+    };
+
+    const platformData: PlatformMessageSupportItem[] = [
+        {
+            key: 'text',
+            type: '文本',
+            qq: 'supported',
+            lark: 'supported',
+            web: 'planned',
+        },
+        {
+            key: 'text',
+            type: '@/回复',
+            qq: 'supported',
+            lark: 'planned',
+            web: 'planned',
+        },
+        {
+            key: 'emoji',
+            type: '内置表情',
+            qq: 'supported',
+            lark: 'planned',
+            web: 'planned',
+        },
+        {
+            key: 'asr',
+            type: '语音识别',
+            qq: 'planned',
+            lark: 'not-supported',
+            larkTooltips: '飞书暂不支持语音消息',
+            web: 'planned',
+        },
+        {
+            key: 'tts',
+            type: '语音合成',
+            qq: 'planned',
+            lark: 'not-supported',
+            larkTooltips: '飞书暂不支持语音消息',
+            web: 'planned',
+        },
+        {
+            key: 'image-analyze',
+            type: '图片分析',
+            qq: 'planned',
+            lark: 'planned',
+            web: 'planned',
+        },
+        {
+            key: 'image-generation',
+            type: '图片生成',
+            qq: 'planned',
+            lark: 'planned',
+            web: 'planned',
+        }
+    ];
+
+    const columns: (ColumnGroupType<PlatformMessageSupportItem> | ColumnType<PlatformMessageSupportItem>)[] = [
+        {
+            title: '消息类型',
+            dataIndex: 'type',
+            key: 'type',
+            width: 120
+        },
+        {
+            title: 'QQ',
+            dataIndex: 'qq',
+            key: 'qq',
+            render: (status: DevelopmentStatus, record: PlatformMessageSupportItem) => renderStatus(status, record.qqTooltips),
+            align: 'center'
+        },
+        {
+            title: '飞书',
+            dataIndex: 'lark',
+            key: 'lark',
+            render: (status: DevelopmentStatus, record: PlatformMessageSupportItem) => renderStatus(status, record.larkTooltips),
+            align: 'center'
+        },
+        {
+            title: 'Web',
+            dataIndex: 'web',
+            key: 'web',
+            render: (status: DevelopmentStatus, record: PlatformMessageSupportItem) => renderStatus(status, record.webTooltips),
+            align: 'center'
+        }
+    ];
 
     return (
         <Layout className="min-h-screen bg-white">
@@ -194,6 +352,26 @@ const MainPage = () => {
                                 ))
                             }
                         </Row>
+                    </div>
+                </section>
+
+                <section className="py-24 bg-[#f8fafc] px-6">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="text-center mb-16">
+                            <h2 className="text-3xl font-bold text-gray-900">支持的平台</h2>
+                            <p className="text-gray-500 mt-4 max-w-2xl mx-auto">我们正在不断拓展支持的平台和消息类型，以下是当前的支持情况和未来的开发计划</p>
+                            <div className="w-12 h-1 bg-pink-400 mx-auto mt-4 rounded-full" />
+                        </div>
+
+                        <Card className="rounded-3xl shadow-sm border-gray-100 overflow-hidden">
+                            <Table
+                                dataSource={platformData}
+                                columns={columns}
+                                pagination={false}
+                                scroll={{ x: 600 }}
+                                className="ant-table-custom"
+                            />
+                        </Card>
                     </div>
                 </section>
             </Content>

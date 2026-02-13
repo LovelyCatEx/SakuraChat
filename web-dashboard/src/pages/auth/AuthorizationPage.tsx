@@ -3,10 +3,18 @@ import {LoginPage} from './LoginPage.tsx';
 import {RegisterPage} from './RegisterPage.tsx';
 import {ForgotPasswordPage} from './ForgotPasswordPage.tsx';
 import {GithubOutlined} from '@ant-design/icons';
-import * as React from 'react';
+import {getUserAuthentication} from '../../utils/token.utils.ts';
+import {useEffect} from "react";
 
 export function AuthorizationPage() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const auth = getUserAuthentication();
+    if (auth && !auth.expired) {
+      navigate('/manager/dashboard');
+    }
+  }, [navigate]);
 
   return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50 relative overflow-hidden">
