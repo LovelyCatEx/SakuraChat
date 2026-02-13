@@ -8,12 +8,10 @@
 
 package com.lovelycatv.sakurachat.controller.manager
 
-import com.lovelycatv.sakurachat.controller.manager.dto.UpdateUserRoleRelationDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateUserRoleRelationDTO
 import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.request.PageQuery
 import com.lovelycatv.sakurachat.service.UserRoleRelationService
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -48,8 +46,8 @@ class ManagerUserRoleRelationController(
     }
 
     @PostMapping("/update")
-    fun updateUserRoleRelations(@RequestBody updateUserRoleRelationDTO: UpdateUserRoleRelationDTO): ApiResponse<*> {
-        userRoleRelationService.updateUserRoleRelations(updateUserRoleRelationDTO)
+    fun updateUserRoleRelations(@RequestBody managerUpdateUserRoleRelationDTO: ManagerUpdateUserRoleRelationDTO): ApiResponse<*> {
+        userRoleRelationService.updateUserRoleRelations(managerUpdateUserRoleRelationDTO)
         return ApiResponse.success(null)
     }
 }

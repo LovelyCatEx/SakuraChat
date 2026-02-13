@@ -9,7 +9,7 @@
 package com.lovelycatv.sakurachat.controller.manager
 
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateCredentialDTO
-import com.lovelycatv.sakurachat.controller.manager.dto.UpdateCredentialDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateCredentialDTO
 import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.request.PageQuery
 import com.lovelycatv.sakurachat.service.CredentialService
@@ -58,8 +58,8 @@ class ManagerCredentialController(
     }
 
     @PostMapping("/update")
-    suspend fun updateCredential(@ModelAttribute updateCredentialDTO: UpdateCredentialDTO): ApiResponse<*> {
-        credentialService.updateCredential(updateCredentialDTO)
+    suspend fun updateCredential(@ModelAttribute managerUpdateCredentialDTO: ManagerUpdateCredentialDTO): ApiResponse<*> {
+        credentialService.updateCredential(managerUpdateCredentialDTO)
         return ApiResponse.success(null)
     }
 

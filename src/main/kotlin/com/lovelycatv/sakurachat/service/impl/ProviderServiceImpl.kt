@@ -9,7 +9,7 @@
 package com.lovelycatv.sakurachat.service.impl
 
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateProviderDTO
-import com.lovelycatv.sakurachat.controller.manager.dto.UpdateProviderDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateProviderDTO
 import com.lovelycatv.sakurachat.entity.ProviderEntity
 import com.lovelycatv.sakurachat.repository.ProviderRepository
 import com.lovelycatv.sakurachat.request.PaginatedResponseData
@@ -44,23 +44,23 @@ class ProviderServiceImpl(
         }
     }
 
-    override suspend fun updateProvider(updateProviderDTO: UpdateProviderDTO) {
-        val existing = this.getByIdOrThrow(updateProviderDTO.id)
+    override suspend fun updateProvider(managerUpdateProviderDTO: ManagerUpdateProviderDTO) {
+        val existing = this.getByIdOrThrow(managerUpdateProviderDTO.id)
 
-        if (updateProviderDTO.name != null) {
-            existing.name = updateProviderDTO.name
+        if (managerUpdateProviderDTO.name != null) {
+            existing.name = managerUpdateProviderDTO.name
         }
 
-        if (updateProviderDTO.description != null) {
-            existing.description = updateProviderDTO.description
+        if (managerUpdateProviderDTO.description != null) {
+            existing.description = managerUpdateProviderDTO.description
         }
 
-        if (updateProviderDTO.chatCompletionsUrl != null) {
-            existing.chatCompletionsUrl = updateProviderDTO.chatCompletionsUrl
+        if (managerUpdateProviderDTO.chatCompletionsUrl != null) {
+            existing.chatCompletionsUrl = managerUpdateProviderDTO.chatCompletionsUrl
         }
 
-        if (updateProviderDTO.apiType != null) {
-            existing.apiType = updateProviderDTO.apiType
+        if (managerUpdateProviderDTO.apiType != null) {
+            existing.apiType = managerUpdateProviderDTO.apiType
         }
 
         withContext(Dispatchers.IO) {

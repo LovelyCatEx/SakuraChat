@@ -10,10 +10,13 @@ package com.lovelycatv.sakurachat.controller.manager.dto
 
 import jakarta.validation.constraints.Min
 
-class UpdateThirdPartyAccountDTO(
+class ManagerUpdateAgentDTO(
     @field:Min(1, message = "Invalid resource id")
     val id: Long,
-    val accountId: String?,
-    val nickname: String?,
-    val platform: Int?
+    val name: String?,
+    val description: String?,
+    val prompt: String?,
+    val delimiter: String?,
+    val userId: Long?,
+    val chatModelId: Long?
 )

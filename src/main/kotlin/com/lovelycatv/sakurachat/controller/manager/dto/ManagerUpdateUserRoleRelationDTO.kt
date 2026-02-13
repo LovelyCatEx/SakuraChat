@@ -8,11 +8,10 @@
 
 package com.lovelycatv.sakurachat.controller.manager.dto
 
-import jakarta.validation.constraints.Min
+import jakarta.validation.constraints.NotNull
 
-class UpdateUserRoleDTO(
-    @field:Min(1, message = "Invalid resource id")
-    val id: Long,
-    val name: String?,
-    val description: String?
+class ManagerUpdateUserRoleRelationDTO(
+    @field:NotNull
+    var userId: Long,
+    val roleIds: List<String>
 )

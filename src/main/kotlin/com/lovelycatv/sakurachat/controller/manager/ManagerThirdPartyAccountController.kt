@@ -9,7 +9,7 @@
 package com.lovelycatv.sakurachat.controller.manager
 
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateThirdPartyAccountDTO
-import com.lovelycatv.sakurachat.controller.manager.dto.UpdateThirdPartyAccountDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateThirdPartyAccountDTO
 import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.request.PageQuery
 import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
@@ -51,8 +51,8 @@ class ManagerThirdPartyAccountController(
     }
 
     @PostMapping("/update")
-    suspend fun updateThirdPartyAccount(@ModelAttribute updateThirdPartyAccountDTO: UpdateThirdPartyAccountDTO): ApiResponse<*> {
-        thirdPartyAccountService.updateThirdPartyAccount(updateThirdPartyAccountDTO)
+    suspend fun updateThirdPartyAccount(@ModelAttribute managerUpdateThirdPartyAccountDTO: ManagerUpdateThirdPartyAccountDTO): ApiResponse<*> {
+        thirdPartyAccountService.updateThirdPartyAccount(managerUpdateThirdPartyAccountDTO)
         return ApiResponse.success(null)
     }
 

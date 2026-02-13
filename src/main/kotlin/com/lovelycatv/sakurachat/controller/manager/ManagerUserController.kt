@@ -9,7 +9,7 @@
 package com.lovelycatv.sakurachat.controller.manager
 
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateUserDTO
-import com.lovelycatv.sakurachat.controller.manager.dto.UpdateUserDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateUserDTO
 import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.request.PageQuery
 import com.lovelycatv.sakurachat.service.user.UserService
@@ -58,8 +58,8 @@ class ManagerUserController(
     }
 
     @PostMapping("/update")
-    suspend fun updateUser(@ModelAttribute updateUserDTO: UpdateUserDTO): ApiResponse<*> {
-        userService.updateUser(updateUserDTO)
+    suspend fun updateUser(@ModelAttribute managerUpdateUserDTO: ManagerUpdateUserDTO): ApiResponse<*> {
+        userService.updateUser(managerUpdateUserDTO)
         return ApiResponse.success(null)
     }
 

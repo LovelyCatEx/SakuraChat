@@ -9,7 +9,7 @@
 package com.lovelycatv.sakurachat.service.user
 
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateUserDTO
-import com.lovelycatv.sakurachat.controller.manager.dto.UpdateUserDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateUserDTO
 import com.lovelycatv.sakurachat.entity.UserEntity
 import com.lovelycatv.sakurachat.exception.BusinessException
 import com.lovelycatv.sakurachat.repository.UserRepository
@@ -150,30 +150,30 @@ class UserServiceImpl(
     }
 
     @Transactional
-    override fun updateUser(updateUserDTO: UpdateUserDTO) {
-        val existing = this.getByIdOrThrow(updateUserDTO.id)
+    override fun updateUser(managerUpdateUserDTO: ManagerUpdateUserDTO) {
+        val existing = this.getByIdOrThrow(managerUpdateUserDTO.id)
 
-        if (updateUserDTO.nickname != null) {
-            existing.nickname = updateUserDTO.nickname
+        if (managerUpdateUserDTO.nickname != null) {
+            existing.nickname = managerUpdateUserDTO.nickname
         }
 
-        if (updateUserDTO.email != null) {
-            existing.email = updateUserDTO.email
+        if (managerUpdateUserDTO.email != null) {
+            existing.email = managerUpdateUserDTO.email
         }
 
-        if (updateUserDTO.points != null) {
-            val delta = updateUserDTO.points - existing.points
+        if (managerUpdateUserDTO.points != null) {
+            val delta = managerUpdateUserDTO.points - existing.points
             if (delta != 0L) {
                 this.userPointsService.consumePoints(
-                    userId = updateUserDTO.id,
+                    userId = managerUpdateUserDTO.id,
                     request = UserPointsConsumeRequest(
                         reason = PointsChangesReason.ADMIN,
                         consumedPoints = - delta,
-                        afterBalance = updateUserDTO.points
+                        afterBalance = managerUpdateUserDTO.points
                     )
                 )
 
-                existing.points = updateUserDTO.points
+                existing.points = managerUpdateUserDTO.points
             }
         }
 

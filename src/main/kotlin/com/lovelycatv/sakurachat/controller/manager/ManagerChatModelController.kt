@@ -9,7 +9,7 @@
 package com.lovelycatv.sakurachat.controller.manager
 
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateChatModelDTO
-import com.lovelycatv.sakurachat.controller.manager.dto.UpdateChatModelDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateChatModelDTO
 import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.request.PageQuery
 import com.lovelycatv.sakurachat.service.ChatModelService
@@ -56,8 +56,8 @@ class ManagerChatModelController(
     }
 
     @PostMapping("/update")
-    suspend fun updateChatModel(@ModelAttribute updateChatModelDTO: UpdateChatModelDTO): ApiResponse<*> {
-        chatModelService.updateChatModel(updateChatModelDTO)
+    suspend fun updateChatModel(@ModelAttribute managerUpdateChatModelDTO: ManagerUpdateChatModelDTO): ApiResponse<*> {
+        chatModelService.updateChatModel(managerUpdateChatModelDTO)
         return ApiResponse.success(null)
     }
 

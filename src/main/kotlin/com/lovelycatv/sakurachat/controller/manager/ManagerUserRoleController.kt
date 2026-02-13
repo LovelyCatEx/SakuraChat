@@ -9,7 +9,7 @@
 package com.lovelycatv.sakurachat.controller.manager
 
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateUserRoleDTO
-import com.lovelycatv.sakurachat.controller.manager.dto.UpdateUserRoleDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateUserRoleDTO
 import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.request.PageQuery
 import com.lovelycatv.sakurachat.service.UserRoleService
@@ -51,8 +51,8 @@ class ManagerUserRoleController(
     }
 
     @PostMapping("/update")
-    suspend fun updateUserRole(@ModelAttribute updateUserRoleDTO: UpdateUserRoleDTO): ApiResponse<*> {
-        userRoleService.updateUserRole(updateUserRoleDTO)
+    suspend fun updateUserRole(@ModelAttribute managerUpdateUserRoleDTO: ManagerUpdateUserRoleDTO): ApiResponse<*> {
+        userRoleService.updateUserRole(managerUpdateUserRoleDTO)
         return ApiResponse.success(null)
     }
 

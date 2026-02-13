@@ -10,7 +10,7 @@ package com.lovelycatv.sakurachat.controller.manager.dto
 
 import jakarta.validation.constraints.Min
 
-class UpdateUserDTO(
+class ManagerUpdateUserDTO(
     @field:Min(1, message = "Invalid user id")
     val id: Long,
     val nickname: String?,

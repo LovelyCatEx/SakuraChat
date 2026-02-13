@@ -9,7 +9,7 @@
 package com.lovelycatv.sakurachat.controller.manager
 
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateAgentDTO
-import com.lovelycatv.sakurachat.controller.manager.dto.UpdateAgentDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateAgentDTO
 import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.repository.AgentThirdPartyAccountRelationRepository
 import com.lovelycatv.sakurachat.request.ApiResponse
@@ -59,8 +59,8 @@ class ManagerAgentController(
     }
 
     @PostMapping("/update")
-    suspend fun updateAgent(@ModelAttribute updateAgentDTO: UpdateAgentDTO): ApiResponse<*> {
-        agentService.updateAgent(updateAgentDTO)
+    suspend fun updateAgent(@ModelAttribute managerUpdateAgentDTO: ManagerUpdateAgentDTO): ApiResponse<*> {
+        agentService.updateAgent(managerUpdateAgentDTO)
         return ApiResponse.success(null)
     }
 

@@ -9,7 +9,7 @@
 package com.lovelycatv.sakurachat.controller.manager
 
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateProviderDTO
-import com.lovelycatv.sakurachat.controller.manager.dto.UpdateProviderDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateProviderDTO
 import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.request.PageQuery
 import com.lovelycatv.sakurachat.service.ProviderService
@@ -58,9 +58,9 @@ class ManagerProviderController(
     }
 
     @PostMapping("/update")
-    suspend fun updateProvider(@ModelAttribute updateProviderDTO: UpdateProviderDTO): ApiResponse<*> {
+    suspend fun updateProvider(@ModelAttribute managerUpdateProviderDTO: ManagerUpdateProviderDTO): ApiResponse<*> {
         return ApiResponse.success(
-            providerService.updateProvider(updateProviderDTO)
+            providerService.updateProvider(managerUpdateProviderDTO)
         )
     }
 

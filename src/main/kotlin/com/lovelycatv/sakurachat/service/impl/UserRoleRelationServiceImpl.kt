@@ -8,7 +8,7 @@
 
 package com.lovelycatv.sakurachat.service.impl
 
-import com.lovelycatv.sakurachat.controller.manager.dto.UpdateUserRoleRelationDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateUserRoleRelationDTO
 import com.lovelycatv.sakurachat.entity.UserRoleRelationEntity
 import com.lovelycatv.sakurachat.repository.UserRoleRelationRepository
 import com.lovelycatv.sakurachat.repository.UserRepository
@@ -17,8 +17,6 @@ import com.lovelycatv.sakurachat.service.UserRoleRelationService
 import com.lovelycatv.sakurachat.service.UserRoleService
 import com.lovelycatv.sakurachat.types.UserRoleType
 import com.lovelycatv.sakurachat.utils.SnowIdGenerator
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -35,9 +33,9 @@ class UserRoleRelationServiceImpl(
     }
 
     @Transactional
-    override fun updateUserRoleRelations(updateUserRoleRelationDTO: UpdateUserRoleRelationDTO) {
-        val userId = updateUserRoleRelationDTO.userId
-        val roleIds = updateUserRoleRelationDTO.roleIds
+    override fun updateUserRoleRelations(managerUpdateUserRoleRelationDTO: ManagerUpdateUserRoleRelationDTO) {
+        val userId = managerUpdateUserRoleRelationDTO.userId
+        val roleIds = managerUpdateUserRoleRelationDTO.roleIds
 
         userRoleRelationRepository.deleteAllByUserId(userId)
 

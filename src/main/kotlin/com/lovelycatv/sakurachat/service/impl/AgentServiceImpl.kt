@@ -9,7 +9,7 @@
 package com.lovelycatv.sakurachat.service.impl
 
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateAgentDTO
-import com.lovelycatv.sakurachat.controller.manager.dto.UpdateAgentDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateAgentDTO
 import com.lovelycatv.sakurachat.entity.AgentEntity
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
@@ -85,31 +85,31 @@ class AgentServiceImpl(
         )
     }
 
-    override suspend fun updateAgent(updateAgentDTO: UpdateAgentDTO) {
-        val existing = this.getByIdOrThrow(updateAgentDTO.id)
+    override suspend fun updateAgent(managerUpdateAgentDTO: ManagerUpdateAgentDTO) {
+        val existing = this.getByIdOrThrow(managerUpdateAgentDTO.id)
 
-        if (updateAgentDTO.name != null) {
-            existing.name = updateAgentDTO.name
+        if (managerUpdateAgentDTO.name != null) {
+            existing.name = managerUpdateAgentDTO.name
         }
 
-        if (updateAgentDTO.description != null) {
-            existing.description = updateAgentDTO.description
+        if (managerUpdateAgentDTO.description != null) {
+            existing.description = managerUpdateAgentDTO.description
         }
 
-        if (updateAgentDTO.prompt != null) {
-            existing.prompt = updateAgentDTO.prompt
+        if (managerUpdateAgentDTO.prompt != null) {
+            existing.prompt = managerUpdateAgentDTO.prompt
         }
 
-        if (updateAgentDTO.delimiter != null) {
-            existing.delimiter = updateAgentDTO.delimiter
+        if (managerUpdateAgentDTO.delimiter != null) {
+            existing.delimiter = managerUpdateAgentDTO.delimiter
         }
 
-        if (updateAgentDTO.userId != null) {
-            existing.userId = updateAgentDTO.userId
+        if (managerUpdateAgentDTO.userId != null) {
+            existing.userId = managerUpdateAgentDTO.userId
         }
 
-        if (updateAgentDTO.chatModelId != null) {
-            existing.chatModelId = updateAgentDTO.chatModelId
+        if (managerUpdateAgentDTO.chatModelId != null) {
+            existing.chatModelId = managerUpdateAgentDTO.chatModelId
         }
 
         withContext(Dispatchers.IO) {

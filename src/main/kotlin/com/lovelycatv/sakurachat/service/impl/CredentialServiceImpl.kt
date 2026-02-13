@@ -9,7 +9,7 @@
 package com.lovelycatv.sakurachat.service.impl
 
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateCredentialDTO
-import com.lovelycatv.sakurachat.controller.manager.dto.UpdateCredentialDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateCredentialDTO
 import com.lovelycatv.sakurachat.entity.CredentialEntity
 import com.lovelycatv.sakurachat.repository.CredentialRepository
 import com.lovelycatv.sakurachat.request.PaginatedResponseData
@@ -30,19 +30,19 @@ class CredentialServiceImpl(
         return this.credentialRepository
     }
 
-    override suspend fun updateCredential(updateCredentialDTO: UpdateCredentialDTO) {
-        val existing = this.getByIdOrThrow(updateCredentialDTO.id)
+    override suspend fun updateCredential(managerUpdateCredentialDTO: ManagerUpdateCredentialDTO) {
+        val existing = this.getByIdOrThrow(managerUpdateCredentialDTO.id)
 
-        if (updateCredentialDTO.type != null) {
-            existing.type = updateCredentialDTO.type
+        if (managerUpdateCredentialDTO.type != null) {
+            existing.type = managerUpdateCredentialDTO.type
         }
 
-        if (updateCredentialDTO.data != null) {
-            existing.data = updateCredentialDTO.data
+        if (managerUpdateCredentialDTO.data != null) {
+            existing.data = managerUpdateCredentialDTO.data
         }
 
-        if (updateCredentialDTO.active != null) {
-            existing.active = updateCredentialDTO.active
+        if (managerUpdateCredentialDTO.active != null) {
+            existing.active = managerUpdateCredentialDTO.active
         }
 
         withContext(Dispatchers.IO) {

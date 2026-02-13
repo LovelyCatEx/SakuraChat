@@ -8,7 +8,7 @@
 
 package com.lovelycatv.sakurachat.service
 
-import com.lovelycatv.sakurachat.controller.manager.dto.UpdateUserRoleRelationDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateUserRoleRelationDTO
 import com.lovelycatv.sakurachat.entity.UserRoleRelationEntity
 import com.lovelycatv.sakurachat.repository.UserRoleRelationRepository
 import com.lovelycatv.sakurachat.request.PaginatedResponseData
@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional
 
 interface UserRoleRelationService : BaseService<UserRoleRelationRepository, UserRoleRelationEntity, Long> {
     @Transactional
-    fun updateUserRoleRelations(updateUserRoleRelationDTO: UpdateUserRoleRelationDTO)
+    fun updateUserRoleRelations(managerUpdateUserRoleRelationDTO: ManagerUpdateUserRoleRelationDTO)
 
     fun getUserRolesByUserId(userId: Long): List<String>
 

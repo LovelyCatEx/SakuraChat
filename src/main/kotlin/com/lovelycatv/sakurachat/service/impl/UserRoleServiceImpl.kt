@@ -9,7 +9,7 @@
 package com.lovelycatv.sakurachat.service.impl
 
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateUserRoleDTO
-import com.lovelycatv.sakurachat.controller.manager.dto.UpdateUserRoleDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateUserRoleDTO
 import com.lovelycatv.sakurachat.entity.UserRoleEntity
 import com.lovelycatv.sakurachat.exception.BusinessException
 import com.lovelycatv.sakurachat.repository.UserRoleRepository
@@ -32,15 +32,15 @@ class UserRoleServiceImpl(
         return this.userRoleRepository
     }
 
-    override suspend fun updateUserRole(updateUserRoleDTO: UpdateUserRoleDTO) {
-        val existing = this.getByIdOrThrow(updateUserRoleDTO.id)
+    override suspend fun updateUserRole(managerUpdateUserRoleDTO: ManagerUpdateUserRoleDTO) {
+        val existing = this.getByIdOrThrow(managerUpdateUserRoleDTO.id)
 
-        if (updateUserRoleDTO.name != null) {
-            existing.name = updateUserRoleDTO.name
+        if (managerUpdateUserRoleDTO.name != null) {
+            existing.name = managerUpdateUserRoleDTO.name
         }
 
-        if (updateUserRoleDTO.description != null) {
-            existing.description = updateUserRoleDTO.description
+        if (managerUpdateUserRoleDTO.description != null) {
+            existing.description = managerUpdateUserRoleDTO.description
         }
 
         withContext(Dispatchers.IO) {

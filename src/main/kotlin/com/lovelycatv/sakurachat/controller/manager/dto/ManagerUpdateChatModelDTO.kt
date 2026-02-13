@@ -10,7 +10,7 @@ package com.lovelycatv.sakurachat.controller.manager.dto
 
 import jakarta.validation.constraints.Min
 
-class UpdateChatModelDTO(
+class ManagerUpdateChatModelDTO(
     @field:Min(1, message = "Invalid resource id")
     val id: Long,
     val name: String?,

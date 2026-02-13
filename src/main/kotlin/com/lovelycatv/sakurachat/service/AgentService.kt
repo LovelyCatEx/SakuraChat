@@ -9,7 +9,7 @@
 package com.lovelycatv.sakurachat.service
 
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateAgentDTO
-import com.lovelycatv.sakurachat.controller.manager.dto.UpdateAgentDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateAgentDTO
 import com.lovelycatv.sakurachat.entity.AgentEntity
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
@@ -24,7 +24,7 @@ interface AgentService : BaseService<AgentRepository, AgentEntity, Long> {
 
     fun toAggregatedAgentEntity(agent: AgentEntity): AggregatedAgentEntity
 
-    suspend fun updateAgent(updateAgentDTO: UpdateAgentDTO)
+    suspend fun updateAgent(managerUpdateAgentDTO: ManagerUpdateAgentDTO)
 
     suspend fun createAgent(managerCreateAgentDTO: ManagerCreateAgentDTO)
 

@@ -10,14 +10,14 @@ package com.lovelycatv.sakurachat.service
 
 import com.lovelycatv.sakurachat.adapters.thirdparty.account.ThirdPartyAccountAdapter
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateThirdPartyAccountDTO
-import com.lovelycatv.sakurachat.controller.manager.dto.UpdateThirdPartyAccountDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateThirdPartyAccountDTO
 import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.repository.ThirdPartyAccountRepository
 import com.lovelycatv.sakurachat.request.PaginatedResponseData
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
 
 interface ThirdPartyAccountService : BaseService<ThirdPartyAccountRepository, ThirdPartyAccountEntity, Long> {
-    suspend fun updateThirdPartyAccount(updateThirdPartyAccountDTO: UpdateThirdPartyAccountDTO)
+    suspend fun updateThirdPartyAccount(managerUpdateThirdPartyAccountDTO: ManagerUpdateThirdPartyAccountDTO)
 
     suspend fun createThirdPartyAccount(managerCreateThirdPartyAccountDTO: ManagerCreateThirdPartyAccountDTO)
 

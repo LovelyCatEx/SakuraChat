@@ -9,7 +9,7 @@
 package com.lovelycatv.sakurachat.service.user
 
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateUserDTO
-import com.lovelycatv.sakurachat.controller.manager.dto.UpdateUserDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateUserDTO
 import com.lovelycatv.sakurachat.entity.UserEntity
 import com.lovelycatv.sakurachat.repository.UserRepository
 import com.lovelycatv.sakurachat.request.PaginatedResponseData
@@ -39,7 +39,7 @@ interface UserService : UserDetailsService, BaseService<UserRepository, UserEnti
 
     @Transactional
 
-    fun updateUser(updateUserDTO: UpdateUserDTO)
+    fun updateUser(managerUpdateUserDTO: ManagerUpdateUserDTO)
 
     @Transactional
     fun createUser(managerCreateUserDTO: ManagerCreateUserDTO)

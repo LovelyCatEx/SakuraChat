@@ -108,19 +108,19 @@ class ThirdPartyAccountServiceImpl(
             }
     }
 
-    override suspend fun updateThirdPartyAccount(updateThirdPartyAccountDTO: com.lovelycatv.sakurachat.controller.manager.dto.UpdateThirdPartyAccountDTO) {
-        val existing = this.getByIdOrThrow(updateThirdPartyAccountDTO.id)
+    override suspend fun updateThirdPartyAccount(managerUpdateThirdPartyAccountDTO: com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateThirdPartyAccountDTO) {
+        val existing = this.getByIdOrThrow(managerUpdateThirdPartyAccountDTO.id)
 
-        if (updateThirdPartyAccountDTO.accountId != null) {
-            existing.accountId = updateThirdPartyAccountDTO.accountId
+        if (managerUpdateThirdPartyAccountDTO.accountId != null) {
+            existing.accountId = managerUpdateThirdPartyAccountDTO.accountId
         }
 
-        if (updateThirdPartyAccountDTO.nickname != null) {
-            existing.nickname = updateThirdPartyAccountDTO.nickname
+        if (managerUpdateThirdPartyAccountDTO.nickname != null) {
+            existing.nickname = managerUpdateThirdPartyAccountDTO.nickname
         }
 
-        if (updateThirdPartyAccountDTO.platform != null) {
-            existing.platform = updateThirdPartyAccountDTO.platform
+        if (managerUpdateThirdPartyAccountDTO.platform != null) {
+            existing.platform = managerUpdateThirdPartyAccountDTO.platform
         }
 
         withContext(Dispatchers.IO) {

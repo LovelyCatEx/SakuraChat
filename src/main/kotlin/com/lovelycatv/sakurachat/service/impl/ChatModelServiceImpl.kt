@@ -9,7 +9,7 @@
 package com.lovelycatv.sakurachat.service.impl
 
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateChatModelDTO
-import com.lovelycatv.sakurachat.controller.manager.dto.UpdateChatModelDTO
+import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateChatModelDTO
 import com.lovelycatv.sakurachat.entity.ChatModelEntity
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedChatModelEntity
 import com.lovelycatv.sakurachat.repository.ChatModelRepository
@@ -50,55 +50,55 @@ class ChatModelServiceImpl(
         )
     }
 
-    override suspend fun updateChatModel(updateChatModelDTO: UpdateChatModelDTO) {
-        val existing = this.getByIdOrThrow(updateChatModelDTO.id)
+    override suspend fun updateChatModel(managerUpdateChatModelDTO: ManagerUpdateChatModelDTO) {
+        val existing = this.getByIdOrThrow(managerUpdateChatModelDTO.id)
 
-        if (updateChatModelDTO.name != null) {
-            existing.name = updateChatModelDTO.name
+        if (managerUpdateChatModelDTO.name != null) {
+            existing.name = managerUpdateChatModelDTO.name
         }
 
-        if (updateChatModelDTO.description != null) {
-            existing.description = updateChatModelDTO.description
+        if (managerUpdateChatModelDTO.description != null) {
+            existing.description = managerUpdateChatModelDTO.description
         }
 
-        if (updateChatModelDTO.providerId != null) {
-            existing.providerId = updateChatModelDTO.providerId
+        if (managerUpdateChatModelDTO.providerId != null) {
+            existing.providerId = managerUpdateChatModelDTO.providerId
         }
 
-        if (updateChatModelDTO.qualifiedName != null) {
-            existing.qualifiedName = updateChatModelDTO.qualifiedName
+        if (managerUpdateChatModelDTO.qualifiedName != null) {
+            existing.qualifiedName = managerUpdateChatModelDTO.qualifiedName
         }
 
-        if (updateChatModelDTO.maxContextTokens != null) {
-            existing.maxContextTokens = updateChatModelDTO.maxContextTokens
+        if (managerUpdateChatModelDTO.maxContextTokens != null) {
+            existing.maxContextTokens = managerUpdateChatModelDTO.maxContextTokens
         }
 
-        if (updateChatModelDTO.temperature != null) {
-            existing.temperature = updateChatModelDTO.temperature
+        if (managerUpdateChatModelDTO.temperature != null) {
+            existing.temperature = managerUpdateChatModelDTO.temperature
         }
 
-        if (updateChatModelDTO.maxTokens != null) {
-            existing.maxTokens = updateChatModelDTO.maxTokens
+        if (managerUpdateChatModelDTO.maxTokens != null) {
+            existing.maxTokens = managerUpdateChatModelDTO.maxTokens
         }
 
-        if (updateChatModelDTO.inputTokenPointRate != null) {
-            existing.inputTokenPointRate = updateChatModelDTO.inputTokenPointRate
+        if (managerUpdateChatModelDTO.inputTokenPointRate != null) {
+            existing.inputTokenPointRate = managerUpdateChatModelDTO.inputTokenPointRate
         }
 
-        if (updateChatModelDTO.outputTokenPointRate != null) {
-            existing.outputTokenPointRate = updateChatModelDTO.outputTokenPointRate
+        if (managerUpdateChatModelDTO.outputTokenPointRate != null) {
+            existing.outputTokenPointRate = managerUpdateChatModelDTO.outputTokenPointRate
         }
 
-        if (updateChatModelDTO.cachedInputTokenPointRate != null) {
-            existing.cachedInputTokenPointRate = updateChatModelDTO.cachedInputTokenPointRate
+        if (managerUpdateChatModelDTO.cachedInputTokenPointRate != null) {
+            existing.cachedInputTokenPointRate = managerUpdateChatModelDTO.cachedInputTokenPointRate
         }
 
-        if (updateChatModelDTO.credentialId != null) {
-            existing.credentialId = updateChatModelDTO.credentialId
+        if (managerUpdateChatModelDTO.credentialId != null) {
+            existing.credentialId = managerUpdateChatModelDTO.credentialId
         }
 
-        if (updateChatModelDTO.active != null) {
-            existing.active = updateChatModelDTO.active
+        if (managerUpdateChatModelDTO.active != null) {
+            existing.active = managerUpdateChatModelDTO.active
         }
 
         withContext(Dispatchers.IO) {
