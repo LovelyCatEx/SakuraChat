@@ -21,11 +21,9 @@ export function AuthorizationPage() {
         {/* Top Navigation Bar */}
         <nav className="fixed top-0 left-0 w-full h-16 px-6 sm:px-12 flex items-center justify-between z-50 bg-white/30 backdrop-blur-md border-b border-white/50">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-200">
-              <span className="text-white font-bold text-lg">S</span>
-            </div>
-            <span className="text-xl font-bold bg-clip-text bg-gradient-to-r from-gray-800 to-gray-600 tracking-tight">
-              SakuraChat
+            <img src="/logo.svg" alt="SakuraChat Logo" className="w-8 h-8" />
+            <span className="text-2xl font-bold tracking-tight text-gray-900">
+              Sakura<span className="text-pink-400">Chat</span>
             </span>
           </div>
 

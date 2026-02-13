@@ -106,19 +106,17 @@ export function MainContainer() {
     >
       <Layout className="min-h-screen bg-[#f8fafc]">
         <Header className="fixed top-0 left-0 w-full h-16 px-6 flex items-center justify-between z-50 backdrop-blur-md border-b border-gray-100 shadow-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-200">
-              <span className="text-white font-bold text-lg">S</span>
-            </div>
-            <span className="text-xl font-bold bg-clip-text bg-gradient-to-r from-gray-800 to-blue-600 tracking-tight">
-              SakuraChat
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+            <img src="/logo.svg" alt="SakuraChat Logo" className="w-8 h-8"/>
+            <span className="text-2xl font-bold tracking-tight text-gray-900">
+              Sakura<span className="text-pink-400">Chat</span>
             </span>
           </div>
 
           <div className="flex flex-row items-center gap-4">
             <Dropdown
-              menu={{
-                items: [
+                menu={{
+                  items: [
                   { key: 'profile', label: '个人中心', icon: <UserOutlined /> },
                   {
                     key: 'logout',
