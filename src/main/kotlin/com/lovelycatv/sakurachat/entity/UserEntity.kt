@@ -7,9 +7,11 @@
  */
 package com.lovelycatv.sakurachat.entity
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Table
+import jakarta.persistence.Transient
 import org.hibernate.annotations.SQLDelete
 import org.hibernate.annotations.SQLRestriction
 import org.springframework.security.core.GrantedAuthority
@@ -35,8 +37,16 @@ class UserEntity(
     override var modifiedTime: Long = System.currentTimeMillis(),
     override var deletedTime: Long? = null
 ) : BaseEntity(), UserDetails {
+    @Transient
+    @JsonIgnore
+    private var innerAuthorities = mutableListOf<GrantedAuthority>()
+
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
-        return mutableListOf()
+        return this.innerAuthorities
+    }
+
+    fun setInnerAuthorities(authorities: Iterable<GrantedAuthority>) {
+        this.innerAuthorities = authorities.toMutableList()
     }
 
     override fun getUsername(): String = this.username

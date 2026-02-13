@@ -64,4 +64,6 @@ interface UserService : UserDetailsService, BaseService<UserRepository, UserEnti
     fun createUser(managerCreateUserDTO: ManagerCreateUserDTO, userRole: UserRoleType = UserRoleType.USER)
 
     fun search(keyword: String, page: Int, pageSize: Int): PaginatedResponseData<UserEntity>
+
+    fun getUserRoles(userId: Long): List<UserRoleType>
 }

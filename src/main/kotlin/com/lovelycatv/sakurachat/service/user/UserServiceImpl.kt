@@ -19,6 +19,7 @@ import com.lovelycatv.sakurachat.service.SystemSettingsService
 import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
 import com.lovelycatv.sakurachat.service.UserPointsService
 import com.lovelycatv.sakurachat.service.UserRoleRelationService
+import com.lovelycatv.sakurachat.service.UserRoleService
 import com.lovelycatv.sakurachat.service.mail.MailService
 import com.lovelycatv.sakurachat.service.request.UserPointsConsumeRequest
 import com.lovelycatv.sakurachat.types.PointsChangesReason
@@ -28,6 +29,7 @@ import com.lovelycatv.sakurachat.utils.toPaginatedResponseData
 import com.lovelycatv.vertex.log.logger
 import okio.withLock
 import org.springframework.data.domain.Pageable
+import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -45,7 +47,8 @@ class UserServiceImpl(
     private val mailService: MailService,
     private val userPointsService: UserPointsService,
     private val systemSettingsService: SystemSettingsService,
-    private val userRoleRelationService: UserRoleRelationService
+    private val userRoleRelationService: UserRoleRelationService,
+    private val userRoleService: UserRoleService
 ) : UserService {
     private val logger = logger()
 
@@ -269,6 +272,12 @@ class UserServiceImpl(
             ?: userRepository.findByEmail(username)
             ?: throw BusinessException("User $username not found")
 
+        user.setInnerAuthorities(
+            getUserRoles(user.id).map {
+                SimpleGrantedAuthority(it.roleName)
+            }
+        )
+
         return user
     }
 
@@ -289,6 +298,20 @@ class UserServiceImpl(
         ).toPaginatedResponseData()
     }
 
+    override fun getUserRoles(userId: Long): List<UserRoleType> {
+        val roleEntityIds = userRoleRelationService.getUserRolesByUserId(userId)
+        if (roleEntityIds.isEmpty()) {
+            return emptyList()
+        }
+
+        return userRoleService
+            .getByIds(roleEntityIds.map { it.toLong() })
+            .map {
+                UserRoleType.getByRoleName(it.name) ?: throw BusinessException("Role $it not found")
+            }
+    }
+
+    // Please preserve the inline modifier to make sure the @Transactional works
     private inline fun afterNewUserSaved(user: UserEntity, defaultUserRole: UserRoleType) {
         val initialPoints = systemSettingsService.getAllSettingsLazy().userRegistration.initialPoints
         this.userPointsService.consumePoints(

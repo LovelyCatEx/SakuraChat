@@ -29,7 +29,7 @@ class CustomLoginFilter(defaultFilterProcessesUrl: String?, authenticationManage
     override fun attemptAuthentication(request: HttpServletRequest, response: HttpServletResponse?): Authentication? {
         val username = request.getParameter("username")
         val password = request.getParameter("password")
-        return getAuthenticationManager().authenticate(UsernamePasswordAuthenticationToken(username, password))
+        return authenticationManager.authenticate(UsernamePasswordAuthenticationToken(username, password))
     }
 
     @Throws(IOException::class)
@@ -39,7 +39,7 @@ class CustomLoginFilter(defaultFilterProcessesUrl: String?, authenticationManage
         chain: FilterChain?,
         authResult: Authentication
     ) {
-        val authorities = authResult.getAuthorities()
+        val authorities = authResult.authorities
 
         response.contentType = "application/json;charset=utf-8"
         val userToken = buildJwtToken("jwtSignKey", authorities, authResult, 7 * 1440 * 60 * 1000L)

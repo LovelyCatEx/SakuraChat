@@ -12,4 +12,10 @@ enum class UserRoleType(val roleName: String) {
     ROOT("root"),
     ADMIN("admin"),
     USER("user");
+
+    companion object {
+        fun getByRoleName(roleName: String): UserRoleType? {
+            return entries.firstOrNull { it.roleName == roleName }
+        }
+    }
 }
