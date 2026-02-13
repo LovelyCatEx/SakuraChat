@@ -20,5 +20,5 @@ interface UserPointsLogRepository : JpaRepository<UserPointsLogEntity, Long> {
     fun findAllByUserId(userId: Long, pageable: Pageable): Page<UserPointsLogEntity>
 
     @Query("SELECT SUM(ABS(l.deltaPoints)) FROM UserPointsLogEntity l WHERE l.deltaPoints < 0")
-    fun getTotalPointsConsumed(): Long
+    fun getTotalPointsConsumed(): Long?
 }

@@ -40,7 +40,7 @@ class ManagerDashboardController(
         val totalProviders = providerRepository.count()
         val totalModels = chatModelRepository.count()
         val totalThirdPartyAccounts = thirdPartyAccountRepository.count()
-        val totalPointsConsumed = userPointsLogRepository.getTotalPointsConsumed()
+        val totalPointsConsumed = userPointsLogRepository.getTotalPointsConsumed() ?: 0
 
         return ApiResponse.success(
             DashboardStats(
