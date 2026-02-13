@@ -51,6 +51,34 @@ class UserController {
     }
 
     @Unauthorized
+    @PostMapping("/requestPasswordResetEmailCode")
+    suspend fun requestPasswordResetEmailCode(
+        @RequestParam("email")
+        @Email(message = "Must be a valid email address")
+        email: String
+    ): ApiResponse<*> {
+        userService.sendPasswordResetEmail(email)
+
+        return ApiResponse.success(null)
+    }
+
+    @Unauthorized
+    @PostMapping("/resetPassword")
+    suspend fun resetPassword(
+        @RequestParam("email")
+        @Email(message = "Must be a valid email address")
+        email: String,
+        @RequestParam("emailCode")
+        emailCode: String,
+        @RequestParam("newPassword")
+        newPassword: String
+    ): ApiResponse<*> {
+        userService.resetPassword(email, emailCode, newPassword)
+
+        return ApiResponse.success(null)
+    }
+
+    @Unauthorized
     @GetMapping("/profile")
     suspend fun getUserProfile(
         userAuthentication: UserAuthentication?,

@@ -22,9 +22,9 @@ import org.springframework.security.core.userdetails.UserDetails
 class UserEntity(
     override val id: Long = 0,
     @Column(name = "username", length = 64, nullable = false, unique = true)
-    private val username: String = "",
+    private var username: String = "",
     @Column(name = "password", length = 128, nullable = false)
-    private val password: String = "",
+    private var password: String = "",
     @Column(name = "nickname", length = 64, nullable = false)
     var nickname: String = "",
     @Column(name = "email", length = 256, nullable = false, unique = true)
@@ -41,6 +41,10 @@ class UserEntity(
 
     override fun getUsername(): String = this.username
     override fun getPassword(): String = this.password
+
+    fun updatePassword(password: String) {
+        this.password = password
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

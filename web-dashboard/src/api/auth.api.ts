@@ -20,3 +20,14 @@ export async function register(
 export async function requestRegisterEmailCode(email: string) {
     return doPost('/api/user/requestRegisterEmailCode', { email: email });
 }
+
+export async function requestPasswordResetEmailCode(email: string) {
+    return doPost('/api/user/requestPasswordResetEmailCode', { email: email });
+}
+
+export async function resetPassword(email: string, emailCode: string, newPassword: string) {
+    return doPost(
+        '/api/user/resetPassword',
+        { email: email, emailCode: emailCode, newPassword: newPassword }
+    );
+}

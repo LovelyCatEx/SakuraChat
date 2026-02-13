@@ -96,7 +96,7 @@ export function LoginPage() {
           </Form.Item>
           <a
             className="text-xs text-blue-600 hover:text-blue-500 font-medium"
-            href="#"
+            href="/auth/forgot-password"
           >
             忘记密码?
           </a>

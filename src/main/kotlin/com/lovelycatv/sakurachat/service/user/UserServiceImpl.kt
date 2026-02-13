@@ -51,6 +51,7 @@ class UserServiceImpl(
 
     companion object {
         val registrationEmailCodeMap = mutableMapOf<String, Pair<Long, String>>()
+        val passwordResetEmailCodeMap = mutableMapOf<String, Pair<Long, String>>()
     }
 
     /**
@@ -118,6 +119,55 @@ class UserServiceImpl(
         return code.also {
             registrationEmailCodeMap[email] = System.currentTimeMillis() to code
         }
+    }
+
+    override fun sendPasswordResetEmail(email: String): String {
+        if (userRepository.findByEmail(email) == null) {
+            throw BusinessException("邮箱 $email 未注册")
+        }
+
+        if (passwordResetEmailCodeMap.containsKey(email)) {
+            if (System.currentTimeMillis() - passwordResetEmailCodeMap[email]!!.first <= 60 * 1000L) {
+                throw BusinessException("request email code frequently, please try again later")
+            }
+        }
+
+        val code = (100000..999999).random().toString()
+
+        mailService.sendResetPasswordEmail(email, code)
+
+        return code.also {
+            passwordResetEmailCodeMap[email] = System.currentTimeMillis() to code
+        }
+    }
+
+    override fun resetPassword(email: String, emailCode: String, newPassword: String) {
+        val codePair = passwordResetEmailCodeMap[email]
+            ?: throw BusinessException("验证码不存在或已过期")
+
+        if (System.currentTimeMillis() - codePair.first > 5 * 60 * 1000L) {
+            passwordResetEmailCodeMap.remove(email)
+            throw BusinessException("验证码已过期")
+        }
+
+        if (codePair.second != emailCode) {
+            throw BusinessException("验证码错误")
+        }
+
+        val user = userRepository.findByEmail(email)
+            ?: throw BusinessException("用户不存在")
+
+        userIdMutex.withLock {
+            userRepository.save(
+                user.apply {
+                    this.updatePassword(passwordEncoder.encode(newPassword))
+                }
+            )
+        }
+
+        passwordResetEmailCodeMap.remove(email)
+
+        logger.info("Password reset successfully for user: ${user.username}")
     }
 
     override fun getUserByThirdPartyAccount(

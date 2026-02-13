@@ -1,6 +1,7 @@
 import {Route, Routes} from 'react-router-dom';
 import {LoginPage} from './LoginPage.tsx';
 import {RegisterPage} from './RegisterPage.tsx';
+import {ForgotPasswordPage} from './ForgotPasswordPage.tsx';
 import {ConfigProvider} from 'antd';
 import {GithubOutlined} from '@ant-design/icons';
 import * as React from 'react';
@@ -47,6 +48,7 @@ export function AuthorizationPage() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         </Routes>
       </div>
     </ConfigProvider>

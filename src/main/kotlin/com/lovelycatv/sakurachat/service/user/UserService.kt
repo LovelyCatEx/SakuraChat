@@ -31,6 +31,24 @@ interface UserService : UserDetailsService, BaseService<UserRepository, UserEnti
      */
     fun sendRegisterEmail(email: String): String
 
+    /**
+     * Send a password reset email code to target email address
+     *
+     * @param email Target email address
+     * @return email code has been sent
+     */
+    fun sendPasswordResetEmail(email: String): String
+
+    /**
+     * Reset password with email code
+     *
+     * @param email Target email address
+     * @param emailCode Email code
+     * @param newPassword New password
+     */
+    @Transactional
+    fun resetPassword(email: String, emailCode: String, newPassword: String)
+
     fun getUserByThirdPartyAccount(
         platform: ThirdPartyPlatform,
         accountId: String

@@ -14,4 +14,6 @@ interface MailService {
     fun sendMail(to: String, subject: String, content: String)
 
     fun sendRegisterEmail(to: String, emailCode: String)
+
+    fun sendResetPasswordEmail(to: String, emailCode: String)
 }

@@ -77,7 +77,7 @@ class MailServiceImpl(
                                         </p>
 
                                         <p style="margin: 0 0 30px; font-size: 16px; line-height: 1.6; color: #555555;">
-                                            请在注册页面输入下方的验证码以完成身份验证。该验证码在 <span style="font-weight: bold; color: #333;">10 分钟</span> 内有效：
+                                            请在注册页面输入下方的验证码以完成身份验证。该验证码在 <span style="font-weight: bold; color: #333;">5 分钟</span> 内有效：
                                         </p>
 
                                         <div style="background-color: #f0f7ff; border: 1px dashed #007bff; border-radius: 4px; padding: 25px; text-align: center; margin-bottom: 30px;">
@@ -98,6 +98,74 @@ class MailServiceImpl(
                                     </td>
                                 </tr>
 
+                                <tr>
+                                    <td style="background-color: #f8f9fa; padding: 20px 30px; text-align: center;">
+                                        <p style="margin: 0; font-size: 12px; color: #aaaaaa;">
+                                            &copy; 2026 LovelyCat 保留所有权利。
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+                </body>
+                </html>
+            """.trimIndent()
+        )
+    }
+
+    override fun sendResetPasswordEmail(to: String, emailCode: String) {
+        this.sendMail(
+            to = to,
+            subject = "SakuraChat Reset Password",
+            content = """
+                <!DOCTYPE html>
+                <html lang="zh-CN">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>SakuraChat 重置密码</title>
+                </head>
+                <body style="margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f7f9; color: #333333;">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;">
+                    <tr>
+                        <td align="center" style="padding: 40px 0;">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
+                                <tr>
+                                    <td style="background-color: #007bff; height: 6px;"></td>
+                                </tr>
+                
+                                <tr>
+                                    <td style="padding: 40px 30px;">
+                                        <h2 style="margin: 0 0 20px; color: #007bff; font-size: 24px; font-weight: 600;">SakuraChat 重置密码</h2>
+                
+                                        <p style="margin: 0 0 15px; font-size: 16px; line-height: 1.6; color: #555555;">
+                                            您好！我们收到了重置您账户密码的请求。
+                                        </p>
+                
+                                        <p style="margin: 0 0 30px; font-size: 16px; line-height: 1.6; color: #555555;">
+                                            请在密码重置页面输入下方的验证码以完成身份确认。该验证码在 <span style="font-weight: bold; color: #333;">5 分钟</span> 内有效：
+                                        </p>
+                
+                                        <div style="background-color: #f0f7ff; border: 1px dashed #007bff; border-radius: 4px; padding: 25px; text-align: center; margin-bottom: 30px;">
+                                                <span style="font-size: 36px; font-family: 'Courier New', Courier, monospace; font-weight: bold; color: #007bff; letter-spacing: 10px;">
+                                                    $emailCode
+                                                </span>
+                                        </div>
+                
+                                        <p style="margin: 0 0 15px; font-size: 14px; line-height: 1.6; color: #888888;">
+                                            如果您没有尝试重置密码，请忽略此邮件。您的账户目前是安全的，无需采取进一步操作。
+                                        </p>
+                
+                                        <div style="border-top: 1px solid #eeeeee; padding-top: 25px; margin-top: 30px;">
+                                            <p style="margin: 5px 0 0; font-size: 12px; color: #999999;">
+                                                本邮件由系统自动发送，请勿直接回复。
+                                            </p>
+                                        </div>
+                                    </td>
+                                </tr>
+                
                                 <tr>
                                     <td style="background-color: #f8f9fa; padding: 20px 30px; text-align: center;">
                                         <p style="margin: 0; font-size: 12px; color: #aaaaaa;">
