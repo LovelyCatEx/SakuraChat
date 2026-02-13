@@ -18,6 +18,7 @@ import com.lovelycatv.sakurachat.repository.NapCatPrivateMessageRepository
 import com.lovelycatv.sakurachat.service.AgentService
 import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
 import com.lovelycatv.sakurachat.service.ThirdPartyGroupService
+import com.lovelycatv.sakurachat.service.UserThirdPartyAccountBindService
 import com.lovelycatv.sakurachat.service.user.UserService
 import com.lovelycatv.sakurachat.thirdparty.AbstractThirdPartyMessageDispatcher
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
@@ -44,7 +45,8 @@ class NapCatMessageDispatcher(
     private val agentService: AgentService,
     private val userService: UserService,
     private val sakuraChatMessageChannelDaemon: SakuraChatMessageChannelDaemon,
-    private val messageAdapterManager: MessageAdapterManager
+    private val messageAdapterManager: MessageAdapterManager,
+    private val userThirdPartyAccountBindService: UserThirdPartyAccountBindService
 ) : AbstractThirdPartyMessageDispatcher(ThirdPartyPlatform.NAPCAT_OICQ) {
     private val logger = logger()
 
@@ -120,7 +122,7 @@ class NapCatMessageDispatcher(
         )
 
         // 3. Make sure the message sender has been registered to 3rd party account table
-        when (event) {
+        val sendThirdPartyAccountEntity = when (event) {
             is PrivateMessageEvent -> {
                 thirdPartyAccountService.getOrAddAccount(
                     ThirdPartyPlatform.NAPCAT_OICQ,
@@ -215,9 +217,11 @@ class NapCatMessageDispatcher(
         if (relatedUser == null) {
             logger.warn("Cannot find related user for OICQ User Account: $userOICQId")
 
+            val code = userThirdPartyAccountBindService.generateUserBindCode(sendThirdPartyAccountEntity.id)
+
             bot.sendPrivateMsg(
                 userOICQId,
-                "Your OICQ account $userOICQId has not been registered in SakuraChat, please turn to https://sakurachat.lovelycatv.com and bind your OICQ Account.",
+                "Your OICQ account $userOICQId has not been registered in SakuraChat, please turn to https://sakurachat.lovelycatv.com and bind your OICQ Account. Your bind code is $code",
                 true
             )
 

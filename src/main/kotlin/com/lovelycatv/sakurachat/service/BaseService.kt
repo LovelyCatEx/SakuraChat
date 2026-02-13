@@ -28,6 +28,10 @@ interface BaseService<R: JpaRepository<T, ID>, T, ID: Any> {
         return getRepository().findById(id).orElse(null)
     }
 
+    fun getByIds(ids: Iterable<ID>): List<T> {
+        return getRepository().findAllById(ids)
+    }
+
     fun getByIdOrThrow(
         id: ID,
         t: Throwable = BusinessException("Resource with id $id not found")

@@ -19,6 +19,7 @@ import com.lovelycatv.sakurachat.daemon.SakuraChatMessageChannelDaemon
 import com.lovelycatv.sakurachat.service.AgentService
 import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
 import com.lovelycatv.sakurachat.service.ThirdPartyGroupService
+import com.lovelycatv.sakurachat.service.UserThirdPartyAccountBindService
 import com.lovelycatv.sakurachat.service.user.UserService
 import com.lovelycatv.sakurachat.thirdparty.AbstractThirdPartyMessageDispatcher
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
@@ -33,7 +34,8 @@ class LarkMessageDispatcher(
     private val userService: UserService,
     private val sakuraChatMessageChannelDaemon: SakuraChatMessageChannelDaemon,
     private val messageAdapterManager: MessageAdapterManager,
-    private val thirdPartyGroupService: ThirdPartyGroupService
+    private val thirdPartyGroupService: ThirdPartyGroupService,
+    private val userThirdPartyAccountBindService: UserThirdPartyAccountBindService
 ) : AbstractThirdPartyMessageDispatcher(ThirdPartyPlatform.LARK) {
     private val logger = logger()
 
@@ -61,7 +63,7 @@ class LarkMessageDispatcher(
         )
 
         // 3. Make sure the message sender has been registered to 3rd party account table
-        thirdPartyAccountService.getOrAddAccount(
+        val sendThirdPartyAccountEntity = thirdPartyAccountService.getOrAddAccount(
             ThirdPartyPlatform.LARK,
             event.event.sender
         )
@@ -97,10 +99,12 @@ class LarkMessageDispatcher(
         if (relatedUser == null) {
             logger.warn("Cannot find related user for Lark User Account: ${userPlatformAccountId.senderId.toJSONString()}")
 
+            val code = userThirdPartyAccountBindService.generateUserBindCode(sendThirdPartyAccountEntity.id)
+
             client.sendMessage(
                 LarkIdType.UNION_ID,
                 userPlatformAccountId.senderId.unionId,
-                "Your Lark account ${userPlatformAccountId.senderId.unionId} has not been registered in SakuraChat, please turn to https://sakurachat.lovelycatv.com and bind your Lark Account."
+                "Your Lark account ${userPlatformAccountId.senderId.unionId} has not been registered in SakuraChat, please turn to https://sakurachat.lovelycatv.com and bind your Lark Account. Your bind code is $code"
             )
 
             return false

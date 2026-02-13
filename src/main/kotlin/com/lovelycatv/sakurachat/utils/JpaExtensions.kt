@@ -17,12 +17,16 @@ import org.springframework.data.domain.Sort
 class JpaExtensions private constructor()
 
 fun <T> Page<T>.toPaginatedResponseData(): PaginatedResponseData<T> {
+    return this.toPaginatedResponseData { it }
+}
+
+fun <T, R> Page<T>.toPaginatedResponseData(recordTransform: (T) -> R): PaginatedResponseData<R> {
     return PaginatedResponseData(
         page = this.pageable.pageNumber,
         pageSize = this.pageable.pageSize,
         total = this.totalElements,
         totalPages = this.totalPages,
-        records = this.toList()
+        records = this.toList().map { recordTransform(it) }
     )
 }
 
