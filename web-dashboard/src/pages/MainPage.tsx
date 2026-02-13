@@ -417,7 +417,7 @@ const MainPage = () => {
                                     <Button type="primary" size="large" className="h-14 px-10 text-lg shadow-lg shadow-pink-100" onClick={() => navigate('/auth/register')}>
                                         免费体验
                                     </Button>
-                                    <Button size="large" className="h-14 px-10 text-lg">
+                                    <Button size="large" className="h-14 px-10 text-lg" onClick={() => window.open('https://github.com/LovelyCatEx/SakuraChat/', '_blank', 'noopener noreferrer')}>
                                         了解更多
                                     </Button>
                                 </div>
