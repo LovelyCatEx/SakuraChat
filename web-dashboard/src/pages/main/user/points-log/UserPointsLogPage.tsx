@@ -84,14 +84,16 @@ export function UserPointsLogPage() {
             key: 'relatedTableType1',
             width: 200,
             render: (_: string, record: UserPointsLog) => (
-                <Space orientation="horizontal" size={8}>
-                    {[
-                        { type: record.relatedTableType1, id: record.relatedTableId1 },
-                        { type: record.relatedTableType2, id: record.relatedTableId2 },
-                        { type: record.relatedTableType3, id: record.relatedTableId3 },
-                        { type: record.relatedTableType4, id: record.relatedTableId4 },
-                    ].filterNot((e) => e.type == null || e.id == null)
-                        .map((e) => <Tag>{e.type} / {e.id}</Tag>)}
+                <Space orientation="vertical" size={8} wrap>
+                    {
+                        [
+                            { type: record.relatedTableType1, id: record.relatedTableId1 },
+                            { type: record.relatedTableType2, id: record.relatedTableId2 },
+                            { type: record.relatedTableType3, id: record.relatedTableId3 },
+                            { type: record.relatedTableType4, id: record.relatedTableId4 },
+                        ].filterNot((e) => e.type == null || e.id == null)
+                            .map((e) => <Tag>{e.type} / {e.id}</Tag>)
+                    }
                 </Space>
             )
         },
