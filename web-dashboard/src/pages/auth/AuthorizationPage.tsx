@@ -2,7 +2,6 @@ import {Route, Routes, useNavigate} from 'react-router-dom';
 import {LoginPage} from './LoginPage.tsx';
 import {RegisterPage} from './RegisterPage.tsx';
 import {ForgotPasswordPage} from './ForgotPasswordPage.tsx';
-import {ConfigProvider} from 'antd';
 import {GithubOutlined} from '@ant-design/icons';
 import * as React from 'react';
 
@@ -10,16 +9,7 @@ export function AuthorizationPage() {
   const navigate = useNavigate();
 
   return (
-    <ConfigProvider
-      theme={{
-        token: {
-          colorPrimary: '#2563eb',
-          borderRadius: 12,
-          fontFamily: 'Inter, system-ui, sans-serif',
-        },
-      }}
-    >
-      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 via-white to-cyan-50 relative overflow-hidden">
+      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50 relative overflow-hidden">
         {/* Top Navigation Bar */}
         <nav className="fixed top-0 left-0 w-full h-16 px-6 sm:px-12 flex items-center justify-between z-50 bg-white/30 backdrop-blur-md border-b border-white/50">
           <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
@@ -31,10 +21,10 @@ export function AuthorizationPage() {
 
           <div className="flex items-center">
             <a
-              href="https://github.com/LovelyCatEx/SakuraChat"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 text-gray-600 hover:text-blue-600 hover:bg-white/50 rounded-full transition-all"
+                href="https://github.com/LovelyCatEx/SakuraChat"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 text-gray-600 hover:text-primary hover:bg-white/50 rounded-full transition-all"
             >
               <GithubOutlined className="text-2xl" />
             </a>
@@ -42,7 +32,7 @@ export function AuthorizationPage() {
         </nav>
 
         {/* Background Decorations */}
-        <div className="fixed top-[-10%] left-[-5%] w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+        <div className="fixed top-[-10%] left-[-5%] w-72 h-72 bg-primary/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
         <div className="fixed bottom-[-10%] right-[-5%] w-96 h-96 bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
 
         <Routes>
@@ -51,7 +41,6 @@ export function AuthorizationPage() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         </Routes>
       </div>
-    </ConfigProvider>
   );
 }
 
@@ -106,7 +95,7 @@ export function AuthCardLayout({
             <span className="text-gray-500 text-sm">{footerText}</span>
             <span
               onClick={footerAction}
-              className="ml-2 text-sm font-bold text-blue-600 hover:text-blue-500 transition-colors cursor-pointer"
+              className="ml-2 text-sm font-bold text-primary hover:text-primary transition-colors cursor-pointer"
             >
               {footerLink}
             </span>

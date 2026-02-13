@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {Button, Card, ConfigProvider, Form, Input, message, Steps} from 'antd';
+import {Button, Card, Form, Input, message, Steps} from 'antd';
 import {LockOutlined, MailOutlined, UserOutlined} from '@ant-design/icons';
 import {useNavigate} from 'react-router-dom';
 import {
@@ -89,16 +89,7 @@ export function InitializerPage() {
   };
 
   return (
-    <ConfigProvider
-      theme={{
-        token: {
-          colorPrimary: '#2563eb',
-          borderRadius: 12,
-          fontFamily: 'Inter, system-ui, sans-serif',
-        },
-      }}
-    >
-      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 via-white to-cyan-50 relative overflow-hidden">
+      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-50 relative overflow-hidden">
         {/* Top Navigation Bar */}
         <nav className="fixed top-0 left-0 w-full h-16 px-6 sm:px-12 flex items-center justify-between z-50 bg-white/30 backdrop-blur-md border-b border-white/50">
           <div className="flex items-center gap-2">
@@ -110,7 +101,7 @@ export function InitializerPage() {
         </nav>
 
         {/* Background Decorations */}
-        <div className="fixed top-[-10%] left-[-5%] w-72 h-72 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
+        <div className="fixed top-[-10%] left-[-5%] w-72 h-72 bg-primary/20 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob"></div>
         <div className="fixed bottom-[-10%] right-[-5%] w-96 h-96 bg-cyan-200 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
 
         {/* Main Content */}
@@ -124,70 +115,70 @@ export function InitializerPage() {
             <Steps current={currentStep} items={steps} titlePlacement="vertical" className="mb-8" />
 
             <Form
-              form={form}
-              layout="vertical"
-              disabled={checkingStatus}
-              onFinish={currentStep === 0 ? handleCreateRootUser : handleCompleteInitialization}
+                form={form}
+                layout="vertical"
+                disabled={checkingStatus}
+                onFinish={currentStep === 0 ? handleCreateRootUser : handleCompleteInitialization}
             >
               {currentStep === 0 ? (
-                <>
-                  <Form.Item
-                    name="username"
-                    label="用户名"
-                    rules={[
-                      { required: true, message: '请输入用户名' },
-                      { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含数字、字母和下划线' },
-                      { max: 64, message: '用户名长度不能超过64个字符' }
-                    ]}
-                  >
-                    <Input prefix={<UserOutlined className="text-gray-400 mr-2" />} placeholder="输入用户名" className="rounded-lg h-10" />
-                  </Form.Item>
+                  <>
+                    <Form.Item
+                        name="username"
+                        label="用户名"
+                        rules={[
+                          { required: true, message: '请输入用户名' },
+                          { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含数字、字母和下划线' },
+                          { max: 64, message: '用户名长度不能超过64个字符' }
+                        ]}
+                    >
+                      <Input prefix={<UserOutlined className="text-gray-400 mr-2" />} placeholder="输入用户名" className="rounded-lg h-10" />
+                    </Form.Item>
 
-                  <Form.Item
-                    name="password"
-                    label="密码"
-                    rules={[
-                      { required: true, message: '请输入密码' },
-                      { pattern: /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$/, message: '密码至少8位，且包含数字和字母' },
-                      { max: 128, message: '密码长度不能超过128个字符' }
-                    ]}
-                  >
-                    <Password prefix={<LockOutlined className="text-gray-400 mr-2" />} placeholder="输入密码" className="rounded-lg h-10" />
-                  </Form.Item>
+                    <Form.Item
+                        name="password"
+                        label="密码"
+                        rules={[
+                          { required: true, message: '请输入密码' },
+                          { pattern: /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$/, message: '密码至少8位，且包含数字和字母' },
+                          { max: 128, message: '密码长度不能超过128个字符' }
+                        ]}
+                    >
+                      <Password prefix={<LockOutlined className="text-gray-400 mr-2" />} placeholder="输入密码" className="rounded-lg h-10" />
+                    </Form.Item>
 
-                  <Form.Item
-                    name="nickname"
-                    label="昵称"
-                    rules={[{ required: true, message: '请输入昵称' }]}
-                  >
-                    <Input placeholder="输入昵称" className="rounded-lg h-10" />
-                  </Form.Item>
+                    <Form.Item
+                        name="nickname"
+                        label="昵称"
+                        rules={[{ required: true, message: '请输入昵称' }]}
+                    >
+                      <Input placeholder="输入昵称" className="rounded-lg h-10" />
+                    </Form.Item>
 
-                  <Form.Item
-                    name="email"
-                    label="邮箱"
-                    rules={[
-                      { required: true, message: '请输入邮箱' },
-                      { type: 'email', message: '邮箱格式不正确' },
-                      { max: 256, message: '邮箱长度不能超过256个字符' }
-                    ]}
-                  >
-                    <Input prefix={<MailOutlined className="text-gray-400 mr-2" />} placeholder="输入邮箱" className="rounded-lg h-10" />
-                  </Form.Item>
-                </>
+                    <Form.Item
+                        name="email"
+                        label="邮箱"
+                        rules={[
+                          { required: true, message: '请输入邮箱' },
+                          { type: 'email', message: '邮箱格式不正确' },
+                          { max: 256, message: '邮箱长度不能超过256个字符' }
+                        ]}
+                    >
+                      <Input prefix={<MailOutlined className="text-gray-400 mr-2" />} placeholder="输入邮箱" className="rounded-lg h-10" />
+                    </Form.Item>
+                  </>
               ) : (
-                <div className="text-center py-8">
-                  <p className="text-gray-600 mb-4">系统管理员已创建成功</p>
-                  <p className="text-gray-500">点击"完成初始化"按钮完成系统初始化过程</p>
-                </div>
+                  <div className="text-center py-8">
+                    <p className="text-gray-600 mb-4">系统管理员已创建成功</p>
+                    <p className="text-gray-500">点击"完成初始化"按钮完成系统初始化过程</p>
+                  </div>
               )}
 
               <Form.Item className="mt-8">
                 <Button
-                  type="primary"
-                  htmlType="submit"
-                  loading={loading}
-                  className="w-full h-12 rounded-xl font-bold"
+                    type="primary"
+                    htmlType="submit"
+                    loading={loading}
+                    className="w-full h-12 rounded-xl font-bold"
                 >
                   {currentStep === 0 ? '创建系统管理员' : '完成初始化'}
                 </Button>
@@ -219,6 +210,5 @@ export function InitializerPage() {
           }
         `}</style>
       </div>
-    </ConfigProvider>
   );
 }

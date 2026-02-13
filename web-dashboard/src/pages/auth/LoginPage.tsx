@@ -75,7 +75,7 @@ export function LoginPage() {
           <Input
             prefix={<MailOutlined className="text-gray-400 mr-2" />}
             placeholder="电子邮箱"
-            className="hover:border-blue-400 focus:border-blue-500 rounded-xl"
+            className="rounded-xl"
           />
         </Form.Item>
 
@@ -86,7 +86,7 @@ export function LoginPage() {
           <Input.Password
             prefix={<LockOutlined className="text-gray-400 mr-2" />}
             placeholder="密码"
-            className="hover:border-blue-400 focus:border-blue-500 rounded-xl"
+            className="rounded-xl"
           />
         </Form.Item>
 
@@ -95,7 +95,7 @@ export function LoginPage() {
             <Checkbox className="text-xs text-gray-500">记住我</Checkbox>
           </Form.Item>
           <a
-            className="text-xs text-blue-600 hover:text-blue-500 font-medium"
+            className="text-xs font-medium"
             href="/auth/forgot-password"
           >
             忘记密码?
@@ -107,7 +107,7 @@ export function LoginPage() {
             type="primary"
             htmlType="submit"
             loading={loading}
-            className="w-full h-12 text-base font-semibold shadow-lg shadow-blue-100 rounded-xl border-none bg-blue-600 hover:bg-blue-500 active:scale-[0.98] transition-all"
+            className="w-full h-12 text-base font-semibold shadow-lg rounded-xl border-none active:scale-[0.98] transition-all"
           >
             立即登录
           </Button>

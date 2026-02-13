@@ -7,10 +7,30 @@ import {RequireAuthComponent} from "./components/auth/RequireAuthComponent.tsx";
 import MainPage from "./pages/MainPage.tsx";
 import TermsOfServicePage from "./pages/TermsOfServicePage.tsx";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage.tsx";
+import {ConfigProvider} from "antd";
 
 function App() {
   return (
-      <div>
+      <ConfigProvider
+          theme={{
+              token: {
+                  colorPrimary: '#FF8DA1',
+                  borderRadius: 12,
+                  fontFamily: 'Inter, system-ui, sans-serif',
+              },
+              components: {
+                  Layout: {
+                      headerBg: 'rgba(255, 255, 255, 0.7)',
+                      siderBg: '#ffffff',
+                  },
+                  Menu: {
+                      itemBorderRadius: 12,
+                      itemSelectedBg: 'rgba(255,240,243,0.8)',
+                      itemSelectedColor: '#FF8DA1',
+                  },
+              },
+          }}
+      >
           <Routes>
               <Route path="/" element={<MainPage />} />
               <Route path="/terms" element={<TermsOfServicePage />} />
@@ -26,7 +46,7 @@ function App() {
               />
               <Route path="/auth/*" element={<AuthorizationPage />} />
           </Routes>
-      </div>
+      </ConfigProvider>
   )
 }
 

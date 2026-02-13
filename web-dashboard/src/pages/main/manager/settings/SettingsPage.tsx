@@ -111,7 +111,7 @@ export function SettingsPage() {
                 <Space orientation="vertical" size={24} className="w-full">
                     <Card
                         loading={requesting}
-                        title={<Space><MailOutlined className="text-blue-600" /><span>SMTP 邮件服务配置</span></Space>}
+                        title={<Space><MailOutlined className="text-primary" /><span>SMTP 邮件服务配置</span></Space>}
                         className="border-none shadow-sm rounded-[2rem] overflow-hidden"
                     >
                         <Row gutter={24}>
@@ -235,7 +235,7 @@ export function SettingsPage() {
                             size="large"
                             loading={requesting}
                             onClick={() => settingsForm.submit()}
-                            className="h-12 px-12 rounded-xl shadow-lg shadow-blue-100 font-bold"
+                            className="h-12 px-12 rounded-xl shadow-lg font-bold"
                         >
                             保存全局配置
                         </Button>

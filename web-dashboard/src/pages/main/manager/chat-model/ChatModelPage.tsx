@@ -313,7 +313,7 @@ export function ChatModelPage() {
             dataIndex: 'inputTokenPointRate',
             key: 'inputTokenPointRate',
             width: 120,
-            render: (val: number) => <span className="text-blue-600 font-mono">{val}</span>
+            render: (val: number) => <span className="text-primary font-mono">{val}</span>
         },
         {
             title: '输出 Token 费率',
@@ -379,7 +379,7 @@ export function ChatModelPage() {
                     type="primary"
                     icon={<PlusOutlined />}
                     size="large"
-                    className="rounded-xl h-12 shadow-lg shadow-blue-100"
+                    className="rounded-xl h-12 shadow-lg"
                     onClick={() => openModal()}
                 >
                     新增模型

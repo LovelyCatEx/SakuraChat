@@ -186,7 +186,7 @@ export function ProviderPage() {
                     type="primary"
                     icon={<PlusOutlined />}
                     size="large"
-                    className="rounded-xl h-12 shadow-lg shadow-blue-100"
+                    className="rounded-xl h-12 shadow-lg"
                     onClick={() => openModal()}
                 >
                     新增供应商

@@ -89,7 +89,7 @@ export function ForgotPasswordPage() {
           <Input
             prefix={<MailOutlined className="text-gray-400 mr-2" />}
             placeholder="电子邮箱"
-            className="hover:border-blue-400 focus:border-blue-500 rounded-xl"
+            className="rounded-xl"
           />
         </Form.Item>
 
@@ -101,7 +101,7 @@ export function ForgotPasswordPage() {
             <Col span={16}>
               <Input
                 placeholder="验证码"
-                className="hover:border-blue-400 focus:border-blue-500 rounded-xl"
+                className="rounded-xl"
               />
             </Col>
             <Col span={8}>
@@ -111,7 +111,7 @@ export function ForgotPasswordPage() {
                 loading={sendingCode}
                 disabled={countdown > 0}
                 onClick={handleSendCode}
-                className="w-full h-10 text-base font-semibold rounded-xl border-none bg-blue-600 hover:bg-blue-500 active:scale-[0.98] transition-all"
+                className="w-full h-10 text-base font-semibold rounded-xl border-none active:scale-[0.98] transition-all"
               >
                 {countdown > 0 ? `${countdown}s后重试` : '发送验证码'}
               </Button>
@@ -130,7 +130,7 @@ export function ForgotPasswordPage() {
           <Password
             prefix={<LockOutlined className="text-gray-400 mr-2" />}
             placeholder="新密码"
-            className="hover:border-blue-400 focus:border-blue-500 rounded-xl"
+            className="rounded-xl"
           />
         </Form.Item>
 
@@ -152,7 +152,7 @@ export function ForgotPasswordPage() {
           <Password
             prefix={<LockOutlined className="text-gray-400 mr-2" />}
             placeholder="确认新密码"
-            className="hover:border-blue-400 focus:border-blue-500 rounded-xl"
+            className="rounded-xl"
           />
         </Form.Item>
 
@@ -161,7 +161,7 @@ export function ForgotPasswordPage() {
             type="primary"
             htmlType="submit"
             loading={loading}
-            className="w-full h-12 text-base font-semibold shadow-lg shadow-blue-100 rounded-xl border-none bg-blue-600 hover:bg-blue-500 active:scale-[0.98] transition-all"
+            className="w-full h-12 text-base font-semibold shadow-lg rounded-xl border-none active:scale-[0.98] transition-all"
           >
             重置密码
           </Button>

@@ -122,7 +122,7 @@ export function UserPointsLogPage() {
                     type="primary"
                     icon={<ReloadOutlined />}
                     size="large"
-                    className="rounded-xl h-12 shadow-lg shadow-blue-100"
+                    className="rounded-xl h-12 shadow-lg"
                     onClick={() => refreshData()}
                 >
                     刷新

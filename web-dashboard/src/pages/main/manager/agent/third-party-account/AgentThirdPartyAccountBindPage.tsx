@@ -124,7 +124,7 @@ export function AgentThirdPartyAccountBindPage({ agentId, agentName }: AgentThir
                 <Space orientation='vertical' size={0} style={{ width: '100%' }}>
                     <Tooltip title={nickname}>
                         <span 
-                            className="font-bold text-gray-800 cursor-pointer hover:text-blue-600"
+                            className="font-bold text-gray-800 cursor-pointer hover:text-primary"
                             style={{
                                 maxWidth: '100%',
                                 display: 'inline-block',
@@ -220,7 +220,7 @@ export function AgentThirdPartyAccountBindPage({ agentId, agentName }: AgentThir
                 <Space orientation='vertical' size={0} style={{ width: '100%' }}>
                     <Tooltip title={nickname}>
                         <span 
-                            className="font-bold text-gray-800 cursor-pointer hover:text-blue-600"
+                            className="font-bold text-gray-800 cursor-pointer hover:text-primary"
                             style={{
                                 maxWidth: '100%',
                                 display: 'inline-block',
@@ -320,7 +320,7 @@ export function AgentThirdPartyAccountBindPage({ agentId, agentName }: AgentThir
                     type="primary"
                     icon={<ReloadOutlined />}
                     size="large"
-                    className="rounded-xl h-12 shadow-lg shadow-blue-100"
+                    className="rounded-xl h-12 shadow-lg"
                     onClick={() => refreshData()}
                 >
                     刷新

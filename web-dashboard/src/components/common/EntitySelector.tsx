@@ -216,10 +216,10 @@ export function EntitySelector<T extends Entity>({
                 ) : (
                     <div
                         onClick={() => !disabled && setFocused(true)}
-                        className="flex-1 flex items-center px-3 py-1 bg-white border border-gray-300 rounded-l-md cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-100 min-h-8 transition-all duration-300 hover:border-blue-500 hover:z-10 -mr-px"
+                        className="flex-1 flex items-center px-3 py-1 bg-white border border-gray-300 rounded-l-md cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-100 min-h-8 transition-all duration-300 hover:border-primary hover:z-10 -mr-px"
                     >
                         {displayLabel ? (
-                            <Tag color="blue" className="m-0">{displayLabel}</Tag>
+                            <Tag color="pink" className="m-0">{displayLabel}</Tag>
                         ) : (
                             <span className="text-gray-400">{placeholder}</span>
                         )}

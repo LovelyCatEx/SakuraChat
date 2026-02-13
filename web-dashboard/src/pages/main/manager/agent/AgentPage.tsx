@@ -286,7 +286,7 @@ export function AgentPage() {
                     type="primary"
                     icon={<PlusOutlined />}
                     size="large"
-                    className="rounded-xl h-12 shadow-lg shadow-blue-100"
+                    className="rounded-xl h-12 shadow-lg"
                     onClick={() => openModal()}
                 >
                     新增智能体
