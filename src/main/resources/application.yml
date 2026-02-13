@@ -27,6 +27,6 @@ server:
   port: 8080
 logging:
   level:
-    org.springframework.transaction: TRACE
-    org.springframework.orm.jpa: DEBUG
-    org.hibernate.resource.transaction: DEBUG
+    org.springframework.transaction: ERROR
+    org.springframework.orm.jpa: ERROR
+    org.hibernate.resource.transaction: ERROR
