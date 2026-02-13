@@ -10,7 +10,6 @@ package com.lovelycatv.sakurachat.service.impl
 
 import com.lovelycatv.sakurachat.constants.SystemSettings
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateUserDTO
-import com.lovelycatv.sakurachat.entity.UserEntity
 import com.lovelycatv.sakurachat.exception.BusinessException
 import com.lovelycatv.sakurachat.repository.UserRepository
 import com.lovelycatv.sakurachat.service.SystemInitializationService

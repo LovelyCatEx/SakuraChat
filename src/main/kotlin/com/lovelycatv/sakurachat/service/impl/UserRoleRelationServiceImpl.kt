@@ -10,8 +10,8 @@ package com.lovelycatv.sakurachat.service.impl
 
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateUserRoleRelationDTO
 import com.lovelycatv.sakurachat.entity.UserRoleRelationEntity
-import com.lovelycatv.sakurachat.repository.UserRoleRelationRepository
 import com.lovelycatv.sakurachat.repository.UserRepository
+import com.lovelycatv.sakurachat.repository.UserRoleRelationRepository
 import com.lovelycatv.sakurachat.request.PaginatedResponseData
 import com.lovelycatv.sakurachat.service.UserRoleRelationService
 import com.lovelycatv.sakurachat.service.UserRoleService

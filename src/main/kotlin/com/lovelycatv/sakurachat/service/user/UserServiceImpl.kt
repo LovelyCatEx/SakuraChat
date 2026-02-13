@@ -15,11 +15,7 @@ import com.lovelycatv.sakurachat.exception.BusinessException
 import com.lovelycatv.sakurachat.repository.UserRepository
 import com.lovelycatv.sakurachat.repository.UserThirdPartyAccountRelationRepository
 import com.lovelycatv.sakurachat.request.PaginatedResponseData
-import com.lovelycatv.sakurachat.service.SystemSettingsService
-import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
-import com.lovelycatv.sakurachat.service.UserPointsService
-import com.lovelycatv.sakurachat.service.UserRoleRelationService
-import com.lovelycatv.sakurachat.service.UserRoleService
+import com.lovelycatv.sakurachat.service.*
 import com.lovelycatv.sakurachat.service.mail.MailService
 import com.lovelycatv.sakurachat.service.request.UserPointsConsumeRequest
 import com.lovelycatv.sakurachat.types.PointsChangesReason

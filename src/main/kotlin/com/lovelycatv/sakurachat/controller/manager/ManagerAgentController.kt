@@ -9,7 +9,6 @@
 package com.lovelycatv.sakurachat.controller.manager
 
 import com.lovelycatv.sakurachat.constants.SystemRolePermissions
-import com.lovelycatv.sakurachat.constants.SystemSettings
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateAgentDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateAgentDTO
 import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
@@ -19,7 +18,6 @@ import com.lovelycatv.sakurachat.request.PageQuery
 import com.lovelycatv.sakurachat.service.AgentService
 import com.lovelycatv.sakurachat.service.ThirdPartyAccountRelationService
 import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
-import com.lovelycatv.sakurachat.types.UserRoleType
 import com.lovelycatv.sakurachat.utils.toPageable
 import com.lovelycatv.sakurachat.utils.toPaginatedResponseData
 import kotlinx.coroutines.Dispatchers

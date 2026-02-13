@@ -10,7 +10,6 @@ package com.lovelycatv.sakurachat.service
 
 import com.lovelycatv.sakurachat.entity.UserEntity
 import com.lovelycatv.sakurachat.repository.UserRepository
-import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.service.request.UserPointsConsumeRequest
 import com.lovelycatv.sakurachat.types.DatabaseTableType
 import com.lovelycatv.sakurachat.types.PointsChangesReason
