@@ -28,6 +28,7 @@ import type {ItemType} from "antd/es/menu/interface";
 import {clearUserAuthentication} from "../../utils/token.utils.ts";
 import {useLoggedUser} from "../../compositions/use-logged-user.ts";
 import {UserPointsLogPage} from "./user/points-log/UserPointsLogPage.tsx";
+import {UserThirdPartyAccountBindPage} from "./user/third-party-account/UserThirdPartyAccountBindPage.tsx";
 
 const { Header, Sider, Content } = Layout;
 
@@ -49,6 +50,7 @@ export function MainContainer() {
   const menuItems: (MenuItem & ItemType)[] = useMemo(() => [
     { key: '/manager/dashboard', icon: <DashboardOutlined />, label: '仪表盘' },
     { key: '/points-logs', icon: <PayCircleOutlined />, label: '积分变更记录' },
+    { key: '/third-party-account/bind', icon: <TeamOutlined />, label: '第三方账号绑定' },
     { key: '/manager/agents', icon: <RobotOutlined />, label: '智能体' },
     { key: '/manager/providers', icon: <CloudServerOutlined />, label: '模型提供商' },
     { key: '/manager/models', icon: <DatabaseOutlined />, label: '语言模型' },
@@ -187,6 +189,7 @@ export function MainContainer() {
             <Routes>
               <Route path="/manager/dashboard" element={<DashboardPage />} />
               <Route path="/points-logs" element={<UserPointsLogPage />} />
+              <Route path="/third-party-account/bind" element={<UserThirdPartyAccountBindPage />} />
               <Route path="/manager/agents" element={<AgentPage />} />
               <Route path="/manager/providers" element={<ProviderPage />} />
               <Route path="/manager/models" element={<ChatModelPage />} />
