@@ -1,11 +1,18 @@
 import {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Form, Input, message, Row, Col } from 'antd';
+import {Button, Form, Input, message, Row, Col, Checkbox} from 'antd';
 import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
 import { AuthCardLayout } from './AuthorizationPage.tsx';
 import { register, requestRegisterEmailCode } from '../../api/auth.api.ts';
 
 const { Password } = Input;
+
+interface RegisterFormData {
+  username: string;
+  password: string;
+  email: string;
+  emailCode: string;
+}
 
 export function RegisterPage() {
   const [loading, setLoading] = useState(false);
@@ -47,7 +54,7 @@ export function RegisterPage() {
     }
   };
 
-  const onFinish = async (values: any) => {
+  const onFinish = async (values: RegisterFormData) => {
     setLoading(true);
     try {
       await register(values.username, values.password, values.email, values.emailCode);
@@ -169,6 +176,20 @@ export function RegisterPage() {
             placeholder="确认密码"
             className="rounded-xl"
           />
+        </Form.Item>
+
+        <Form.Item
+          name="agreement"
+          valuePropName="checked"
+          rules={[{ required: true, message: '请阅读并同意服务条款和隐私政策' }]}
+          className="mb-6"
+        >
+          <Checkbox className="text-xs text-gray-500">
+            我已阅读并同意
+            <a href="/privacy" className="text-pink-400 hover:underline mx-1" target="_blank">隐私政策</a>
+            和
+            <a href="/terms" className="text-pink-400 hover:underline mx-1" target="_blank">服务条款</a>
+          </Checkbox>
         </Form.Item>
 
         <Form.Item className="mb-4">

@@ -164,7 +164,126 @@ const MainPage = () => {
         ) : content;
     };
 
-    const platformData: PlatformMessageSupportItem[] = [
+    interface FeatureSupportItem {
+        key: string;
+        feature: string;
+        description: string;
+        status: DevelopmentStatus;
+        tooltips?: string;
+    }
+
+    const featureSupportData: FeatureSupportItem[] = [
+        {
+            key: 'multi-user',
+            feature: '多用户管理',
+            description: '支持多个用户同时使用系统',
+            status: 'supported'
+        },
+        {
+            key: 'model-management',
+            feature: '模型管理',
+            description: '管理第三方模型',
+            status: 'supported'
+        },
+        {
+            key: 'agent-management',
+            feature: '智能体管理',
+            description: '管理和配置 AI 智能体',
+            status: 'supported'
+        },
+        {
+            key: 'points-management',
+            feature: '积分管理',
+            description: '用户积分系统管理',
+            status: 'supported'
+        },
+        {
+            key: 'third-party-account',
+            feature: '第三方账号管理',
+            description: '支持绑定和管理第三方账号',
+            status: 'supported'
+        },
+        {
+            key: 'openai-format',
+            feature: 'OpenAI 格式',
+            description: '支持 OpenAI API 格式的请求和响应',
+            status: 'supported'
+        },
+        {
+            key: 'gemini-format',
+            feature: 'Gemini 格式',
+            description: '支持 Google Gemini API 格式',
+            status: 'not-supported'
+        },
+        {
+            key: 'anthropic-format',
+            feature: 'Anthropic 格式',
+            description: '支持 Anthropic API 格式',
+            status: 'not-supported'
+        },
+        {
+            key: 'cross-platform-context',
+            feature: '跨平台上下文',
+            description: '在不同平台间保持对话上下文',
+            status: 'supported'
+        },
+        {
+            key: 'speech-recognition',
+            feature: '语音识别',
+            description: '将语音转换为文本',
+            status: 'planned'
+        },
+        {
+            key: 'text-to-speech',
+            feature: '语音合成',
+            description: '将文本转换为语音',
+            status: 'planned'
+        },
+        {
+            key: 'image-recognition',
+            feature: '图像识别',
+            description: '分析和识别图片内容',
+            status: 'planned'
+        },
+        {
+            key: 'image-generation',
+            feature: '图像生成',
+            description: '根据描述生成图片',
+            status: 'planned'
+        },
+        {
+            key: 'emoji-sending',
+            feature: '发送表情包',
+            description: '支持发送和管理表情包',
+            status: 'planned'
+        }
+    ];
+
+    const featureSupportColumns: (ColumnGroupType<FeatureSupportItem> | ColumnType<FeatureSupportItem>)[] = [
+        {
+            title: '功能',
+            dataIndex: 'feature',
+            key: 'feature',
+            width: 280,
+            align: 'center'
+        },
+        {
+            title: '描述',
+            dataIndex: 'description',
+            key: 'description',
+            align: 'center'
+        },
+        {
+            title: '状态',
+            dataIndex: 'status',
+            key: 'status',
+            render: (status: DevelopmentStatus, record: FeatureSupportItem) => renderStatus(status, record.tooltips),
+            align: 'center',
+            width: 200.
+        }
+    ];
+
+    const platformMessageSupportData: PlatformMessageSupportItem[] = [
         {
             key: 'text',
             type: '文本',
@@ -173,7 +292,7 @@ const MainPage = () => {
             web: 'planned',
         },
         {
-            key: 'text',
+            key: 'at-reply',
             type: '@/回复',
             qq: 'supported',
             lark: 'planned',
@@ -218,7 +337,7 @@ const MainPage = () => {
         }
     ];
 
-    const columns: (ColumnGroupType<PlatformMessageSupportItem> | ColumnType<PlatformMessageSupportItem>)[] = [
+    const platformMessageSupportColumns: (ColumnGroupType<PlatformMessageSupportItem> | ColumnType<PlatformMessageSupportItem>)[] = [
         {
             title: '消息类型',
             dataIndex: 'type',
@@ -355,6 +474,26 @@ const MainPage = () => {
                     </div>
                 </section>
 
+                <section className="bg-white px-6">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="text-center mb-16">
+                            <h2 className="text-3xl font-bold text-gray-900">支持的功能</h2>
+                            <p className="text-gray-500 mt-4 max-w-2xl mx-auto">我们提供丰富的功能来满足您的需求，以下是当前的支持情况和未来的开发计划</p>
+                            <div className="w-12 h-1 bg-pink-400 mx-auto mt-4 rounded-full" />
+                        </div>
+
+                        <Card className="rounded-3xl shadow-sm border-gray-100 overflow-hidden">
+                            <Table
+                                dataSource={featureSupportData}
+                                columns={featureSupportColumns}
+                                pagination={false}
+                                scroll={{ x: 800 }}
+                                className="ant-table-custom"
+                            />
+                        </Card>
+                    </div>
+                </section>
+
                 <section className="py-24 bg-[#f8fafc] px-6">
                     <div className="max-w-7xl mx-auto">
                         <div className="text-center mb-16">
@@ -365,8 +504,8 @@ const MainPage = () => {
 
                         <Card className="rounded-3xl shadow-sm border-gray-100 overflow-hidden">
                             <Table
-                                dataSource={platformData}
-                                columns={columns}
+                                dataSource={platformMessageSupportData}
+                                columns={platformMessageSupportColumns}
                                 pagination={false}
                                 scroll={{ x: 600 }}
                                 className="ant-table-custom"

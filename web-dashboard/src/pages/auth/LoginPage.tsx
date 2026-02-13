@@ -7,6 +7,13 @@ import {login} from "../../api/auth.api.ts";
 import {setUserAuthentication} from "../../utils/token.utils.ts";
 import {getQueryString} from "../../utils/url.utils.ts";
 
+interface LoginFormData {
+  username: string,
+  password: string,
+  remember: boolean,
+  agreement: boolean
+}
+
 export function LoginPage() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -15,11 +22,7 @@ export function LoginPage() {
     document.title = '登录 - SakuraChat'
   }, []);
 
-  const onFinish = (values: {
-    username: string,
-    password: string,
-    remember: boolean
-  }) => {
+  const onFinish = (values: LoginFormData) => {
     setLoading(true);
 
     if (values.remember) {
@@ -101,6 +104,20 @@ export function LoginPage() {
             忘记密码?
           </a>
         </div>
+
+        <Form.Item
+          name="agreement"
+          valuePropName="checked"
+          rules={[{ required: true, message: '请阅读并同意服务条款和隐私政策' }]}
+          className="mb-6"
+        >
+          <Checkbox className="text-xs text-gray-500">
+            我已阅读并同意
+            <a href="/privacy" className="text-pink-400 hover:underline mx-1" target="_blank">隐私政策</a>
+            和
+            <a href="/terms" className="text-pink-400 hover:underline mx-1" target="_blank">服务条款</a>
+          </Checkbox>
+        </Form.Item>
 
         <Form.Item className="mb-4">
           <Button
