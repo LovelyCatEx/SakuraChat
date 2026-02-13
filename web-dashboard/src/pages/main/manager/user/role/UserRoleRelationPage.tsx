@@ -8,8 +8,10 @@ import {
     updateUserRoleRelations
 } from '../../../../../api/user-role-relation.api.ts';
 import {getUserRoleList} from '../../../../../api/user-role.api.ts';
+import {getUserProfile} from '../../../../../api/user.api.ts';
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
 import type {UserRole, UserRoleRelation} from '../../../../../types/user-role.types.ts';
+import type {UserProfileVO} from '../../../../../types/user.types.ts';
 
 const { Option } = Select;
 
@@ -24,6 +26,7 @@ export function UserRoleRelationPage() {
     const [searchKeyword, setSearchKeyword] = useState('');
     const [userRoleRelations, setUserRoleRelations] = useState<UserRoleRelation[]>([]);
     const [allRoles, setAllRoles] = useState<UserRole[]>([]);
+    const [users, setUsers] = useState<Record<number, UserProfileVO>>({});
 
     const refreshData = () => {
         setRefreshing(true);
@@ -36,6 +39,26 @@ export function UserRoleRelationPage() {
             if (res.data) {
                 setUserRoleRelations(res.data.records);
                 setTotal(res.data.total);
+
+                const userIds = res.data.records.map(record => record.first);
+                
+                const userPromises = userIds.map(userId => getUserProfile(userId));
+                
+                if (userPromises.length > 0) {
+                    Promise.all(userPromises).then(userResults => {
+                        const userMap: Record<number, UserProfileVO> = {};
+                        userResults.forEach((userRes, index) => {
+                            if (userRes.data) {
+                                userMap[userIds[index]] = userRes.data;
+                            }
+                        });
+                        setUsers(userMap);
+                    }).catch(() => {
+                        void message.error('获取用户信息失败');
+                    });
+                } else {
+                    setUsers({});
+                }
             }
         }).finally(() => {
             setRefreshing(false);
@@ -110,30 +133,39 @@ export function UserRoleRelationPage() {
 
     const columns: (ColumnGroupType<UserRoleRelation> | ColumnType<UserRoleRelation>)[] = [
         {
-            title: '用户ID',
+            title: '用户',
             dataIndex: 'first',
             key: 'userId',
             fixed: 'start',
             width: 150,
-            render: (userId: number) => (
-                <Tag color="blue" className="m-0 text-[12px] leading-4 h-6 px-2 rounded">{userId}</Tag>
-            ),
+            render: (userId: number) => {
+                const user = users[userId];
+                return (
+                    <Space orientation="vertical" size={0}>
+                        <span className="text-gray-600">{user?.nickname ?? `用户 ${userId}`}</span>
+                        <span className="text-xs text-gray-400">@{user?.username ?? ''}</span>
+                    </Space>
+                );
+            },
         },
         {
-            title: '拥有的角色ID',
+            title: '拥有的角色',
             dataIndex: 'second',
             key: 'roleIds',
             width: 400,
-            render: (roleIds: number[]) => (
+            render: (roleIds: string[]) => (
                 <Space wrap size={4}>
                     {roleIds.length > 0 ? (
-                        roleIds.map((roleId) => (
-                            <Tag key={roleId} color="green" className="m-0 text-[12px] leading-4 h-6 px-2 rounded">
-                                {roleId}
-                            </Tag>
-                        ))
+                        roleIds.map((roleId) => {
+                            const role = allRoles.find(r => r.id === roleId);
+                            return (
+                                <Tag key={roleId} color="green" className="m-0 leading-4 h-6 px-2 rounded">
+                                    {role ? role.name : roleId}
+                                </Tag>
+                            );
+                        })
                     ) : (
-                        <Tag color="gray" className="m-0 text-[12px] leading-4 h-6 px-2 rounded">无角色</Tag>
+                        <Tag color="gray" className="m-0 leading-4 h-6 px-2 rounded">无角色</Tag>
                     )}
                 </Space>
             ),
