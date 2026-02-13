@@ -17,7 +17,7 @@ import org.hibernate.annotations.SQLRestriction
 @Table(name = "user_roles")
 @SQLDelete(sql = "UPDATE user_roles SET deleted_time = ROUND(UNIX_TIMESTAMP(CURTIME(3)) * 1000) WHERE id = ?")
 @SQLRestriction(BaseEntity.SOFT_NON_DELETED_RESTRICTION)
-class UserRole(
+class UserRoleEntity(
     override val id: Long = 0,
     @Column(name = "name", length = 32, nullable = false, unique = true)
     var name: String = "",
@@ -29,7 +29,7 @@ class UserRole(
 ) : BaseEntity() {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is UserRole) return false
+        if (other !is UserRoleEntity) return false
 
         if (id != other.id) return false
         if (name != other.name) return false

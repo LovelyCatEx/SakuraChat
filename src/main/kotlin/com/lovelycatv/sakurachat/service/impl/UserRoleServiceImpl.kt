@@ -10,10 +10,12 @@ package com.lovelycatv.sakurachat.service.impl
 
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateUserRoleDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.UpdateUserRoleDTO
-import com.lovelycatv.sakurachat.entity.UserRole
+import com.lovelycatv.sakurachat.entity.UserRoleEntity
+import com.lovelycatv.sakurachat.exception.BusinessException
 import com.lovelycatv.sakurachat.repository.UserRoleRepository
 import com.lovelycatv.sakurachat.request.PaginatedResponseData
 import com.lovelycatv.sakurachat.service.UserRoleService
+import com.lovelycatv.sakurachat.types.UserRoleType
 import com.lovelycatv.sakurachat.utils.SnowIdGenerator
 import com.lovelycatv.sakurachat.utils.toPaginatedResponseData
 import kotlinx.coroutines.Dispatchers
@@ -49,7 +51,7 @@ class UserRoleServiceImpl(
     override suspend fun createUserRole(managerCreateUserRoleDTO: ManagerCreateUserRoleDTO) {
         withContext(Dispatchers.IO) {
             getRepository().save(
-                UserRole(
+                UserRoleEntity(
                     id = snowIdGenerator.nextId(),
                     name = managerCreateUserRoleDTO.name,
                     description = managerCreateUserRoleDTO.description
@@ -58,7 +60,7 @@ class UserRoleServiceImpl(
         }
     }
 
-    override suspend fun search(keyword: String, page: Int, pageSize: Int): PaginatedResponseData<UserRole> {
+    override suspend fun search(keyword: String, page: Int, pageSize: Int): PaginatedResponseData<UserRoleEntity> {
         if (keyword.isBlank()) {
             return this.listByPage(page, pageSize).toPaginatedResponseData()
         }
@@ -70,5 +72,10 @@ class UserRoleServiceImpl(
                 Pageable.ofSize(pageSize).withPage(page - 1)
             )
         }.toPaginatedResponseData()
+    }
+
+    override fun getRoleEntityByType(type: UserRoleType): UserRoleEntity {
+        return this.getRepository().findAll().firstOrNull { it.name == type.roleName }
+            ?: throw BusinessException("Could not find user role with name ${type.name}")
     }
 }

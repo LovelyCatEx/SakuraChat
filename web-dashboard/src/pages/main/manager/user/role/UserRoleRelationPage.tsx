@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {Button, Card, Col, Form, Input, message, Modal, Row, Select, Space, Table, Tag} from 'antd';
 import {EditOutlined, SearchOutlined} from '@ant-design/icons';
 import {getUserRoleRelationList, searchUserRoleRelations, getUserRoles, updateUserRoleRelations} from '../../../../../api/user-role-relation.api.ts';
-import {searchUserRoles} from '../../../../../api/user-role.api.ts';
+import {getUserRoleList, searchUserRoles} from '../../../../../api/user-role.api.ts';
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
 import type {UserRole, UserRoleRelation} from '../../../../../types/user-role.types.ts';
 
@@ -37,13 +37,32 @@ export function UserRoleRelationPage() {
         })
     }
 
-    const refreshRoles = () => {
-        searchUserRoles('', 1, 100).then((res) => {
-            if (res.data) {
-                setAllRoles(res.data.records);
+    const refreshRoles = async () => {
+        const pageSize = 20;
+        let allRecords: UserRole[] = [];
+        let totalPages = 1;
+
+        try {
+            const firstPageRes = await getUserRoleList({ page: 1, pageSize: pageSize });
+
+            if (firstPageRes.data) {
+                allRecords = [...firstPageRes.data.records];
+                totalPages = firstPageRes.data.totalPages || 1;
+
+                for (let page = 2; page <= totalPages; page++) {
+                    const res = await getUserRoleList({ page: page, pageSize: pageSize });
+                    if (res.data && res.data.records) {
+                        allRecords = [...allRecords, ...res.data.records];
+                    }
+                }
             }
-        });
-    }
+
+            setAllRoles(allRecords);
+        } catch {
+            void message.error('获取用户角色列表失败');
+        }
+    };
+
 
     const handleSearch = (keyword: string) => {
         setSearchKeyword(keyword);
@@ -53,12 +72,11 @@ export function UserRoleRelationPage() {
     useEffect(() => {
         // eslint-disable-next-line react-hooks/set-state-in-effect
         refreshData();
-        refreshRoles();
+        void refreshRoles();
     }, [currentPage, currentPageSize, searchKeyword]);
 
     const handleUpdateUserRoles = (values: { roleIds: (number | string)[] }) => {
         if (editingUserId) {
-            // 将所有角色ID转换为字符串类型，避免长数字精度丢失
             const roleIds = values.roleIds.map(id => typeof id === 'number' ? id.toString() : id);
             updateUserRoleRelations(editingUserId, roleIds).then(() => {
                 refreshData();
@@ -76,7 +94,6 @@ export function UserRoleRelationPage() {
     const openEditModal = (userId: number) => {
         setEditingUserId(userId);
 
-        // 获取用户当前角色
         getUserRoles(userId).then((res) => {
             if (res.data) {
                 form.setFieldsValue({ roleIds: res.data });
@@ -111,7 +128,7 @@ export function UserRoleRelationPage() {
                             </Tag>
                         ))
                     ) : (
-                        <Tag color="gray" className="m-0 text-[12px] leading-4 h-6 px-2 rounded">无</Tag>
+                        <Tag color="gray" className="m-0 text-[12px] leading-4 h-6 px-2 rounded">无角色</Tag>
                     )}
                 </Space>
             ),
@@ -208,7 +225,7 @@ export function UserRoleRelationPage() {
                                 >
                                     {allRoles.map((role) => (
                                         <Option key={role.id} value={role.id}>
-                                            {role.name} (ID: {role.id})
+                                            {role.name}
                                         </Option>
                                     ))}
                                 </Select>

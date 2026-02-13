@@ -23,4 +23,5 @@ interface UserRoleRelationRepository : JpaRepository<UserRoleRelationEntity, Lon
     @Modifying
     @Query("DELETE FROM UserRoleRelationEntity r WHERE r.userId = :userId")
     fun deleteAllByUserId(userId: Long)
+    fun deleteByUserIdAndRoleId(userId: Long, roleId: Long)
 }

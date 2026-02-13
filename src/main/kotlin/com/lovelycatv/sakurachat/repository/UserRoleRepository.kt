@@ -7,17 +7,17 @@
  */
 package com.lovelycatv.sakurachat.repository
 
-import com.lovelycatv.sakurachat.entity.UserRole
+import com.lovelycatv.sakurachat.entity.UserRoleEntity
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface UserRoleRepository : JpaRepository<UserRole, Long> {
+interface UserRoleRepository : JpaRepository<UserRoleEntity, Long> {
     fun findAllByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
         name: String,
         description: String,
         pageable: Pageable
-    ): Page<UserRole>
+    ): Page<UserRoleEntity>
 }

@@ -18,10 +18,12 @@ import com.lovelycatv.sakurachat.request.PaginatedResponseData
 import com.lovelycatv.sakurachat.service.SystemSettingsService
 import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
 import com.lovelycatv.sakurachat.service.UserPointsService
+import com.lovelycatv.sakurachat.service.UserRoleRelationService
 import com.lovelycatv.sakurachat.service.mail.MailService
 import com.lovelycatv.sakurachat.service.request.UserPointsConsumeRequest
 import com.lovelycatv.sakurachat.types.PointsChangesReason
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
+import com.lovelycatv.sakurachat.types.UserRoleType
 import com.lovelycatv.sakurachat.utils.toPaginatedResponseData
 import com.lovelycatv.vertex.log.logger
 import okio.withLock
@@ -42,7 +44,8 @@ class UserServiceImpl(
     private val thirdPartyAccountService: ThirdPartyAccountService,
     private val mailService: MailService,
     private val userPointsService: UserPointsService,
-    private val systemSettingsService: SystemSettingsService
+    private val systemSettingsService: SystemSettingsService,
+    private val userRoleRelationService: UserRoleRelationService
 ) : UserService {
     private val logger = logger()
 
@@ -96,15 +99,7 @@ class UserServiceImpl(
                     email
                 )
             ).also {
-                val initialPoints = systemSettingsService.getAllSettingsLazy().userRegistration.initialPoints
-                this.userPointsService.consumePoints(
-                    userId = it.id,
-                    request = UserPointsConsumeRequest(
-                        reason = PointsChangesReason.REGISTER,
-                        consumedPoints = -abs(initialPoints),
-                        afterBalance = initialPoints
-                    )
-                )
+                afterNewUserSaved(it)
             }
         }
     }
@@ -210,15 +205,7 @@ class UserServiceImpl(
                     points = managerCreateUserDTO.points
                 )
             ).also {
-                val initialPoints = systemSettingsService.getAllSettingsLazy().userRegistration.initialPoints
-                this.userPointsService.consumePoints(
-                    userId = it.id,
-                    request = UserPointsConsumeRequest(
-                        reason = PointsChangesReason.REGISTER,
-                        consumedPoints = -abs(initialPoints),
-                        afterBalance = initialPoints
-                    )
-                )
+                afterNewUserSaved(it)
             }
         }
     }
@@ -250,6 +237,20 @@ class UserServiceImpl(
             keyword,
             Pageable.ofSize(pageSize).withPage(page - 1)
         ).toPaginatedResponseData()
+    }
+
+    private inline fun afterNewUserSaved(user: UserEntity) {
+        val initialPoints = systemSettingsService.getAllSettingsLazy().userRegistration.initialPoints
+        this.userPointsService.consumePoints(
+            userId = user.id,
+            request = UserPointsConsumeRequest(
+                reason = PointsChangesReason.REGISTER,
+                consumedPoints = - abs(initialPoints),
+                afterBalance = initialPoints
+            )
+        )
+
+        this.userRoleRelationService.bindRole(user.id, UserRoleType.USER)
     }
 
     private fun findNextUserId(): Long {

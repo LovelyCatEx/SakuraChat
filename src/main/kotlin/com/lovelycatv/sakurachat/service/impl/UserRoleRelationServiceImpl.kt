@@ -14,6 +14,8 @@ import com.lovelycatv.sakurachat.repository.UserRoleRelationRepository
 import com.lovelycatv.sakurachat.repository.UserRepository
 import com.lovelycatv.sakurachat.request.PaginatedResponseData
 import com.lovelycatv.sakurachat.service.UserRoleRelationService
+import com.lovelycatv.sakurachat.service.UserRoleService
+import com.lovelycatv.sakurachat.types.UserRoleType
 import com.lovelycatv.sakurachat.utils.SnowIdGenerator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -25,7 +27,8 @@ import org.springframework.transaction.annotation.Transactional
 class UserRoleRelationServiceImpl(
     private val userRoleRelationRepository: UserRoleRelationRepository,
     private val userRepository: UserRepository,
-    private val snowIdGenerator: SnowIdGenerator
+    private val snowIdGenerator: SnowIdGenerator,
+    private val userRoleService: UserRoleService
 ) : UserRoleRelationService {
     override fun getRepository(): UserRoleRelationRepository {
         return this.userRoleRelationRepository
@@ -49,28 +52,24 @@ class UserRoleRelationServiceImpl(
         }
     }
 
-    override suspend fun getUserRolesByUserId(userId: Long): List<String> {
-        return withContext(Dispatchers.IO) {
-            userRoleRelationRepository.findAllByUserId(userId)
-        }.map { it.roleId.toString() }
+    override fun getUserRolesByUserId(userId: Long): List<String> {
+        return userRoleRelationRepository.findAllByUserId(userId).map { it.roleId.toString() }
     }
 
-    override suspend fun search(keyword: String, page: Int, pageSize: Int): PaginatedResponseData<Pair<Long, List<String>>> {
-        val users = withContext(Dispatchers.IO) {
-            if (keyword.isBlank()) {
-                userRepository.findAll(Pageable.ofSize(pageSize).withPage(page - 1))
-            } else {
-                userRepository.findAllByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(
-                    keyword,
-                    keyword,
-                    Pageable.ofSize(pageSize).withPage(page - 1)
-                )
-            }
+    override fun search(keyword: String, page: Int, pageSize: Int): PaginatedResponseData<Pair<Long, List<String>>> {
+        val users = if (keyword.isBlank()) {
+            userRepository.findAll(Pageable.ofSize(pageSize).withPage(page - 1))
+        } else {
+            userRepository.findAllByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(
+                keyword,
+                keyword,
+                Pageable.ofSize(pageSize).withPage(page - 1)
+            )
         }
-
-        val userRoleMap = withContext(Dispatchers.IO) {
-            userRoleRelationRepository.findAllByUserIdIn(users.content.map { it.id!! })
-        }.groupBy { it.userId }.mapValues { it.value.map { relation -> relation.roleId.toString() } }
+        val userRoleMap = userRoleRelationRepository
+            .findAllByUserIdIn(users.content.map { it.id })
+            .groupBy { it.userId }
+            .mapValues { it.value.map { relation -> relation.roleId.toString() } }
 
         val data = users.content.map { user ->
             Pair(user.id, userRoleMap[user.id] ?: emptyList())
@@ -83,5 +82,30 @@ class UserRoleRelationServiceImpl(
             page = page,
             pageSize = pageSize
         )
+    }
+
+    @Transactional
+    override fun bindRole(userId: Long, roleType: UserRoleType) {
+        val roleEntity = userRoleService.getRoleEntityByType(roleType)
+
+        val isAlreadyBound = getUserRolesByUserId(userId)
+            .any { it == roleEntity.id.toString() }
+
+        if (!isAlreadyBound) {
+            userRoleRelationRepository.save(
+                UserRoleRelationEntity(
+                    id = snowIdGenerator.nextId(),
+                    userId = userId,
+                    roleId = roleEntity.id
+                )
+            )
+        }
+    }
+
+    @Transactional
+    override fun unbindRole(userId: Long, roleType: UserRoleType) {
+        val roleEntity = userRoleService.getRoleEntityByType(roleType)
+
+        this.userRoleRelationRepository.deleteByUserIdAndRoleId(userId, roleEntity.id)
     }
 }
