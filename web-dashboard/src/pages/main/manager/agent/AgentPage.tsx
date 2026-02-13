@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import {Button, Card, Col, Form, Input, message, Modal, Popconfirm, Row, Space, Table, Tag} from 'antd';
-import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from '@ant-design/icons';
+import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined, UserOutlined} from '@ant-design/icons';
 import type {Agent} from "../../../../types/agent.types.ts";
 import {createAgent, deleteAgent, getAgentList, searchAgents, updateAgent} from "../../../../api/agent.api.ts";
 import {formatTimestamp} from "../../../../utils/datetime.utils.ts";
@@ -8,12 +8,15 @@ import type {ColumnGroupType, ColumnType} from "antd/es/table";
 import {EntitySelector} from "../../../../components/common/EntitySelector.tsx";
 import {getUserById, searchUsers} from "../../../../api/user.api.ts";
 import {getChatModelById, searchChatModels} from "../../../../api/chat-model.api.ts";
+import {AgentThirdPartyAccountBindPage} from "./third-party-account/AgentThirdPartyAccountBindPage.tsx";
 
 const { TextArea } = Input;
 
 export function AgentPage() {
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isThirdPartyAccountModalVisible, setIsThirdPartyAccountModalVisible] = useState(false);
     const [editingItem, setEditingItem] = useState<Agent | null>(null);
+    const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
     const [form] = Form.useForm();
     const [refreshing, setRefreshing] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
@@ -175,6 +178,11 @@ export function AgentPage() {
         setIsModalVisible(true);
     };
 
+    const openThirdPartyAccountModal = (item: Agent) => {
+        setSelectedAgent(item);
+        setIsThirdPartyAccountModalVisible(true);
+    };
+
     const columns: (ColumnGroupType<Agent> | ColumnType<Agent>)[] = [
         {
             title: '智能体名称',
@@ -254,10 +262,11 @@ export function AgentPage() {
             title: '操作',
             key: 'action',
             fixed: 'end',
-            width: 100,
+            width: 140,
             render: (_: unknown, record: Agent) => (
                 <Space>
                     <Button type="text" size="small" icon={<EditOutlined />} onClick={() => openModal(record)} />
+                    <Button type="text" size="small" icon={<UserOutlined />} onClick={() => openThirdPartyAccountModal(record)} />
                     <Popconfirm title="确定要删除此智能体？" onConfirm={() => deleteAgentItem(record.id)} okText="确认" cancelText="取消">
                         <Button type="text" size="small" icon={<DeleteOutlined />} danger />
                     </Popconfirm>
@@ -395,6 +404,24 @@ export function AgentPage() {
                         <TextArea rows={12} placeholder="输入智能体提示词..." className="rounded-lg" />
                     </Form.Item>
                 </Form>
+            </Modal>
+
+            <Modal
+                title="第三方账号绑定"
+                open={isThirdPartyAccountModalVisible}
+                onCancel={() => setIsThirdPartyAccountModalVisible(false)}
+                footer={null}
+                width={1000}
+                centered
+                okButtonProps={{ className: "rounded-lg h-10 px-6" }}
+                cancelButtonProps={{ className: "rounded-lg h-10 px-6" }}
+            >
+                {selectedAgent && (
+                    <AgentThirdPartyAccountBindPage 
+                        agentId={selectedAgent.id} 
+                        agentName={selectedAgent.name} 
+                    />
+                )}
             </Modal>
 
             <style>{`

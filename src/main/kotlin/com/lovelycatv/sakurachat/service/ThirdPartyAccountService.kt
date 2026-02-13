@@ -34,5 +34,7 @@ interface ThirdPartyAccountService : BaseService<ThirdPartyAccountRepository, Th
         return this.getAccountAdapter(platform, platformAccount::class.java).getAccountId(platformAccount)
     }
 
-    suspend fun search(keyword: String, page: Int, pageSize: Int): PaginatedResponseData<ThirdPartyAccountEntity>
+    fun search(keyword: String, page: Int, pageSize: Int): PaginatedResponseData<ThirdPartyAccountEntity>
+
+    fun getUnboundAccountsForAgent(agentId: Long, page: Int, pageSize: Int): PaginatedResponseData<ThirdPartyAccountEntity>
 }

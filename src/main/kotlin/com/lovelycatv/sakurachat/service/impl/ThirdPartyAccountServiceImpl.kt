@@ -12,7 +12,9 @@ import com.lovelycatv.sakurachat.adapters.thirdparty.account.ThirdPartyAccountAd
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateThirdPartyAccountDTO
 import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.exception.BusinessException
+import com.lovelycatv.sakurachat.repository.AgentThirdPartyAccountRelationRepository
 import com.lovelycatv.sakurachat.repository.ThirdPartyAccountRepository
+import com.lovelycatv.sakurachat.repository.UserThirdPartyAccountRelationRepository
 import com.lovelycatv.sakurachat.request.PaginatedResponseData
 import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
@@ -30,7 +32,9 @@ import org.springframework.stereotype.Service
 class ThirdPartyAccountServiceImpl(
     private val applicationContext: ApplicationContext,
     private val snowIdGenerator: SnowIdGenerator,
-    private val thirdPartyAccountRepository: ThirdPartyAccountRepository
+    private val thirdPartyAccountRepository: ThirdPartyAccountRepository,
+    private val agentThirdPartyAccountRelationRepository: AgentThirdPartyAccountRelationRepository,
+    private val userThirdPartyAccountRelationRepository: UserThirdPartyAccountRelationRepository
 ) : ThirdPartyAccountService {
     private val logger = logger()
 
@@ -137,17 +141,51 @@ class ThirdPartyAccountServiceImpl(
         }
     }
 
-    override suspend fun search(keyword: String, page: Int, pageSize: Int): PaginatedResponseData<ThirdPartyAccountEntity> {
+    override fun search(keyword: String, page: Int, pageSize: Int): PaginatedResponseData<ThirdPartyAccountEntity> {
         if (keyword.isBlank()) {
             return this.listByPage(page, pageSize).toPaginatedResponseData()
         }
 
-        return withContext(Dispatchers.IO) {
-            getRepository().findAllByNicknameContainingIgnoreCaseOrAccountIdContainingIgnoreCase(
-                keyword,
-                keyword,
-                Pageable.ofSize(pageSize).withPage(page - 1)
-            )
-        }.toPaginatedResponseData()
+        return getRepository().findAllByNicknameContainingIgnoreCaseOrAccountIdContainingIgnoreCase(
+            keyword,
+            keyword,
+            Pageable.ofSize(pageSize).withPage(page - 1)
+        ).toPaginatedResponseData()
+    }
+
+    override fun getUnboundAccountsForAgent(agentId: Long, page: Int, pageSize: Int): PaginatedResponseData<ThirdPartyAccountEntity> {
+        // Get all bound account IDs from all agents
+        val agentBoundAccountIds = agentThirdPartyAccountRelationRepository
+            .findAll()
+            .map { it.primaryKey.thirdPartyAccountId }
+
+        // Get all bound account IDs from all users
+        val userBoundAccountIds = userThirdPartyAccountRelationRepository
+            .findAll()
+            .map { it.primaryKey.thirdPartyAccountId }
+
+        // Combine all bound account IDs
+        val allBoundAccountIds = agentBoundAccountIds + userBoundAccountIds
+
+        // Get all accounts not in the bound list with pagination
+        val pageable = Pageable.ofSize(pageSize).withPage(page - 1)
+        val allAccounts = thirdPartyAccountRepository.findAll(pageable)
+        
+        // Filter unbound accounts
+        val unboundAccounts = allAccounts.filter { !allBoundAccountIds.contains(it.id) }
+
+        // Get total count of unbound accounts
+        val totalUnboundAccounts = thirdPartyAccountRepository.findAll()
+            .filter { !allBoundAccountIds.contains(it.id) }
+            .size
+
+        // Create paginated response
+        return PaginatedResponseData(
+            page = page,
+            pageSize = pageSize,
+            total = totalUnboundAccounts.toLong(),
+            totalPages = (totalUnboundAccounts + pageSize - 1) / pageSize,
+            records = unboundAccounts.toList()
+        )
     }
 }
