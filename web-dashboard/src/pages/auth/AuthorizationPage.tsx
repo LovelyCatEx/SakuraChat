@@ -95,7 +95,7 @@ export function AuthCardLayout({
             <span className="text-gray-500 text-sm">{footerText}</span>
             <span
               onClick={footerAction}
-              className="ml-2 text-sm font-bold text-primary hover:text-primary transition-colors cursor-pointer"
+              className="ml-2 text-sm font-bold text-pink-400 hover:text-pink-400 transition-colors cursor-pointer"
             >
               {footerLink}
             </span>

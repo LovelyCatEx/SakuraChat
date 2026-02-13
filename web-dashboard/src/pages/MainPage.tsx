@@ -1,14 +1,7 @@
 import {useEffect, useState} from 'react';
 import {Link, useNavigate} from 'react-router-dom';
-import {Badge, Button, Card, Col, Input, Layout, Row} from 'antd';
-import {
-    GithubOutlined,
-    MenuOutlined,
-    MessageOutlined,
-    SendOutlined,
-    SyncOutlined,
-    UserOutlined
-} from '@ant-design/icons';
+import {Badge, Button, Card, Col, Layout, Row} from 'antd';
+import {GithubOutlined, MenuOutlined, MessageOutlined, SyncOutlined, UserOutlined} from '@ant-design/icons';
 
 const { Header, Content, Footer } = Layout;
 
@@ -27,9 +20,19 @@ const SakuraLogo = ({ size = 40 }) => (
 
 const ChatPreview = () => {
     const [messages] = useState([
-        { id: 1, type: 'ai', text: '您好！我是 SakuraChat，今天有什么我可以帮您的吗？🌸' },
-        { id: 2, type: 'user', text: '我想写一首关于樱花的诗。' },
-        { id: 3, type: 'ai', text: '正在为您构思...', status: 'loading' }
+        { id: 1, type: 'user', text: '刚看到你分享的那张落日照片' },
+        { id: 2, type: 'user', text: '很漂亮' },
+        { id: 3, type: 'ai', text: '谢谢' },
+        { id: 4, type: 'ai', text: '那一刻的光影' },
+        { id: 5, type: 'ai', text: '确实很难得' },
+        { id: 6, type: 'user', text: '是在学校拍的吗' },
+        { id: 7, type: 'ai', text: '嗯' },
+        { id: 8, type: 'ai', text: '在图书馆顶楼' },
+        { id: 9, type: 'ai', text: '正好低头看累了' },
+        { id: 10, type: 'ai', text: '抬头就看到了' },
+        { id: 11, type: 'user', text: '挺有生活情调的' },
+        { id: 12, type: 'ai', text: '还行吧' },
+        { id: 13, type: 'ai', text: '只是习惯记录一下' }
     ]);
 
     return (
@@ -45,10 +48,10 @@ const ChatPreview = () => {
                     <div className="w-3 h-3 rounded-full bg-red-400" />
                     <div className="w-3 h-3 rounded-full bg-yellow-400" />
                     <div className="w-3 h-3 rounded-full bg-green-400" />
-                    <span className="ml-4 text-xs text-gray-400 font-medium">SakuraChat Web v2.5</span>
+                    <span className="ml-4 text-xs text-gray-400 font-medium">SakuraChat WebUI v1.0.0</span>
                 </div>
 
-                <div className="p-6 space-y-4 h-[320px] bg-white overflow-y-auto">
+                <div className="p-6 space-y-4 h-[380px] bg-white overflow-y-auto">
                     {messages.map((msg) => (
                         <div key={msg.id} className={`flex items-start space-x-3 ${msg.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
                             <div className={`w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center text-white text-[10px] ${msg.type === 'ai' ? 'bg-pink-400' : 'bg-gray-200'}`}>
@@ -63,13 +66,13 @@ const ChatPreview = () => {
                     ))}
                 </div>
 
-                <div className="p-4 bg-white border-t border-gray-100">
+                {/*<div className="p-4 bg-white border-t border-gray-100">
                     <Input
                         placeholder="输入消息..."
                         suffix={<SendOutlined className="text-pink-400 cursor-pointer" />}
                         className="rounded-xl bg-gray-50 border-none py-2"
                     />
-                </div>
+                </div>*/}
             </Card>
         </div>
     );
@@ -130,8 +133,8 @@ const MainPage = () => {
                                     与 AI <span className="text-pink-400">温柔</span>对话
                                 </h1>
                                 <p className="text-lg text-gray-500 mb-10 leading-relaxed max-w-lg">
-                                    SakuraChat 致力于将强大的 AI 技术与极简的设计美学结合。
-                                    无论是日常闲聊还是专业咨询，我们都在这里，温暖回馈您的每一次输入。
+                                    SakuraChat 致力于将强大的 AI 技术与极简的设计美学融合。
+                                    无论是日常对话还是专业咨询，都能根据你的定制，用自然且精准的交互衔接每一次交互。
                                 </p>
                                 <div className="flex space-x-4">
                                     <Button type="primary" size="large" className="h-14 px-10 text-lg shadow-lg shadow-pink-100" onClick={() => navigate('/auth/register')}>

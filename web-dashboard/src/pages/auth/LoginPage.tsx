@@ -95,7 +95,7 @@ export function LoginPage() {
             <Checkbox className="text-xs text-gray-500">记住我</Checkbox>
           </Form.Item>
           <a
-            className="text-xs font-medium"
+            className="text-xs font-medium text-pink-400 hover:text-pink-400 transition-colors"
             href="/auth/forgot-password"
           >
             忘记密码?

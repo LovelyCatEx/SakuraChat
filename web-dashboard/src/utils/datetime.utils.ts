@@ -52,3 +52,20 @@ export function formatTimestamp(
 
     return result;
 }
+
+/**
+ * 根据当前时间返回合适的问候语
+ * @returns 问候语字符串，如"早上好"、"下午好"、"晚上好"
+ */
+export function getGreeting(): string {
+    const now = new Date();
+    const hour = now.getHours();
+
+    if (hour >= 5 && hour < 12) {
+        return '早上好';
+    } else if (hour >= 12 && hour < 18) {
+        return '下午好';
+    } else {
+        return '晚上好';
+    }
+}
