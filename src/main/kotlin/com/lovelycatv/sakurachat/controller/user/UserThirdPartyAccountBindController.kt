@@ -8,6 +8,7 @@
 
 package com.lovelycatv.sakurachat.controller.user
 
+import com.lovelycatv.sakurachat.constants.SystemRolePermissions
 import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
 import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.request.PageQuery
@@ -16,6 +17,7 @@ import com.lovelycatv.sakurachat.service.UserThirdPartyAccountBindService
 import com.lovelycatv.sakurachat.types.UserAuthentication
 import com.lovelycatv.sakurachat.utils.toPageable
 import com.lovelycatv.sakurachat.utils.toPaginatedResponseData
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -31,6 +33,7 @@ class UserThirdPartyAccountBindController(
     private val userThirdPartyAccountBindService: UserThirdPartyAccountBindService,
     private val thirdPartyAccountService: ThirdPartyAccountService
 ) {
+    @PreAuthorize(SystemRolePermissions.PERMISSION_PUBLIC)
     @GetMapping("/list")
     fun getUserThirdPartyAccounts(
         userAuthentication: UserAuthentication,
@@ -58,6 +61,7 @@ class UserThirdPartyAccountBindController(
         )
     }
 
+    @PreAuthorize(SystemRolePermissions.PERMISSION_PUBLIC)
     @PostMapping("/bind")
     fun bindUserThirdPartyAccount(
         userAuthentication: UserAuthentication,
@@ -71,6 +75,7 @@ class UserThirdPartyAccountBindController(
         return ApiResponse.success(null)
     }
 
+    @PreAuthorize(SystemRolePermissions.PERMISSION_PUBLIC)
     @PostMapping("/unbind")
     fun bindUserThirdPartyAccount(
         userAuthentication: UserAuthentication,

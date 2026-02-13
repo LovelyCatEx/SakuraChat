@@ -11,6 +11,7 @@ import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.vertex.log.logger
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.authorization.AuthorizationDeniedException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 
@@ -26,13 +27,32 @@ class GlobalExceptionHandler {
         )
 
         return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
+            .status(HttpStatus.OK)
+            .header("Content-Type", "application/json")
+            .body<ApiResponse<*>?>(response)
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException::class)
+    fun handleAuthorizationDeniedException(e: AuthorizationDeniedException): ResponseEntity<ApiResponse<*>?> {
+        val response: ApiResponse<*> = ApiResponse.forbidden<Any?>(
+            (if (e.message != null) e.message else "no error message")!!,
+            null
+        )
+
+        return ResponseEntity
+            .status(HttpStatus.OK)
             .header("Content-Type", "application/json")
             .body<ApiResponse<*>?>(response)
     }
 
     @ExceptionHandler(Exception::class)
     fun handleException(e: Exception): ResponseEntity<ApiResponse<*>?> {
+        if (e is BusinessException) {
+            return this.handleBusinessException(e)
+        } else if (e is AuthorizationDeniedException) {
+            return this.handleAuthorizationDeniedException(e)
+        }
+
         val response: ApiResponse<*> = ApiResponse.internalServerError<Any?>(
             (if (e.message != null) e.message else "no error message")!!,
             null
@@ -41,7 +61,7 @@ class GlobalExceptionHandler {
         logger.error("An error occurred while processing request", e)
 
         return ResponseEntity
-            .status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .status(HttpStatus.OK)
             .header("Content-Type", "application/json")
             .body<ApiResponse<*>?>(response)
     }

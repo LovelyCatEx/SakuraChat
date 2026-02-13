@@ -8,6 +8,7 @@
 
 package com.lovelycatv.sakurachat.controller.manager
 
+import com.lovelycatv.sakurachat.constants.SystemRolePermissions
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateCredentialDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateCredentialDTO
 import com.lovelycatv.sakurachat.request.ApiResponse
@@ -16,6 +17,7 @@ import com.lovelycatv.sakurachat.service.CredentialService
 import com.lovelycatv.sakurachat.utils.toPaginatedResponseData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.*
 class ManagerCredentialController(
     private val credentialService: CredentialService
 ) {
+    @PreAuthorize(SystemRolePermissions.PERMISSION_ROOT_ADMIN)
     @GetMapping("/list")
     suspend fun listCredentials(@ModelAttribute pageQuery: PageQuery): ApiResponse<*> {
         return ApiResponse.success(
@@ -34,6 +37,7 @@ class ManagerCredentialController(
         )
     }
 
+    @PreAuthorize(SystemRolePermissions.PERMISSION_ROOT_ADMIN)
     @GetMapping("/search")
     suspend fun searchCredentials(
         @RequestParam("keyword") keyword: String,
@@ -44,6 +48,7 @@ class ManagerCredentialController(
         )
     }
 
+    @PreAuthorize(SystemRolePermissions.PERMISSION_ROOT_ADMIN)
     @GetMapping("/getById")
     suspend fun getCredentialById(@RequestParam("id") id: Long): ApiResponse<*> {
         return ApiResponse.success(
@@ -51,18 +56,21 @@ class ManagerCredentialController(
         )
     }
 
+    @PreAuthorize(SystemRolePermissions.PERMISSION_ROOT_ADMIN)
     @PostMapping("/create")
     suspend fun createCredential(@ModelAttribute managerCreateCredentialDTO: ManagerCreateCredentialDTO): ApiResponse<*> {
         credentialService.createCredential(managerCreateCredentialDTO)
         return ApiResponse.success(null)
     }
 
+    @PreAuthorize(SystemRolePermissions.PERMISSION_ROOT_ADMIN)
     @PostMapping("/update")
     suspend fun updateCredential(@ModelAttribute managerUpdateCredentialDTO: ManagerUpdateCredentialDTO): ApiResponse<*> {
         credentialService.updateCredential(managerUpdateCredentialDTO)
         return ApiResponse.success(null)
     }
 
+    @PreAuthorize(SystemRolePermissions.PERMISSION_ROOT_ADMIN)
     @PostMapping("/delete")
     suspend fun deleteCredential(@RequestParam("id") id: Long): ApiResponse<*> {
         return ApiResponse.success(

@@ -8,6 +8,7 @@
 package com.lovelycatv.sakurachat.controller.user
 
 import com.lovelycatv.sakurachat.annotations.Unauthorized
+import com.lovelycatv.sakurachat.constants.SystemRolePermissions
 import com.lovelycatv.sakurachat.controller.user.dto.UserProfileVO
 import com.lovelycatv.sakurachat.controller.user.dto.UserRegisterDTO
 import com.lovelycatv.sakurachat.request.ApiResponse
@@ -17,6 +18,7 @@ import com.lovelycatv.sakurachat.types.UserAuthentication
 import jakarta.annotation.Resource
 import jakarta.validation.constraints.Email
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -107,6 +109,7 @@ class UserController {
         )
     }
 
+    @PreAuthorize(SystemRolePermissions.PERMISSION_PUBLIC)
     @GetMapping("/points")
     suspend fun getUserPoints(userAuthentication: UserAuthentication): ApiResponse<*> {
         return ApiResponse.success(

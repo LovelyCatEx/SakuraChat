@@ -30,6 +30,9 @@ function handleApiResponse<T>(response: ApiResponse<T>) {
             window.location.pathname = '/auth/login';
         }, 500);
         throw response;
+    } else if (response.code === 403) {
+        void message.error('你无权访问当前资源');
+        throw response;
     } else {
         throw response;
     }

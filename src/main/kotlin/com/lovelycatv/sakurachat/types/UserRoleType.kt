@@ -14,6 +14,10 @@ enum class UserRoleType(val roleName: String) {
     USER("user");
 
     companion object {
+        const val ROLE_ROOT = "root"
+        const val ROLE_ADMIN = "admin"
+        const val ROLE_USER = "user"
+
         fun getByRoleName(roleName: String): UserRoleType? {
             return entries.firstOrNull { it.roleName == roleName }
         }

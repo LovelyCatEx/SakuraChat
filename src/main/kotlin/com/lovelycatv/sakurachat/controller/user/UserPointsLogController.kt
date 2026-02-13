@@ -8,10 +8,12 @@
 
 package com.lovelycatv.sakurachat.controller.user
 
+import com.lovelycatv.sakurachat.constants.SystemRolePermissions
 import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.request.PageQuery
 import com.lovelycatv.sakurachat.service.UserPointsLogService
 import com.lovelycatv.sakurachat.types.UserAuthentication
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController
 class UserPointsLogController(
     private val userPointsLogService: UserPointsLogService
 ) {
+    @PreAuthorize(SystemRolePermissions.PERMISSION_PUBLIC)
     @GetMapping("/logs")
     suspend fun getUserPointsLogs(
         userAuthentication: UserAuthentication,

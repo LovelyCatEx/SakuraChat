@@ -8,11 +8,13 @@
 
 package com.lovelycatv.sakurachat.controller.manager
 
+import com.lovelycatv.sakurachat.constants.SystemRolePermissions
 import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.service.SystemSettingsService
 import com.lovelycatv.sakurachat.service.mail.MailService
 import com.lovelycatv.sakurachat.types.SakuraChatSystemSettings
 import jakarta.validation.constraints.Email
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -23,16 +25,19 @@ class ManagerSettingsController(
     private val systemSettingsService: SystemSettingsService,
     private val mailService: MailService,
 ) {
+    @PreAuthorize(SystemRolePermissions.PERMISSION_ROOT_ADMIN)
     @GetMapping("/list")
     suspend fun getAllSystemSettings(): ApiResponse<*> {
         return ApiResponse.success(systemSettingsService.getAllSettings())
     }
 
+    @PreAuthorize(SystemRolePermissions.PERMISSION_ROOT_ONLY)
     @PostMapping("/update")
     suspend fun updateSettings(@RequestBody settings: SakuraChatSystemSettings): ApiResponse<*> {
         return ApiResponse.success(systemSettingsService.updateAllSettings(settings))
     }
 
+    @PreAuthorize(SystemRolePermissions.PERMISSION_ROOT_ADMIN)
     @PostMapping("/sendTestEmail")
     suspend fun sendTestEmail(
         @RequestParam("email")

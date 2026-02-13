@@ -8,6 +8,8 @@
 
 package com.lovelycatv.sakurachat.controller.manager
 
+import com.lovelycatv.sakurachat.constants.SystemRolePermissions
+import com.lovelycatv.sakurachat.constants.SystemSettings
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerCreateAgentDTO
 import com.lovelycatv.sakurachat.controller.manager.dto.ManagerUpdateAgentDTO
 import com.lovelycatv.sakurachat.entity.thirdparty.ThirdPartyAccountEntity
@@ -17,10 +19,12 @@ import com.lovelycatv.sakurachat.request.PageQuery
 import com.lovelycatv.sakurachat.service.AgentService
 import com.lovelycatv.sakurachat.service.ThirdPartyAccountRelationService
 import com.lovelycatv.sakurachat.service.ThirdPartyAccountService
+import com.lovelycatv.sakurachat.types.UserRoleType
 import com.lovelycatv.sakurachat.utils.toPageable
 import com.lovelycatv.sakurachat.utils.toPaginatedResponseData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -33,6 +37,7 @@ class ManagerAgentController(
     private val thirdPartyAccountService: ThirdPartyAccountService,
     private val thirdPartyAccountRelationService: ThirdPartyAccountRelationService
 ) {
+    @PreAuthorize(SystemRolePermissions.PERMISSION_ROOT_ADMIN)
     @GetMapping("/list")
     suspend fun listAgents(@ModelAttribute pageQuery: PageQuery): ApiResponse<*> {
         return ApiResponse.success(
@@ -42,6 +47,7 @@ class ManagerAgentController(
         )
     }
 
+    @PreAuthorize(SystemRolePermissions.PERMISSION_ROOT_ADMIN)
     @GetMapping("/search")
     suspend fun searchAgents(
         @RequestParam("keyword") keyword: String,
@@ -52,18 +58,21 @@ class ManagerAgentController(
         )
     }
 
+    @PreAuthorize(SystemRolePermissions.PERMISSION_ROOT_ADMIN)
     @PostMapping("/create")
     suspend fun createAgent(@ModelAttribute managerCreateAgentDTO: ManagerCreateAgentDTO): ApiResponse<*> {
         agentService.createAgent(managerCreateAgentDTO)
         return ApiResponse.success(null)
     }
 
+    @PreAuthorize(SystemRolePermissions.PERMISSION_ROOT_ADMIN)
     @PostMapping("/update")
     suspend fun updateAgent(@ModelAttribute managerUpdateAgentDTO: ManagerUpdateAgentDTO): ApiResponse<*> {
         agentService.updateAgent(managerUpdateAgentDTO)
         return ApiResponse.success(null)
     }
 
+    @PreAuthorize(SystemRolePermissions.PERMISSION_ROOT_ADMIN)
     @PostMapping("/delete")
     suspend fun deleteAgent(@RequestParam("id") id: Long): ApiResponse<*> {
         return ApiResponse.success(
@@ -73,6 +82,7 @@ class ManagerAgentController(
         )
     }
 
+    @PreAuthorize(SystemRolePermissions.PERMISSION_ROOT_ADMIN)
     @GetMapping("/third-party-account/list")
     fun getAgentThirdPartyAccounts(
         @RequestParam("agentId") agentId: Long,
@@ -99,6 +109,7 @@ class ManagerAgentController(
         )
     }
 
+    @PreAuthorize(SystemRolePermissions.PERMISSION_ROOT_ADMIN)
     @GetMapping("/third-party-account/unbound-list")
     fun getUnboundAccountsForAgent(
         @RequestParam("agentId") agentId: Long,
@@ -113,6 +124,7 @@ class ManagerAgentController(
         )
     }
 
+    @PreAuthorize(SystemRolePermissions.PERMISSION_ROOT_ADMIN)
     @PostMapping("/third-party-account/bind")
     fun bindAgentThirdPartyAccount(
         @RequestParam("agentId") agentId: Long,
@@ -126,6 +138,7 @@ class ManagerAgentController(
         return ApiResponse.success(null)
     }
 
+    @PreAuthorize(SystemRolePermissions.PERMISSION_ROOT_ADMIN)
     @PostMapping("/third-party-account/unbind")
     fun unbindAgentThirdPartyAccount(
         @RequestParam("agentId") agentId: Long,
