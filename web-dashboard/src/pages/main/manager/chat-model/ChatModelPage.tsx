@@ -277,7 +277,7 @@ export function ChatModelPage() {
             title: '凭证',
             dataIndex: 'credentialId',
             key: 'credentialId',
-            width: 280,
+            width: 250,
             render: (id: string) => (
                 <Space orientation="vertical" size={0}>
                     <span className="text-gray-600">凭证 #{id}</span>

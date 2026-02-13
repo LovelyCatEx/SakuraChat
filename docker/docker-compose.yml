@@ -20,7 +20,7 @@ services:
       - sakurachat-network
   phpmyadmin:
     image: phpmyadmin
-    container_name: mysql-web-manager
+    container_name: sakurachat-phpmyadmin
     depends_on:
       - mysql
     ports:
@@ -62,6 +62,7 @@ services:
       - sakurachat-network
   napcat:
     image: mlikiowa/napcat-docker:latest
+    container_name: sakurachat-napcat
     environment:
       - NAPCAT_UID=${NAPCAT_UID}
       - NAPCAT_GID=${NAPCAT_GID}
