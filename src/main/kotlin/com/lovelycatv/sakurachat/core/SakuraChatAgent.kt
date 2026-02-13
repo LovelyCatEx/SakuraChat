@@ -127,9 +127,9 @@ class SakuraChatAgent(
         if (!pointsThreshold) {
             return emitter.invoke(
                 listOf(
-                    TextMessage(
+                    ErrorMessage(
                         sequence = System.currentTimeMillis(),
-                        message = "Insufficient points, required $predictedPoints",
+                        message = "Insufficient points, required $predictedPoints points",
                         extraBody = message.extraBody
                     )
                 )
