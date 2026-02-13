@@ -1,25 +1,64 @@
 import {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Form, Input, message } from 'antd';
+import { Button, Form, Input, message, Row, Col } from 'antd';
 import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
 import { AuthCardLayout } from './AuthorizationPage.tsx';
+import { register, requestRegisterEmailCode } from '../../api/auth.api.ts';
+
+const { Password } = Input;
 
 export function RegisterPage() {
   const [loading, setLoading] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  const [form] = Form.useForm();
   const navigate = useNavigate();
 
   useEffect(() => {
     document.title = '注册 - SakuraChat'
   }, []);
 
-  const onFinish = (values: any) => {
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [countdown]);
+
+  const handleSendCode = async () => {
+    const email = form.getFieldValue('email');
+    if (!email) {
+      void message.warning('请先输入邮箱');
+      return;
+    }
+
+    setSendingCode(true);
+    try {
+      await requestRegisterEmailCode(email);
+      void message.success('验证码发送成功，请注意查收');
+      setCountdown(60);
+    } catch (error) {
+      void message.error('验证码发送失败，请稍后重试');
+      console.error('发送验证码失败:', error);
+    } finally {
+      setSendingCode(false);
+    }
+  };
+
+  const onFinish = async (values: any) => {
     setLoading(true);
-    console.log('Register Success:', values);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await register(values.username, values.password, values.email, values.emailCode);
       void message.success('注册成功！');
       navigate('/login');
-    }, 1500);
+    } catch (error) {
+      void message.error('注册失败，请稍后重试');
+      console.error('注册失败:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -31,6 +70,7 @@ export function RegisterPage() {
       footerAction={() => navigate('/auth/login')}
     >
       <Form
+        form={form}
         name="register_form"
         layout="vertical"
         onFinish={onFinish}
@@ -64,10 +104,36 @@ export function RegisterPage() {
         </Form.Item>
 
         <Form.Item
+          name="emailCode"
+          rules={[{ required: true, message: '请输入验证码' }]}
+        >
+          <Row gutter={12}>
+            <Col span={16}>
+              <Input
+                placeholder="验证码"
+                className="hover:border-blue-400 focus:border-blue-500 rounded-xl"
+              />
+            </Col>
+            <Col span={8}>
+              <Button
+                type="primary"
+                htmlType="button"
+                loading={sendingCode}
+                disabled={countdown > 0}
+                onClick={handleSendCode}
+                className="w-full h-10 text-base font-semibold rounded-xl border-none bg-blue-600 hover:bg-blue-500 active:scale-[0.98] transition-all"
+              >
+                {countdown > 0 ? `${countdown}s后重试` : '发送验证码'}
+              </Button>
+            </Col>
+          </Row>
+        </Form.Item>
+
+        <Form.Item
           name="password"
           rules={[{ required: true, message: '请输入密码' }]}
         >
-          <Input.Password
+          <Password
             prefix={<LockOutlined className="text-gray-400 mr-2" />}
             placeholder="密码"
             className="hover:border-blue-400 focus:border-blue-500 rounded-xl"
@@ -89,7 +155,7 @@ export function RegisterPage() {
             }),
           ]}
         >
-          <Input.Password
+          <Password
             prefix={<LockOutlined className="text-gray-400 mr-2" />}
             placeholder="确认密码"
             className="hover:border-blue-400 focus:border-blue-500 rounded-xl"

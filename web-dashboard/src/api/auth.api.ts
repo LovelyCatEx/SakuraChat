@@ -16,3 +16,7 @@ export async function register(
         { username: username, password: password, email: email, emailCode: emailCode }
     );
 }
+
+export async function requestRegisterEmailCode(email: string) {
+    return doPost('/api/user/requestRegisterEmailCode', { email: email });
+}
