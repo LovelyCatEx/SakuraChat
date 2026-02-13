@@ -80,7 +80,11 @@ export function RegisterPage() {
       >
         <Form.Item
           name="username"
-          rules={[{ required: true, message: '请输入用户名' }]}
+          rules={[
+            { required: true, message: '请输入用户名' },
+            { pattern: /^[a-zA-Z0-9_]+$/, message: '用户名只能包含数字、字母和下划线' },
+            { max: 64, message: '用户名长度不能超过64个字符' }
+          ]}
         >
           <Input
             prefix={<UserOutlined className="text-gray-400 mr-2" />}
@@ -94,6 +98,7 @@ export function RegisterPage() {
           rules={[
             { required: true, message: '请输入邮箱' },
             { type: 'email', message: '邮箱格式不正确' },
+            { max: 256, message: '邮箱长度不能超过256个字符' }
           ]}
         >
           <Input
@@ -131,7 +136,11 @@ export function RegisterPage() {
 
         <Form.Item
           name="password"
-          rules={[{ required: true, message: '请输入密码' }]}
+          rules={[
+            { required: true, message: '请输入密码' },
+            { pattern: /^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$/, message: '密码至少8位，且包含数字和字母' },
+            { max: 128, message: '密码长度不能超过128个字符' }
+          ]}
         >
           <Password
             prefix={<LockOutlined className="text-gray-400 mr-2" />}

@@ -11,13 +11,16 @@ package com.lovelycatv.sakurachat.controller.manager.dto
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 
 class ManagerCreateUserDTO(
     @field:NotBlank(message = "username cannot be empty")
+    @field:Pattern(regexp = "^[a-zA-Z0-9_]+", message = "username can only contain numbers, letters and underscores")
     @field:Size(max = 64, message = "username length should not be greater than 64")
     val username: String,
     @field:NotBlank(message = "password cannot be empty")
+    @field:Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[0-9]).{8,}$", message = "password must be at least 8 characters and contain numbers and letters")
     @field:Size(max = 128, message = "password length should not be greater than 128")
     val password: String,
     @field:NotBlank(message = "nickname cannot be empty")

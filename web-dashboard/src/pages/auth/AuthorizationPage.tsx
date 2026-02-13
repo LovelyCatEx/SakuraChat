@@ -1,8 +1,8 @@
-import { Route, Routes } from 'react-router-dom';
-import { LoginPage } from './LoginPage.tsx';
-import { RegisterPage } from './RegisterPage.tsx';
-import { Button, ConfigProvider, Divider } from 'antd';
-import { GithubOutlined, GoogleOutlined } from '@ant-design/icons';
+import {Route, Routes} from 'react-router-dom';
+import {LoginPage} from './LoginPage.tsx';
+import {RegisterPage} from './RegisterPage.tsx';
+import {ConfigProvider} from 'antd';
+import {GithubOutlined} from '@ant-design/icons';
 import * as React from 'react';
 
 export function AuthorizationPage() {
@@ -83,7 +83,7 @@ export function AuthCardLayout({
           {children}
 
           {/* Third Party Login */}
-          <div className="mt-8">
+          {/*<div className="mt-8">
             <Divider
               plain
               className="text-gray-400 text-[10px] uppercase tracking-widest"
@@ -98,7 +98,7 @@ export function AuthCardLayout({
                 <GithubOutlined className="text-lg" />
               </Button>
             </div>
-          </div>
+          </div>*/}
 
           <div className="mt-10 text-center">
             <span className="text-gray-500 text-sm">{footerText}</span>
@@ -114,7 +114,7 @@ export function AuthCardLayout({
 
       {/* Footer */}
       <div className="fixed bottom-6 text-gray-400 text-xs z-0">
-        © 2025 SakuraChat. All rights reserved.
+        © 2026 SakuraChat. All rights reserved.
       </div>
     </div>
   );
