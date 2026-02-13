@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button, Input, Layout, Row, Col, Card, Badge, ConfigProvider } from 'antd';
 import {
     SendOutlined,
-    ThunderboltOutlined,
-    LockOutlined,
     SyncOutlined,
     MenuOutlined,
     GithubOutlined,
     MessageOutlined,
-    DatabaseOutlined,
     UserOutlined
 } from '@ant-design/icons';
 
@@ -79,12 +77,15 @@ const ChatPreview = () => {
 
 const MainPage = () => {
     const [scrolled, setScrolled] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
+        document.title = 'SakuraChat';
+
         const handleScroll = () => setScrolled(window.scrollY > 50);
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+        }, []);
 
     return (
         <ConfigProvider
@@ -107,12 +108,16 @@ const MainPage = () => {
                     </div>
 
                     <div className="hidden md:flex items-center space-x-8">
-                        {['服务条款', '隐私协议', 'Github'].map(item => (
-                            <a key={item} href="#" className="text-sm font-medium text-gray-600 hover:text-pink-400 transition-colors">
-                                {item}
-                            </a>
-                        ))}
-                        <Button type="primary" shape="round" size="large" className="font-bold px-8">
+                        <Link to="/terms" className="text-sm font-medium text-gray-600 hover:text-pink-400 transition-colors">
+                            服务条款
+                        </Link>
+                        <Link to="/privacy" className="text-sm font-medium text-gray-600 hover:text-pink-400 transition-colors">
+                            隐私协议
+                        </Link>
+                        <a href="https://github.com/LovelyCatEx/SakuraChat/" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-gray-600 hover:text-pink-400 transition-colors">
+                            GitHub
+                        </a>
+                        <Button type="primary" shape="round" size="large" className="font-bold px-8" onClick={() => navigate('/auth/register')}>
                             立即开始
                         </Button>
                     </div>
@@ -137,7 +142,7 @@ const MainPage = () => {
                                         无论是日常闲聊还是专业咨询，我们都在这里，温暖回馈您的每一次输入。
                                     </p>
                                     <div className="flex space-x-4">
-                                        <Button type="primary" size="large" className="h-14 px-10 text-lg shadow-lg shadow-pink-100">
+                                        <Button type="primary" size="large" className="h-14 px-10 text-lg shadow-lg shadow-pink-100" onClick={() => navigate('/auth/register')}>
                                             免费体验
                                         </Button>
                                         <Button size="large" className="h-14 px-10 text-lg">
@@ -206,14 +211,16 @@ const MainPage = () => {
                                 <span className="text-xl font-bold text-gray-900">SakuraChat</span>
                             </div>
                             <div className="flex space-x-6">
-                                <GithubOutlined className="text-2xl text-gray-400 hover:text-gray-600 cursor-pointer" />
+                                <a href="https://github.com/LovelyCatEx/SakuraChat/" target="_blank" rel="noopener noreferrer">
+                                    <GithubOutlined className="text-2xl text-gray-400 hover:text-gray-600 cursor-pointer" />
+                                </a>
                             </div>
                         </div>
                         <div className="mt-8 flex flex-col md:flex-row justify-between items-center text-gray-400 text-sm">
                             <p>© 2026 SakuraChat AI (LovelyCat). 保留所有权利。</p>
                             <div className="flex space-x-8 mt-4 md:mt-0">
-                                <a href="#" className="hover:text-pink-400">服务条款</a>
-                                <a href="#" className="hover:text-pink-400">隐私政策</a>
+                                <Link to="/terms" className="hover:text-pink-400">服务条款</Link>
+                                <Link to="/privacy" className="hover:text-pink-400">隐私政策</Link>
                             </div>
                         </div>
                     </div>

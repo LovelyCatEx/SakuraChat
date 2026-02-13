@@ -1,4 +1,4 @@
-import {Route, Routes} from 'react-router-dom';
+import {Route, Routes, useNavigate} from 'react-router-dom';
 import {LoginPage} from './LoginPage.tsx';
 import {RegisterPage} from './RegisterPage.tsx';
 import {ForgotPasswordPage} from './ForgotPasswordPage.tsx';
@@ -7,6 +7,8 @@ import {GithubOutlined} from '@ant-design/icons';
 import * as React from 'react';
 
 export function AuthorizationPage() {
+  const navigate = useNavigate();
+
   return (
     <ConfigProvider
       theme={{
@@ -20,8 +22,8 @@ export function AuthorizationPage() {
       <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 via-white to-cyan-50 relative overflow-hidden">
         {/* Top Navigation Bar */}
         <nav className="fixed top-0 left-0 w-full h-16 px-6 sm:px-12 flex items-center justify-between z-50 bg-white/30 backdrop-blur-md border-b border-white/50">
-          <div className="flex items-center gap-2">
-            <img src="/logo.svg" alt="SakuraChat Logo" className="w-8 h-8" />
+          <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+            <img src="/logo.svg" alt="SakuraChat Logo" className="w-8 h-8"/>
             <span className="text-2xl font-bold tracking-tight text-gray-900">
               Sakura<span className="text-pink-400">Chat</span>
             </span>

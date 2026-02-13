@@ -21,6 +21,7 @@ export function InitializerPage() {
 
   useEffect(() => {
     checkInitializationStatus();
+    document.title = '初始化 - SakuraChat';
   }, []);
 
   const checkInitializationStatus = async () => {
