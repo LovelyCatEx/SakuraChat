@@ -10,6 +10,10 @@ export function getMyPoints(): Promise<ApiResponse<number>> {
     return doGet<number>('/api/user/points');
 }
 
+export function getUserRoles(): Promise<ApiResponse<string[]>> {
+    return doGet<string[]>('/api/user/roles');
+}
+
 export function getUserList(query: PageQuery): Promise<ApiResponse<PaginatedResponseData<User>>> {
     return doGet<PaginatedResponseData<User>>('/api/manager/user/list', {...query});
 }

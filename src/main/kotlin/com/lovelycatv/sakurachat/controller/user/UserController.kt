@@ -116,4 +116,12 @@ class UserController {
             userPointsService.getUserPoints(userAuthentication.userId)
         )
     }
+
+    @PreAuthorize(SystemRolePermissions.PERMISSION_PUBLIC)
+    @GetMapping("/roles")
+    suspend fun getUserRoles(userAuthentication: UserAuthentication): ApiResponse<*> {
+        return ApiResponse.success(
+            userService.getUserRoles(userAuthentication.userId)
+        )
+    }
 }

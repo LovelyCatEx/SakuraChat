@@ -31,6 +31,7 @@ import {clearUserAuthentication} from "../../utils/token.utils.ts";
 import {useLoggedUser} from "../../compositions/use-logged-user.ts";
 import {UserPointsLogPage} from "./user/points-log/UserPointsLogPage.tsx";
 import {UserThirdPartyAccountBindPage} from "./user/third-party-account/UserThirdPartyAccountBindPage.tsx";
+import {ProfilePage} from "./user/profile/ProfilePage.tsx";
 
 const { Header, Sider, Content } = Layout;
 
@@ -41,6 +42,8 @@ interface MenuItem {
 }
 
 export function MainContainer() {
+  const loggedUser = useLoggedUser();
+
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -49,20 +52,30 @@ export function MainContainer() {
     navigate((e as { key: string }).key);
   };
 
-  const menuItems: (MenuItem & ItemType)[] = useMemo(() => [
-    { key: '/manager/dashboard', icon: <DashboardOutlined />, label: '仪表盘' },
-    { key: '/points-logs', icon: <PayCircleOutlined />, label: '积分变更记录' },
-    { key: '/third-party-account/bind', icon: <TeamOutlined />, label: '第三方账号绑定' },
-    { key: '/manager/agents', icon: <RobotOutlined />, label: '智能体' },
-    { key: '/manager/providers', icon: <CloudServerOutlined />, label: '模型提供商' },
-    { key: '/manager/models', icon: <DatabaseOutlined />, label: '语言模型' },
-    { key: '/manager/credentials', icon: <KeyOutlined />, label: '凭证管理' },
-    { key: '/manager/third-party-accounts', icon: <TeamOutlined />, label: '第三方账号' },
-    { key: '/manager/users', icon: <UserOutlined />, label: '用户' },
-    { key: '/manager/user-roles', icon: <TeamOutlined />, label: '用户角色' },
-    { key: '/manager/user-role-relations', icon: <TeamOutlined />, label: '用户角色关系' },
-    { key: '/manager/settings', icon: <SettingOutlined />, label: '系统设置' },
-  ], []);
+  const menuItems: (MenuItem & ItemType)[] = useMemo(() => {
+    const baseItems = [
+      { key: '/manager/dashboard', icon: <DashboardOutlined />, label: '仪表盘' },
+      { key: '/profile', icon: <UserOutlined />, label: '个人中心' },
+      { key: '/points-logs', icon: <PayCircleOutlined />, label: '积分变更记录' },
+      { key: '/third-party-account/bind', icon: <TeamOutlined />, label: '第三方账号绑定' },
+    ];
+
+    const adminItems = [
+      { key: '/manager/agents', icon: <RobotOutlined />, label: '智能体' },
+      { key: '/manager/providers', icon: <CloudServerOutlined />, label: '模型提供商' },
+      { key: '/manager/models', icon: <DatabaseOutlined />, label: '语言模型' },
+      { key: '/manager/credentials', icon: <KeyOutlined />, label: '凭证管理' },
+      { key: '/manager/third-party-accounts', icon: <TeamOutlined />, label: '第三方账号' },
+      { key: '/manager/users', icon: <UserOutlined />, label: '用户' },
+      { key: '/manager/user-roles', icon: <TeamOutlined />, label: '用户角色' },
+      { key: '/manager/user-role-relations', icon: <TeamOutlined />, label: '用户角色关系' },
+      { key: '/manager/settings', icon: <SettingOutlined />, label: '系统设置' },
+    ];
+
+    const hasAdminRole = loggedUser?.userRoles?.some(role => role === 'ADMIN' || role === 'ROOT') || false;
+
+    return [...baseItems, ...(hasAdminRole ? adminItems : [])];
+  }, [loggedUser?.userRoles]);
 
   const selectedKeys = useMemo(() => {
     const currentPath = location.pathname;
@@ -81,8 +94,6 @@ export function MainContainer() {
       document.title = 'SakuraChat'
     }
   }, [selectedKeys]);
-
-  const loggedUser = useLoggedUser();
 
   return (
       <Layout className="min-h-screen bg-[#f8fafc]">
@@ -171,6 +182,7 @@ export function MainContainer() {
               <Route path="/manager/dashboard" element={<DashboardPage />} />
               <Route path="/points-logs" element={<UserPointsLogPage />} />
               <Route path="/third-party-account/bind" element={<UserThirdPartyAccountBindPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
               <Route path="/manager/agents" element={<AgentPage />} />
               <Route path="/manager/providers" element={<ProviderPage />} />
               <Route path="/manager/models" element={<ChatModelPage />} />
