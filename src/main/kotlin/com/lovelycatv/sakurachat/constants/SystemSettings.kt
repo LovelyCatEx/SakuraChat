@@ -9,6 +9,9 @@
 package com.lovelycatv.sakurachat.constants
 
 object SystemSettings {
+    object System {
+        const val SYSTEM_INITIALIZED = "system.initialized"
+    }
     object UserRegistration {
         const val INITIAL_POINTS = "user_registration.initial_points"
     }

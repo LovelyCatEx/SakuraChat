@@ -99,7 +99,7 @@ class UserServiceImpl(
                     email
                 )
             ).also {
-                afterNewUserSaved(it)
+                afterNewUserSaved(it, UserRoleType.USER)
             }
         }
     }
@@ -181,7 +181,7 @@ class UserServiceImpl(
         getRepository().save(existing)
     }
 
-    override fun createUser(managerCreateUserDTO: ManagerCreateUserDTO) {
+    override fun createUser(managerCreateUserDTO: ManagerCreateUserDTO, userRole: UserRoleType) {
         val userByName = userRepository.findByUsername(managerCreateUserDTO.username)
 
         if (userByName != null) {
@@ -205,7 +205,7 @@ class UserServiceImpl(
                     points = managerCreateUserDTO.points
                 )
             ).also {
-                afterNewUserSaved(it)
+                afterNewUserSaved(it, userRole)
             }
         }
     }
@@ -239,7 +239,7 @@ class UserServiceImpl(
         ).toPaginatedResponseData()
     }
 
-    private inline fun afterNewUserSaved(user: UserEntity) {
+    private inline fun afterNewUserSaved(user: UserEntity, defaultUserRole: UserRoleType) {
         val initialPoints = systemSettingsService.getAllSettingsLazy().userRegistration.initialPoints
         this.userPointsService.consumePoints(
             userId = user.id,
@@ -250,7 +250,7 @@ class UserServiceImpl(
             )
         )
 
-        this.userRoleRelationService.bindRole(user.id, UserRoleType.USER)
+        this.userRoleRelationService.bindRole(user.id, defaultUserRole)
     }
 
     private fun findNextUserId(): Long {

@@ -15,6 +15,7 @@ import com.lovelycatv.sakurachat.repository.UserRepository
 import com.lovelycatv.sakurachat.request.PaginatedResponseData
 import com.lovelycatv.sakurachat.service.BaseService
 import com.lovelycatv.sakurachat.types.ThirdPartyPlatform
+import com.lovelycatv.sakurachat.types.UserRoleType
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.transaction.annotation.Transactional
 
@@ -42,7 +43,7 @@ interface UserService : UserDetailsService, BaseService<UserRepository, UserEnti
     fun updateUser(managerUpdateUserDTO: ManagerUpdateUserDTO)
 
     @Transactional
-    fun createUser(managerCreateUserDTO: ManagerCreateUserDTO)
+    fun createUser(managerCreateUserDTO: ManagerCreateUserDTO, userRole: UserRoleType = UserRoleType.USER)
 
     fun search(keyword: String, page: Int, pageSize: Int): PaginatedResponseData<UserEntity>
 }
