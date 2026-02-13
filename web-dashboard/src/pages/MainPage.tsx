@@ -256,6 +256,18 @@ const MainPage = () => {
             feature: '发送表情包',
             description: '支持发送和管理表情包',
             status: 'planned'
+        },
+        {
+            key: 'napcat-manager',
+            feature: 'NapCat 服务端管理',
+            description: '支持管理接入 SakuraChat 的 NapCat 服务端',
+            status: 'planned'
+        },
+        {
+            key: 'lark-bot-manager',
+            feature: '飞书机器人管理',
+            description: '支持管理接入 SakuraChat 的飞书机器人',
+            status: 'planned'
         }
     ];
 
@@ -417,7 +429,7 @@ const MainPage = () => {
                                     <Button type="primary" size="large" className="h-14 px-10 text-lg shadow-lg shadow-pink-100" onClick={() => navigate('/auth/register')}>
                                         免费体验
                                     </Button>
-                                    <Button size="large" className="h-14 px-10 text-lg" onClick={() => window.open('https://github.com/LovelyCatEx/SakuraChat/', '_blank', 'noopener noreferrer')}>
+                                    <Button size="large" className="h-14 px-10 text-lg" onClick={() => window.open('https://github.com/LovelyCatEx/SakuraChat?tab=readme-ov-file#sakurachat', '_blank', 'noopener noreferrer')}>
                                         了解更多
                                     </Button>
                                 </div>
