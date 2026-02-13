@@ -20,6 +20,7 @@ import {CredentialPage} from './manager/credential/CredentialPage.tsx';
 import {ChatModelPage} from './manager/chat-model/ChatModelPage.tsx';
 import {ProviderPage} from './manager/provider/ProviderPage.tsx';
 import {UserRolePage} from './manager/user/role/UserRolePage.tsx';
+import {UserRoleRelationPage} from './manager/user/role/UserRoleRelationPage.tsx';
 import {SettingsPage} from './manager/settings/SettingsPage.tsx';
 import {ThirdPartyAccountPage} from './manager/third-party-account/ThirdPartyAccountPage.tsx';
 import {UserPage} from './manager/user/UserPage.tsx';
@@ -58,6 +59,7 @@ export function MainContainer() {
     { key: '/manager/third-party-accounts', icon: <TeamOutlined />, label: '第三方账号' },
     { key: '/manager/users', icon: <UserOutlined />, label: '用户' },
     { key: '/manager/user-roles', icon: <TeamOutlined />, label: '用户角色' },
+    { key: '/manager/user-role-relations', icon: <TeamOutlined />, label: '用户角色关系' },
     { key: '/manager/settings', icon: <SettingOutlined />, label: '系统设置' },
   ], []);
 
@@ -197,6 +199,7 @@ export function MainContainer() {
               <Route path="/manager/third-party-accounts" element={<ThirdPartyAccountPage />} />
               <Route path="/manager/users" element={<UserPage />} />
               <Route path="/manager/user-roles" element={<UserRolePage />} />
+              <Route path="/manager/user-role-relations" element={<UserRoleRelationPage />} />
               <Route path="/manager/settings" element={<SettingsPage />} />
             </Routes>
           </Content>

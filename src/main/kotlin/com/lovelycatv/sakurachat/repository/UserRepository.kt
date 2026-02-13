@@ -32,4 +32,9 @@ interface UserRepository : JpaRepository<UserEntity, Long> {
 
     @Query("SELECT u.points FROM UserEntity u WHERE u.id = :userId")
     fun getUserPoints(userId: Long): Long?
+    fun findAllByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(
+        username: String,
+        email: String,
+        pageable: Pageable
+    ): Page<UserEntity>
 }

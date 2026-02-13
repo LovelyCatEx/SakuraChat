@@ -17,3 +17,8 @@ export interface UpdateUserRoleDTO {
     name?: string;
     description?: string | null;
 }
+
+export interface UserRoleRelation {
+    first: number; // userId
+    second: string[]; // roleIds as strings to avoid precision loss
+}
