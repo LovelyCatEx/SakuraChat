@@ -96,11 +96,13 @@ class UserServiceImpl(
                     email
                 )
             ).also {
+                val initialPoints = systemSettingsService.getAllSettingsLazy().userRegistration.initialPoints
                 this.userPointsService.consumePoints(
                     userId = it.id,
                     request = UserPointsConsumeRequest(
                         reason = PointsChangesReason.REGISTER,
-                        consumedPoints = -abs(systemSettingsService.getAllSettingsLazy().userRegistration.initialPoints)
+                        consumedPoints = -abs(initialPoints),
+                        afterBalance = initialPoints
                     )
                 )
             }
@@ -171,7 +173,8 @@ class UserServiceImpl(
                     userId = updateUserDTO.id,
                     request = UserPointsConsumeRequest(
                         reason = PointsChangesReason.ADMIN,
-                        consumedPoints = - delta
+                        consumedPoints = - delta,
+                        afterBalance = updateUserDTO.points
                     )
                 )
 
@@ -207,11 +210,13 @@ class UserServiceImpl(
                     points = managerCreateUserDTO.points
                 )
             ).also {
+                val initialPoints = systemSettingsService.getAllSettingsLazy().userRegistration.initialPoints
                 this.userPointsService.consumePoints(
                     userId = it.id,
                     request = UserPointsConsumeRequest(
                         reason = PointsChangesReason.REGISTER,
-                        consumedPoints = -abs(systemSettingsService.getAllSettingsLazy().userRegistration.initialPoints)
+                        consumedPoints = -abs(initialPoints),
+                        afterBalance = initialPoints
                     )
                 )
             }

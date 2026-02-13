@@ -1,11 +1,12 @@
 import {Button, Card, message, Space, Table, Tag} from "antd";
-import {ReloadOutlined} from "@ant-design/icons";
+import {ReloadOutlined, WalletOutlined} from "@ant-design/icons";
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
 import {formatTimestamp} from "../../../../utils/datetime.utils.ts";
 import type {UserPointsLog} from "../../../../types/user-points-log.types.ts";
 import {useEffect, useState} from "react";
 import {listUserPointsLogs} from "../../../../api/user-points-logs.api.ts";
 import {PointsChangesReason} from "../../../../types/enums/points-changes-reason.enum.ts";
+import {getMyPoints} from "../../../../api/user.api.ts";
 
 export function UserPointsLogPage() {
     const [refreshing, setRefreshing] = useState(false);
@@ -13,25 +14,32 @@ export function UserPointsLogPage() {
     const [currentPageSize, setCurrentPageSize] = useState(20);
     const [total, setTotal] = useState(0);
     const [logs, setLogs] = useState<UserPointsLog[]>([]);
+    const [myPoints, setMyPoints] = useState<number>(0);
 
     function refreshData() {
         setRefreshing(true);
 
-        listUserPointsLogs(currentPage, currentPageSize)
-            .then(res => {
-                if (res.data) {
-                    setTotal(res.data.total);
-                    setLogs(res.data.records);
-                } else {
-                    void message.warning("查询积分消耗记录失败")
-                }
-            })
-            .catch(() => {
-                void message.error("查询积分消耗记录失败")
-            })
-            .finally(() => {
-                setRefreshing(false);
-            })
+        Promise.all([
+            listUserPointsLogs(currentPage, currentPageSize),
+            getMyPoints()
+        ]).then(([logsRes, pointsRes]) => {
+            if (logsRes.data) {
+                setTotal(logsRes.data.total);
+                setLogs(logsRes.data.records);
+            } else {
+                void message.warning("查询积分消耗记录失败")
+            }
+
+            if (pointsRes.data) {
+                setMyPoints(pointsRes.data);
+            } else {
+                void message.warning("查询积分余额失败")
+            }
+        }).catch(() => {
+            void message.error("查询积分消耗记录失败")
+        }).finally(() => {
+            setRefreshing(false);
+        })
     }
 
     useEffect(() => {
@@ -52,11 +60,22 @@ export function UserPointsLogPage() {
             title: '积分',
             dataIndex: 'deltaPoints',
             key: 'deltaPoints',
-            width: 200,
+            width: 80,
             render: (deltaPoints: number) => deltaPoints > 0 ? (
-                <span>{deltaPoints}</span>
+                <span className="text-green-600">+{deltaPoints}</span>
             ) : (
-                <span>{deltaPoints}</span>
+                <span className="text-orange-600">{deltaPoints}</span>
+            )
+        },
+        {
+            title: '余额',
+            dataIndex: 'afterBalance',
+            key: 'afterBalance',
+            width: 120,
+            render: (afterBalance: number) => afterBalance > 0 ? (
+                <span>{afterBalance}</span>
+            ) : (
+                <span>{afterBalance}</span>
             )
         },
         {
@@ -111,6 +130,10 @@ export function UserPointsLogPage() {
             </div>
 
             <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
+                <div className="mb-6 flex gap-4">
+                    <p className="text-lg"><WalletOutlined className="text-orange-600" />&nbsp;积分余额：{myPoints}</p>
+                </div>
+
                 <Table
                     columns={columns}
                     dataSource={logs}

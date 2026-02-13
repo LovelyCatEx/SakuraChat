@@ -34,11 +34,11 @@ class UserPointsServiceImpl(
     }
 
     override suspend fun hasPoints(userId: Long, minimum: Long): Boolean {
-        val user = withContext(Dispatchers.IO) {
-            getRepository().findById(userId).getOrNull()
+        val userPoints = withContext(Dispatchers.IO) {
+            getRepository().getUserPoints(userId)
         } ?: return false
 
-        return user.points > minimum
+        return userPoints >= minimum
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

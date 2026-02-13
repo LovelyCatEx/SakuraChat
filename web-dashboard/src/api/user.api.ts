@@ -6,6 +6,10 @@ export function getUserProfile(userId?: number): Promise<ApiResponse<UserProfile
     return doGet<UserProfileVO>('/api/user/profile', { userId });
 }
 
+export function getMyPoints(): Promise<ApiResponse<number>> {
+    return doGet<number>('/api/user/points');
+}
+
 export function getUserList(query: PageQuery): Promise<ApiResponse<PaginatedResponseData<User>>> {
     return doGet<PaginatedResponseData<User>>('/api/manager/user/list', {...query});
 }

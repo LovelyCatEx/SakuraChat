@@ -27,6 +27,8 @@ class UserPointsLogEntity(
     var userId: Long = 0,
     @Column(name = "delta_points", nullable = false)
     var deltaPoints: Long = 0,
+    @Column(name = "after_balance", nullable = false)
+    var afterBalance: Long = 0,
     @Column(name = "reason_type", nullable = false)
     var reasonType: Int = 0,
     @Column(name = "related_table_type_1")

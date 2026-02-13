@@ -121,7 +121,8 @@ class SakuraChatAgent(
                 chatModelEntity.chatModel.maxTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.outputTokenPointRate)
         ).toLong()
 
-        val pointsThreshold = userPointsService.hasPoints(sender.user.id, predictedPoints)
+        val userPointsBalance = userPointsService.getUserPoints(sender.user.id)
+        val pointsThreshold = userPointsBalance >= predictedPoints
 
         if (!pointsThreshold) {
             return emitter.invoke(
@@ -266,8 +267,8 @@ class SakuraChatAgent(
 
             // After actions
             if (resp.usage != null) {
-                val consumedPoints = resp.usage!!.promptTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.inputTokenPointRate) +
-                        resp.usage!!.completionTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.outputTokenPointRate)
+                val consumedPoints = ceil(resp.usage!!.promptTokens.toLong() * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.inputTokenPointRate) +
+                        resp.usage!!.completionTokens.toLong() * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.outputTokenPointRate)).toLong()
 
                 userPointsService.consumePoints(
                     userId = sender.user.id,
@@ -275,7 +276,8 @@ class SakuraChatAgent(
                         userId = sender.user.id,
                         agentId = agent.agent.id,
                         chatModelId = chatModelEntity.chatModel.id,
-                        points = ceil(consumedPoints).toLong()
+                        points = consumedPoints,
+                        afterPoints = userPointsBalance - consumedPoints
                     )
                 )
             } else {
@@ -331,8 +333,8 @@ class SakuraChatAgent(
                 )
             ).also {
                 // After actions
-                val consumedPoints = resp.usage.promptTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.inputTokenPointRate) +
-                        resp.usage.completionTokens * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.outputTokenPointRate)
+                val consumedPoints = ceil(resp.usage.promptTokens.toLong() * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.inputTokenPointRate) +
+                        resp.usage.completionTokens.toLong() * chatModelEntity.chatModel.getQualifiedTokenPointRate(chatModelEntity.chatModel.outputTokenPointRate)).toLong()
 
                 userPointsService.consumePoints(
                     userId = sender.user.id,
@@ -340,7 +342,8 @@ class SakuraChatAgent(
                         userId = sender.user.id,
                         agentId = agent.agent.id,
                         chatModelId = chatModelEntity.chatModel.id,
-                        points = ceil(consumedPoints).toLong()
+                        points = consumedPoints,
+                        afterPoints = userPointsBalance - consumedPoints
                     )
                 )
             }

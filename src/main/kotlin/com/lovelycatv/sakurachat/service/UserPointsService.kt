@@ -10,6 +10,7 @@ package com.lovelycatv.sakurachat.service
 
 import com.lovelycatv.sakurachat.entity.UserEntity
 import com.lovelycatv.sakurachat.repository.UserRepository
+import com.lovelycatv.sakurachat.request.ApiResponse
 import com.lovelycatv.sakurachat.service.request.UserPointsConsumeRequest
 import com.lovelycatv.sakurachat.types.DatabaseTableType
 import com.lovelycatv.sakurachat.types.PointsChangesReason
@@ -26,11 +27,13 @@ interface UserPointsService : BaseService<UserRepository, UserEntity, Long> {
         userId: Long,
         agentId: Long,
         chatModelId: Long,
-        points: Long
+        points: Long,
+        afterPoints: Long
     ): UserPointsConsumeRequest {
         return UserPointsConsumeRequest(
             reason = PointsChangesReason.AGENT_CHAT_COMPLETION,
             consumedPoints = points,
+            afterBalance = afterPoints,
             associations = listOf(
                 UserPointsConsumeRequest.Association(
                     tableType = DatabaseTableType.AGENTS,
@@ -42,5 +45,10 @@ interface UserPointsService : BaseService<UserRepository, UserEntity, Long> {
                 )
             )
         )
+    }
+
+    fun getUserPoints(userId: Long): Long {
+        return this.getRepository().getUserPoints(userId)
+            ?: throw IllegalStateException("User $userId not found")
     }
 }

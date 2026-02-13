@@ -43,6 +43,7 @@ class UserPointsLogServiceImpl(
             id = snowIdGenerator.nextId(),
             userId = userId,
             deltaPoints = - request.consumedPoints,
+            afterBalance = request.afterBalance,
             reasonType = request.reason.reasonId
         )
 

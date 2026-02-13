@@ -11,10 +11,12 @@ import com.lovelycatv.sakurachat.annotations.Unauthorized
 import com.lovelycatv.sakurachat.controller.user.dto.UserProfileVO
 import com.lovelycatv.sakurachat.controller.user.dto.UserRegisterDTO
 import com.lovelycatv.sakurachat.request.ApiResponse
+import com.lovelycatv.sakurachat.service.UserPointsService
 import com.lovelycatv.sakurachat.service.user.UserService
 import com.lovelycatv.sakurachat.types.UserAuthentication
 import jakarta.annotation.Resource
 import jakarta.validation.constraints.Email
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
@@ -22,6 +24,9 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/user")
 @Validated
 class UserController {
+    @Autowired
+    private lateinit var userPointsService: UserPointsService
+
     @Resource
     private lateinit var userService: UserService
 
@@ -71,6 +76,13 @@ class UserController {
                 nickname = user.nickname,
                 email = if (isSelf) user.email else null,
             )
+        )
+    }
+
+    @GetMapping("/points")
+    suspend fun getUserPoints(userAuthentication: UserAuthentication): ApiResponse<*> {
+        return ApiResponse.success(
+            userPointsService.getUserPoints(userAuthentication.userId)
         )
     }
 }

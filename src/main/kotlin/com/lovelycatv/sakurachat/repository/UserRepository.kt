@@ -29,4 +29,7 @@ interface UserRepository : JpaRepository<UserEntity, Long> {
 
     @Query("SELECT MAX(u.id) FROM UserEntity u")
     fun findMaxId(): Long?
+
+    @Query("SELECT u.points FROM UserEntity u WHERE u.id = :userId")
+    fun getUserPoints(userId: Long): Long?
 }

@@ -14,6 +14,7 @@ import com.lovelycatv.sakurachat.types.PointsChangesReason
 data class UserPointsConsumeRequest(
     val reason: PointsChangesReason,
     val consumedPoints: Long,
+    val afterBalance: Long,
     val associations: List<Association> = listOf()
 ) {
     data class Association(
