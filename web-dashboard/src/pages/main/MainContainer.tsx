@@ -189,46 +189,9 @@ export function MainContainer() {
             />
           </Sider>
 
-          {/* Mobile Menu Overlay */}
-          {mobileMenuOpen && (
-              <div className="fixed inset-0 z-60 md:hidden mobile-menu-overlay">
-                {/* Background Overlay */}
-                <div 
-                    className="absolute inset-0 bg-black bg-opacity-50"
-                    onClick={() => setMobileMenuOpen(false)}
-                />
-                
-                {/* Mobile Menu */}
-                <div className="absolute left-0 top-0 bottom-0 w-64 bg-white shadow-xl overflow-auto mobile-menu-panel">
-                  <div className="flex items-center justify-between px-4 py-4 border-b">
-                    <span className="text-lg font-semibold text-gray-900">菜单</span>
-                    <Button
-                        type="text"
-                        size="small"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100"
-                    >
-                      <MenuUnfoldOutlined />
-                    </Button>
-                  </div>
-                  
-                  <Menu
-                      mode="inline"
-                      selectedKeys={selectedKeys.map((e) => e.key)}
-                      items={menuItems}
-                      onClick={(e) => {
-                        handleMenuClick(e);
-                        setMobileMenuOpen(false);
-                      }}
-                      className="py-4 px-2 border-none"
-                  />
-                </div>
-              </div>
-          )}
-
           {/* Main Router View */}
           <Content
-              className={`p-6 transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-[240px]'}`}
+              className={`p-6 transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-[240px]'} relative z-10`}
           >
             <Routes>
               <Route path="/manager/dashboard" element={<DashboardPage />} />
@@ -247,6 +210,43 @@ export function MainContainer() {
               <Route path="/manager/settings" element={<SettingsPage />} />
             </Routes>
           </Content>
+
+          {/* Mobile Menu Overlay */}
+          {mobileMenuOpen && (
+              <div className="fixed inset-0 md:hidden mobile-menu-overlay" style={{ zIndex: 999999 }}>
+                {/* Background Overlay */}
+                <div
+                    className="absolute inset-0 bg-black bg-opacity-50"
+                    onClick={() => setMobileMenuOpen(false)}
+                />
+
+                {/* Mobile Menu */}
+                <div className="absolute left-0 top-0 bottom-0 w-64 bg-white shadow-xl overflow-auto mobile-menu-panel z-70">
+                  <div className="flex items-center justify-between px-4 py-4 border-b">
+                    <span className="text-lg font-semibold text-gray-900">菜单</span>
+                    <Button
+                        type="text"
+                        size="small"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100"
+                    >
+                      <MenuFoldOutlined />
+                    </Button>
+                  </div>
+
+                  <Menu
+                      mode="inline"
+                      selectedKeys={selectedKeys.map((e) => e.key)}
+                      items={menuItems}
+                      onClick={(e) => {
+                        handleMenuClick(e);
+                        setMobileMenuOpen(false);
+                      }}
+                      className="py-4 px-2 border-none"
+                  />
+                </div>
+              </div>
+          )}
         </Layout>
       </Layout>
   );
