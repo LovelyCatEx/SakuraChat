@@ -22,4 +22,8 @@ class ChainMessage(
     override fun isAtomic(): Boolean {
         return false
     }
+
+    override fun normalizedLength(): Int {
+        return this.messages.sumBy { it.normalizedLength() }
+    }
 }

@@ -22,4 +22,8 @@ class QuoteMessage(
     override fun isAtomic(): Boolean {
         return true
     }
+
+    override fun normalizedLength(): Int {
+        return this.message.normalizedLength()
+    }
 }

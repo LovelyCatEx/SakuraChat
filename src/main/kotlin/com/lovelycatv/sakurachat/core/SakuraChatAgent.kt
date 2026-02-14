@@ -11,6 +11,7 @@ package com.lovelycatv.sakurachat.core
 import com.lovelycatv.sakurachat.core.im.message.AbstractMessage
 import com.lovelycatv.sakurachat.core.im.message.ErrorMessage
 import com.lovelycatv.sakurachat.core.im.message.TextMessage
+import com.lovelycatv.sakurachat.core.task.MessageTask
 import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.service.AgentContextService
 import com.lovelycatv.sakurachat.service.IMChannelMessageService
@@ -27,27 +28,12 @@ import kotlinx.coroutines.*
 import kotlin.math.ceil
 
 class SakuraChatAgent(
-    val agent: AggregatedAgentEntity,
+    agent: AggregatedAgentEntity,
     val userPointsService: UserPointsService,
     val agentContextService: AgentContextService,
     val imChannelMessageService: IMChannelMessageService,
-) : AbstractSakuraChatChannelMember(ChannelMemberType.AGENT) {
+) : AbstractSakuraChatAgent(agent) {
     private val logger = logger()
-
-    override val id: Long get() = this.agent.agent.id
-
-    // Supervisor job prevents exception blocking message handler tasks
-    private val supervisorJob = SupervisorJob()
-    // Name of coroutine
-    private val coroutineName = CoroutineName("SakuraChatAgent#$memberId")
-    // Exception handler
-    private val coroutineExceptionHandler = CoroutineExceptionHandler { ctx, t ->
-        logger.error("An error occurred while attempting to call agent ${agent.agent.id}#${agent.agent.name}", t)
-    }
-
-    private val coroutineScope = CoroutineScope(
-        supervisorJob + Dispatchers.IO + coroutineName + coroutineExceptionHandler
-    )
 
     override fun onPrivateMessage(
         channel: SakuraChatMessageChannel,
@@ -61,16 +47,21 @@ class SakuraChatAgent(
                 val agentMember = channel.getAgentMember(agent.agent.id)!!
 
                 getMessageToResponse(channel, sender, message, true) {
-                    it.forEach {
-                        if (it.isNotEmpty()) {
-                            channel.sendPrivateMessage(
-                                agentMember,
-                                sender,
-                                it
+                    it.forEach { msg ->
+                        if (msg.isNotEmpty()) {
+                            // Enqueue message task instead of sending directly
+                            messageTaskQueueManager.enqueueTask(
+                                channel,
+                                MessageTask.SendPrivateMessage(
+                                    channel = channel,
+                                    sender = agentMember,
+                                    recipient = sender,
+                                    message = msg
+                                )
                             )
 
                             // Save agent message into database
-                            imChannelMessageService.saveMessage(channel, agentMember, it)
+                            imChannelMessageService.saveMessage(channel, agentMember, msg)
                         }
                     }
                 }
@@ -90,14 +81,19 @@ class SakuraChatAgent(
                 val agentMember = channel.getAgentMember(agent.agent.id)!!
                 getMessageToResponse(channel, sender, message, true) {
                     if (it.isNotEmpty()) {
-                        it.forEach {
-                            channel.sendGroupMessage(
-                                agentMember,
-                                it
+                        it.forEach { msg ->
+                            // Enqueue message task instead of sending directly
+                            messageTaskQueueManager.enqueueTask(
+                                channel,
+                                MessageTask.SendGroupMessage(
+                                    channel = channel,
+                                    sender = agentMember,
+                                    message = msg
+                                )
                             )
 
                             // Save agent message into database
-                            imChannelMessageService.saveMessage(channel, agentMember, it)
+                            imChannelMessageService.saveMessage(channel, agentMember, msg)
                         }
                     }
                 }
@@ -360,5 +356,38 @@ class SakuraChatAgent(
             .replace("\\\\", "\\")
             .replace("\\\"", "\"")
             .replace("\\'", "'")
+    }
+
+    override suspend fun handleMessageTask(task: MessageTask) {
+        logger.info("Handling message task {} for channel {}", task.uuid, task.channel.channelId)
+        when (task) {
+            is MessageTask.SendPrivateMessage -> {
+                delay(500L * task.message.normalizedLength())
+                logger.info(
+                    "Sending private message from agent {} to user {} in channel {}",
+                    task.sender.id,
+                    task.recipient.id,
+                    task.channel.channelId
+                )
+                task.channel.sendPrivateMessage(
+                    task.sender,
+                    task.recipient,
+                    task.message
+                )
+            }
+
+            is MessageTask.SendGroupMessage -> {
+                delay(500L * task.message.normalizedLength())
+                logger.info(
+                    "Sending group message from agent {} in channel {}",
+                    task.sender.id,
+                    task.channel.channelId
+                )
+                task.channel.sendGroupMessage(
+                    task.sender,
+                    task.message
+                )
+            }
+        }
     }
 }

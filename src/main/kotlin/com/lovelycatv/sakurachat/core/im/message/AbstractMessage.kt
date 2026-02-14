@@ -39,4 +39,7 @@ abstract class AbstractMessage @JsonCreator constructor(
 
     @JsonIgnore
     abstract fun isAtomic(): Boolean
+
+    @JsonIgnore
+    abstract fun normalizedLength(): Int
 }

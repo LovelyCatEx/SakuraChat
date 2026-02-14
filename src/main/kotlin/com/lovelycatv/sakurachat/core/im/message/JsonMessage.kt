@@ -22,4 +22,8 @@ class JsonMessage(
     override fun isAtomic(): Boolean {
         return true
     }
+
+    override fun normalizedLength(): Int {
+        return 0
+    }
 }
