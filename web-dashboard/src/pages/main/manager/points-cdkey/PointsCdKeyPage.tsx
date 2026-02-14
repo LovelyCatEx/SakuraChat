@@ -257,9 +257,34 @@ export function PointsCdKeyPage() {
 
                     <Row gutter={16}>
                         <Col span={24}>
-                            <Form.Item name="cdKey" label="兑换码" rules={[{ required: true }]}>
-                                <Input placeholder="输入兑换码" className="rounded-lg h-10" />
-                            </Form.Item>
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">兑换码</label>
+                                <div className="flex gap-2">
+                                    <Form.Item name="cdKey" noStyle rules={[{ required: true }]}>
+                                        <Input placeholder="输入兑换码" className="rounded-lg h-10 flex-1" />
+                                    </Form.Item>
+                                    <Button 
+                                        type="default" 
+                                        className="rounded-lg h-10 px-6" 
+                                        onClick={() => {
+                                            let uuid: string;
+                                            if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+                                                uuid = crypto.randomUUID();
+                                            } else {
+                                                uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                                                    const r = Math.random() * 16 | 0;
+                                                    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                                                    return v.toString(16);
+                                                });
+                                            }
+
+                                            form.setFieldsValue({ cdKey: uuid });
+                                        }}
+                                    >
+                                        随机生成
+                                    </Button>
+                                </div>
+                            </div>
                         </Col>
                     </Row>
 
