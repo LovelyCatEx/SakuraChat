@@ -75,7 +75,7 @@ name: SakuraChat
 services:
   mysql:
     container_name: sakurachat-mysql
-    image: lovelycatv/sakurachat-mysql:v1.0.0
+    image: lovelycatv/sakurachat-mysql:latest
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
     healthcheck:
@@ -101,7 +101,7 @@ services:
       - sakurachat-network
   backend:
     container_name: sakurachat-backend
-    image: lovelycatv/sakurachat-backend:v1.0.0
+    image: lovelycatv/sakurachat-backend:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -121,7 +121,7 @@ services:
       - sakurachat-network
   frontend:
     container_name: sakurachat-frontend
-    image: lovelycatv/sakurachat-frontend:v1.0.0
+    image: lovelycatv/sakurachat-frontend:latest
     build:
       context: ./web-dashboard
       dockerfile: Dockerfile
