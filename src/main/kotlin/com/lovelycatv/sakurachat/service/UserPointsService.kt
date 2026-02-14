@@ -50,4 +50,7 @@ interface UserPointsService : BaseService<UserRepository, UserEntity, Long> {
         return this.getRepository().getUserPoints(userId)
             ?: throw IllegalStateException("User $userId not found")
     }
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    suspend fun addPoints(userId: Long, points: Long, reason: PointsChangesReason, reasonType: Int, associations: List<UserPointsConsumeRequest.Association> = emptyList())
 }

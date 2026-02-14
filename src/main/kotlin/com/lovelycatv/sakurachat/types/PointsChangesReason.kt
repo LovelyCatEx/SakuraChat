@@ -12,7 +12,8 @@ enum class PointsChangesReason(val reasonId: Int) {
     REGISTER(0),
     AGENT_CHAT_COMPLETION(1),
     CHARGE(2),
-    ADMIN(3);
+    ADMIN(3),
+    CDKEY_REDEEM(4);
 
     companion object {
         fun getByReasonId(reasonId: Int): PointsChangesReason? {

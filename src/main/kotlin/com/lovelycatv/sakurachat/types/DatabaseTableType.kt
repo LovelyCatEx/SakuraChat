@@ -12,6 +12,7 @@ enum class DatabaseTableType(val typeId: Int) {
     USERS(0),
     AGENTS(1),
     CHAT_MODELS(2),
+    POINTS_CD_KEYS(3),
     ;
 
     companion object {

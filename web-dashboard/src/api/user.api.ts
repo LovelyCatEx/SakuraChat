@@ -37,3 +37,7 @@ export function createUser(dto: CreateUserDTO): Promise<ApiResponse<unknown>> {
 export function updateUser(dto: UpdateUserDTO): Promise<ApiResponse<unknown>> {
     return doPost<unknown>('/api/manager/user/update', {...dto});
 }
+
+export function redeemCdKey(cdKey: string): Promise<ApiResponse<{points: number, message: string}>> {
+    return doPost<{points: number, message: string}>('/api/cdkey/redeem', { cdKey });
+}

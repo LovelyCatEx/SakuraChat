@@ -32,6 +32,7 @@ import {useLoggedUser} from "../../compositions/use-logged-user.ts";
 import {UserPointsLogPage} from "./user/points-log/UserPointsLogPage.tsx";
 import {UserThirdPartyAccountBindPage} from "./user/third-party-account/UserThirdPartyAccountBindPage.tsx";
 import {ProfilePage} from "./user/profile/ProfilePage.tsx";
+import {PointsCdKeyPage} from "./manager/points-cdkey/PointsCdKeyPage.tsx";
 
 const { Header, Sider, Content } = Layout;
 
@@ -66,8 +67,9 @@ export function MainContainer() {
       { key: '/manager/models', icon: <DatabaseOutlined />, label: '语言模型' },
       { key: '/manager/credentials', icon: <KeyOutlined />, label: '凭证管理' },
       { key: '/manager/third-party-accounts', icon: <TeamOutlined />, label: '第三方账号' },
-      { key: '/manager/users', icon: <UserOutlined />, label: '用户' },
-      { key: '/manager/user-roles', icon: <TeamOutlined />, label: '用户角色' },
+      { key: '/manager/points-cdkeys', icon: <TeamOutlined />, label: '积分兑换码' },
+      { key: '/manager/users', icon: <UserOutlined />, label: '用户管理' },
+      { key: '/manager/user-roles', icon: <TeamOutlined />, label: '用户角色管理' },
       { key: '/manager/user-role-relations', icon: <TeamOutlined />, label: '用户角色关系' },
       { key: '/manager/settings', icon: <SettingOutlined />, label: '系统设置' },
     ];
@@ -188,6 +190,7 @@ export function MainContainer() {
               <Route path="/manager/models" element={<ChatModelPage />} />
               <Route path="/manager/credentials" element={<CredentialPage />} />
               <Route path="/manager/third-party-accounts" element={<ThirdPartyAccountPage />} />
+              <Route path="/manager/points-cdkeys" element={<PointsCdKeyPage />} />
               <Route path="/manager/users" element={<UserPage />} />
               <Route path="/manager/user-roles" element={<UserRolePage />} />
               <Route path="/manager/user-role-relations" element={<UserRoleRelationPage />} />
