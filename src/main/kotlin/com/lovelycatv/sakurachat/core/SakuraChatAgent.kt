@@ -16,7 +16,6 @@ import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.service.AgentContextService
 import com.lovelycatv.sakurachat.service.IMChannelMessageService
 import com.lovelycatv.sakurachat.service.UserPointsService
-import com.lovelycatv.sakurachat.types.ChannelMemberType
 import com.lovelycatv.sakurachat.utils.toJSONString
 import com.lovelycatv.vertex.ai.openai.ChatMessageRole
 import com.lovelycatv.vertex.ai.openai.VertexAIClient
@@ -24,7 +23,8 @@ import com.lovelycatv.vertex.ai.openai.VertexAIClientConfig
 import com.lovelycatv.vertex.ai.openai.request.ChatCompletionRequest
 import com.lovelycatv.vertex.ai.openai.response.ChatCompletionStreamChunkResponse
 import com.lovelycatv.vertex.log.logger
-import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.ceil
 
 class SakuraChatAgent(

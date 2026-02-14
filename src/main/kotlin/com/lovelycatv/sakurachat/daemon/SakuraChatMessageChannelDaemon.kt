@@ -16,7 +16,6 @@ import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.repository.AgentRepository
 import com.lovelycatv.sakurachat.service.IMChannelService
 import com.lovelycatv.vertex.log.logger
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
@@ -110,10 +109,10 @@ class SakuraChatMessageChannelDaemon(
         return channel
     }
 
-    @Scheduled(cron = "0 */5 * * * *")
-    fun check() {
-        logger.info("Checking agents <=> channels")
-
-        val allAgents = agentRepository.findAll()
-    }
+    // @Scheduled(cron = "0 */5 * * * *")
+    // fun check() {
+    //     logger.info("Checking agents <=> channels")
+    //
+    //     val allAgents = agentRepository.findAll()
+    // }
 }
