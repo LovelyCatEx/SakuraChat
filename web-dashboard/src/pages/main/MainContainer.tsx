@@ -46,6 +46,7 @@ export function MainContainer() {
   const loggedUser = useLoggedUser();
 
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -108,6 +109,15 @@ export function MainContainer() {
           </div>
 
           <div className="flex flex-row items-center gap-4">
+            {/* Mobile Menu Button */}
+            <Button
+                type="text"
+                size="large"
+                icon={mobileMenuOpen ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden"
+            />
+            
             <Dropdown
                 menu={{
                   items: [
@@ -175,6 +185,43 @@ export function MainContainer() {
                 className="py-4 px-2 border-none"
             />
           </Sider>
+
+          {/* Mobile Menu Overlay */}
+          {mobileMenuOpen && (
+              <div className="fixed inset-0 z-40 md:hidden mobile-menu-overlay">
+                {/* Background Overlay */}
+                <div 
+                    className="absolute inset-0 bg-black bg-opacity-50"
+                    onClick={() => setMobileMenuOpen(false)}
+                />
+                
+                {/* Mobile Menu */}
+                <div className="absolute left-0 top-0 bottom-0 w-64 bg-white shadow-xl overflow-auto mobile-menu-panel">
+                  <div className="flex items-center justify-between px-4 py-4 border-b">
+                    <span className="text-lg font-semibold text-gray-900">菜单</span>
+                    <Button
+                        type="text"
+                        size="small"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100"
+                    >
+                      <MenuUnfoldOutlined />
+                    </Button>
+                  </div>
+                  
+                  <Menu
+                      mode="inline"
+                      selectedKeys={selectedKeys.map((e) => e.key)}
+                      items={menuItems}
+                      onClick={(e) => {
+                        handleMenuClick(e);
+                        setMobileMenuOpen(false);
+                      }}
+                      className="py-4 px-2 border-none"
+                  />
+                </div>
+              </div>
+          )}
 
           {/* Main Router View */}
           <Content
