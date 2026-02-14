@@ -69,8 +69,7 @@ export function PointsCdKeyPage() {
         } else {
             createPointsCdKey({
                 cdKey: values.cdKey,
-                points: values.points,
-                generatedBy: values.generatedBy
+                points: values.points
             }).then(() => {
                 refreshData();
                 void message.success('新增兑换码成功');

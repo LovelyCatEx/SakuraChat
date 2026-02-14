@@ -74,10 +74,10 @@ export function MainContainer() {
       { key: '/manager/settings', icon: <SettingOutlined />, label: '系统设置' },
     ];
 
-    const hasAdminRole = loggedUser?.userRoles?.some(role => role === 'ADMIN' || role === 'ROOT') || false;
+    const hasAdminRole = loggedUser.hasAdminRole
 
     return [...baseItems, ...(hasAdminRole ? adminItems : [])];
-  }, [loggedUser?.userRoles]);
+  }, [loggedUser]);
 
   const selectedKeys = useMemo(() => {
     const currentPath = location.pathname;
