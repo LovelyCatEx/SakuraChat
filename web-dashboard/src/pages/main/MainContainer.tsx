@@ -188,7 +188,7 @@ export function MainContainer() {
 
           {/* Mobile Menu Overlay */}
           {mobileMenuOpen && (
-              <div className="fixed inset-0 z-40 md:hidden mobile-menu-overlay">
+              <div className="fixed inset-0 z-60 md:hidden mobile-menu-overlay">
                 {/* Background Overlay */}
                 <div 
                     className="absolute inset-0 bg-black bg-opacity-50"
