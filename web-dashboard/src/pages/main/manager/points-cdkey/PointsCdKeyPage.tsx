@@ -1,7 +1,7 @@
 import {useEffect, useState} from 'react';
 import {Button, Card, Col, Form, Input, InputNumber, message, Modal, Popconfirm, Row, Space, Table, Tag} from 'antd';
 import {DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined} from '@ant-design/icons';
-import type {PointsCdKey} from "../../../../types/points-cdkey.types.ts";
+import type {PointsCdKey, UpdatePointsCdKeyRequest} from "../../../../types/points-cdkey.types.ts";
 import {
     createPointsCdKey,
     deletePointsCdKey,
@@ -12,6 +12,8 @@ import {
 import {formatTimestamp} from "../../../../utils/datetime.utils.ts";
 import type {ColumnGroupType, ColumnType} from "antd/es/table";
 import type {ApiResponse, PaginatedResponseData} from "../../../../api/sakurachat-request.ts";
+import {EntitySelector} from "../../../../components/common/EntitySelector.tsx";
+import {getUserById, searchUsers} from "../../../../api/user.api.ts";
 
 export function PointsCdKeyPage() {
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -24,6 +26,26 @@ export function PointsCdKeyPage() {
     const [searchKeyword, setSearchKeyword] = useState('');
 
     const [pointsCdKeys, setPointsCdKeys] = useState<PointsCdKey[]>([]);
+    const [users, setUsers] = useState<Record<string | number, {username: string, nickname: string}>>({});
+
+    const fetchUsers = async (keyword: string, page: number = 1, pageSize: number = 5) => {
+        const res = await searchUsers(keyword, page, pageSize);
+        if (res.data) {
+            const userMap: Record<string | number, {username: string, nickname: string}> = {};
+            res.data.records.forEach(u => {
+                userMap[u.id] = {username: u.username, nickname: u.nickname};
+                userMap[parseInt(u.id)] = {username: u.username, nickname: u.nickname};
+            });
+            setUsers(userMap);
+            return res.data;
+        }
+        return {page: 1, pageSize: 5, total: 0, totalPages: 0, records: []};
+    };
+
+    const fetchUserById = async (id: string) => {
+        const res = await getUserById(id);
+        return res.data || null;
+    };
 
     const refreshData = () => {
         setRefreshing(true);
@@ -36,6 +58,33 @@ export function PointsCdKeyPage() {
             if (res.data) {
                 setPointsCdKeys(res.data.records);
                 setTotal(res.data.total);
+                
+                const userIds = new Set<number>();
+                res.data.records.forEach(cdKey => {
+                    userIds.add(cdKey.generatedBy);
+                    if (cdKey.usedBy) {
+                        userIds.add(cdKey.usedBy);
+                    }
+                });
+
+                const userPromises = Array.from(userIds).map(id => getUserById(id.toString()));
+
+                if (userPromises.length === 0) {
+                    setUsers({});
+                    return;
+                }
+
+                Promise.all(userPromises).then(userResults => {
+                    const userMap: Record<string | number, {username: string, nickname: string}> = {};
+                    userResults.forEach(res => {
+                        if (res.data) {
+                            const userId = res.data.id;
+                            userMap[userId] = {username: res.data.username, nickname: res.data.nickname};
+                            userMap[parseInt(userId)] = {username: res.data.username, nickname: res.data.nickname};
+                        }
+                    });
+                    setUsers(userMap);
+                });
             }
         }).finally(() => {
             setRefreshing(false);
@@ -52,14 +101,14 @@ export function PointsCdKeyPage() {
         refreshData();
     }, [currentPage, currentPageSize, searchKeyword]);
 
-    const handleAddOrUpdateEdit = (values: PointsCdKey) => {
+    const handleAddOrUpdateEdit = (values: UpdatePointsCdKeyRequest) => {
         if (editingItem) {
             updatePointsCdKey({
                 id: values.id,
                 cdKey: values.cdKey,
                 points: values.points,
-                generatedBy: values.generatedBy,
-                usedBy: values.usedBy
+                generatedBy: parseInt(values.generatedBy?.toString() ?? "0"),
+                usedBy: values.usedBy ? parseInt(values.usedBy.toString()) : null
             }).then(() => {
                 refreshData();
                 void message.success('更新兑换码成功');
@@ -68,8 +117,8 @@ export function PointsCdKeyPage() {
             })
         } else {
             createPointsCdKey({
-                cdKey: values.cdKey,
-                points: values.points
+                cdKey: values.cdKey!,
+                points: values.points!
             }).then(() => {
                 refreshData();
                 void message.success('新增兑换码成功');
@@ -98,7 +147,11 @@ export function PointsCdKeyPage() {
         setEditingItem(item);
 
         if (item) {
-            form.setFieldsValue(item);
+            form.setFieldsValue({
+                ...item,
+                generatedBy: item.generatedBy.toString(),
+                usedBy: item.usedBy?.toString() || undefined
+            });
         } else {
             form.resetFields();
         }
@@ -128,18 +181,28 @@ export function PointsCdKeyPage() {
             render: (points: number) => <span className="text-gray-800 font-medium">{points}</span>
         },
         {
-            title: '生成者ID',
+            title: '生成者',
             dataIndex: 'generatedBy',
             key: 'generatedBy',
             width: 120,
-            render: (generatedBy: number) => <span className="text-gray-600">{generatedBy}</span>
+            render: (generatedBy: number) => (
+                <Space direction="vertical" size={0}>
+                    <span className="text-gray-600">{users[generatedBy]?.nickname ?? `#${generatedBy}`}</span>
+                    <span className="text-xs text-gray-400">@{users[generatedBy]?.username ?? ''}</span>
+                </Space>
+            )
         },
         {
-            title: '使用者ID',
+            title: '使用者',
             dataIndex: 'usedBy',
             key: 'usedBy',
             width: 120,
-            render: (usedBy: number | null) => <span className="text-gray-600">{usedBy || '-'}</span>
+            render: (usedBy: number | null) => usedBy ? (
+                <Space direction="vertical" size={0}>
+                    <span className="text-gray-600">{users[usedBy]?.nickname ?? `#${usedBy}`}</span>
+                    <span className="text-xs text-gray-400">@{users[usedBy]?.username ?? ''}</span>
+                </Space>
+            ) : <span className="text-gray-400">-</span>
         },
         {
             title: '状态',
@@ -297,16 +360,32 @@ export function PointsCdKeyPage() {
                                     </Form.Item>
                                 </Col>
                                 <Col span={12}>
-                                    <Form.Item name="generatedBy" label="生成者ID" rules={[{ required: true }]}>
-                                        <InputNumber placeholder="输入生成者ID" className="w-full rounded-lg h-10" min={1} />
+                                    <Form.Item name="generatedBy" label="生成者" rules={[{ required: true }]}>
+                                        <EntitySelector
+                                            placeholder="选择生成者"
+                                            fetchOptions={fetchUsers}
+                                            fetchById={fetchUserById}
+                                            renderLabel={(user) => user.nickname}
+                                            renderExtra={(user) => (
+                                                <span className="text-xs text-gray-400">@{user.username}</span>
+                                            )}
+                                        />
                                     </Form.Item>
                                 </Col>
                             </Row>
 
                             <Row gutter={16}>
                                 <Col span={24}>
-                                    <Form.Item name="usedBy" label="使用者ID">
-                                        <InputNumber placeholder="输入使用者ID（可选）" className="w-full rounded-lg h-10" min={1} />
+                                    <Form.Item name="usedBy" label="使用者">
+                                        <EntitySelector
+                                            placeholder="选择使用者（可选）"
+                                            fetchOptions={fetchUsers}
+                                            fetchById={fetchUserById}
+                                            renderLabel={(user) => user.nickname}
+                                            renderExtra={(user) => (
+                                                <span className="text-xs text-gray-400">@{user.username}</span>
+                                            )}
+                                        />
                                     </Form.Item>
                                 </Col>
                             </Row>
