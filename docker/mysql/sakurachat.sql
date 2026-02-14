@@ -195,7 +195,7 @@ CREATE TABLE `napcat_private_messages` (
 CREATE TABLE `providers` (
   `id` bigint NOT NULL,
   `name` varchar(32) NOT NULL,
-  `description` varchar(512) NOT NULL,
+  `description` varchar(512) DEFAULT NULL,
   `icon` blob,
   `api_type` int NOT NULL,
   `chat_completions_url` varchar(1024) NOT NULL,

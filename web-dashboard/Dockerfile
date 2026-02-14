@@ -1,5 +1,7 @@
 FROM --platform=linux/amd64 node:20-alpine as build
 
+MAINTAINER LovelyCat
+
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml ./
@@ -11,6 +13,8 @@ COPY . .
 RUN pnpm run build
 
 FROM --platform=linux/amd64 nginx:alpine
+
+MAINTAINER LovelyCat
 
 COPY --from=build /app/dist /usr/share/nginx/html
 

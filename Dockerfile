@@ -1,5 +1,7 @@
 FROM --platform=linux/amd64 eclipse-temurin:17-jdk-alpine
 
+MAINTAINER LovelyCat
+
 WORKDIR /app
 
 RUN apk add --no-cache git
