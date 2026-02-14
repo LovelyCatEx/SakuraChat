@@ -5,12 +5,15 @@ import {
   CloudServerOutlined,
   DashboardOutlined,
   DatabaseOutlined,
+  GiftOutlined,
   KeyOutlined,
+  LinkOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   PayCircleOutlined,
   RobotOutlined,
+  SafetyCertificateOutlined,
   SettingOutlined,
   TeamOutlined,
   UserOutlined,
@@ -46,6 +49,7 @@ export function MainContainer() {
   const loggedUser = useLoggedUser();
 
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -67,10 +71,10 @@ export function MainContainer() {
       { key: '/manager/models', icon: <DatabaseOutlined />, label: '语言模型' },
       { key: '/manager/credentials', icon: <KeyOutlined />, label: '凭证管理' },
       { key: '/manager/third-party-accounts', icon: <TeamOutlined />, label: '第三方账号' },
-      { key: '/manager/points-cdkeys', icon: <TeamOutlined />, label: '积分兑换码' },
+      { key: '/manager/points-cdkeys', icon: <GiftOutlined />, label: '积分兑换码' },
       { key: '/manager/users', icon: <UserOutlined />, label: '用户管理' },
-      { key: '/manager/user-roles', icon: <TeamOutlined />, label: '用户角色管理' },
-      { key: '/manager/user-role-relations', icon: <TeamOutlined />, label: '用户角色关系' },
+      { key: '/manager/user-roles', icon: <SafetyCertificateOutlined />, label: '用户角色管理' },
+      { key: '/manager/user-role-relations', icon: <LinkOutlined />, label: '用户角色关系' },
       { key: '/manager/settings', icon: <SettingOutlined />, label: '系统设置' },
     ];
 
@@ -108,6 +112,15 @@ export function MainContainer() {
           </div>
 
           <div className="flex flex-row items-center gap-4">
+            {/* Mobile Menu Button */}
+            <Button
+                type="text"
+                size="large"
+                icon={mobileMenuOpen ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden"
+            />
+            
             <Dropdown
                 menu={{
                   items: [
@@ -178,7 +191,7 @@ export function MainContainer() {
 
           {/* Main Router View */}
           <Content
-              className={`p-6 transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-[240px]'}`}
+              className={`p-6 transition-all duration-300 ${collapsed ? 'md:ml-20' : 'md:ml-[240px]'} relative z-10`}
           >
             <Routes>
               <Route path="/manager/dashboard" element={<DashboardPage />} />
@@ -197,6 +210,43 @@ export function MainContainer() {
               <Route path="/manager/settings" element={<SettingsPage />} />
             </Routes>
           </Content>
+
+          {/* Mobile Menu Overlay */}
+          {mobileMenuOpen && (
+              <div className="fixed inset-0 md:hidden mobile-menu-overlay" style={{ zIndex: 999999 }}>
+                {/* Background Overlay */}
+                <div
+                    className="absolute inset-0 bg-black bg-opacity-50"
+                    onClick={() => setMobileMenuOpen(false)}
+                />
+
+                {/* Mobile Menu */}
+                <div className="absolute left-0 top-0 bottom-0 w-64 bg-white shadow-xl overflow-auto mobile-menu-panel z-70">
+                  <div className="flex items-center justify-between px-4 py-4 border-b">
+                    <span className="text-lg font-semibold text-gray-900">菜单</span>
+                    <Button
+                        type="text"
+                        size="small"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100"
+                    >
+                      <MenuFoldOutlined />
+                    </Button>
+                  </div>
+
+                  <Menu
+                      mode="inline"
+                      selectedKeys={selectedKeys.map((e) => e.key)}
+                      items={menuItems}
+                      onClick={(e) => {
+                        handleMenuClick(e);
+                        setMobileMenuOpen(false);
+                      }}
+                      className="py-4 px-2 border-none"
+                  />
+                </div>
+              </div>
+          )}
         </Layout>
       </Layout>
   );

@@ -6,7 +6,10 @@ import type { UserPointsLog } from '../../../../types/user-points-log.types.ts';
 import { useEffect, useState } from 'react';
 import { listUserPointsLogs } from '../../../../api/user-points-logs.api.ts';
 import { PointsChangesReason } from '../../../../types/enums/points-changes-reason.enum.ts';
+import { DatabaseTableType, mapToDatabaseTableType } from '../../../../types/enums/database-table-type.enum.ts';
 import { getMyPoints, redeemCdKey } from '../../../../api/user.api.ts';
+import { getAgentList } from '../../../../api/agent.api.ts';
+import type { Agent } from '../../../../types/agent.types.ts';
 
 export function UserPointsLogPage() {
   const [refreshing, setRefreshing] = useState(false);
@@ -17,14 +20,16 @@ export function UserPointsLogPage() {
   const [myPoints, setMyPoints] = useState<number>(0);
   const [cdKeyModalVisible, setCdKeyModalVisible] = useState(false);
   const [cdKeyInput, setCdKeyInput] = useState('');
+  const [agents, setAgents] = useState<Map<number, Agent>>(new Map());
 
   function refreshData() {
     setRefreshing(true);
 
     Promise.all([
       listUserPointsLogs(currentPage, currentPageSize),
-      getMyPoints()
-    ]).then(([logsRes, pointsRes]) => {
+      getMyPoints(),
+      getAgentList({ page: 1, pageSize: 1000 }) // 获取足够多的智能体，避免分页问题
+    ]).then(([logsRes, pointsRes, agentsRes]) => {
       if (logsRes.data) {
         setTotal(logsRes.data.total);
         setLogs(logsRes.data.records);
@@ -36,6 +41,14 @@ export function UserPointsLogPage() {
         setMyPoints(pointsRes.data);
       } else {
         void message.warning('查询积分余额失败');
+      }
+
+      if (agentsRes.data) {
+        const agentMap = new Map<number, Agent>();
+        agentsRes.data.records.forEach(agent => {
+          agentMap.set(Number(agent.id), agent);
+        });
+        setAgents(agentMap);
       }
     }).catch(() => {
       void message.error('查询积分消耗记录失败');
@@ -111,7 +124,14 @@ export function UserPointsLogPage() {
                 { type: record.relatedTableType3, id: record.relatedTableId3 },
                 { type: record.relatedTableType4, id: record.relatedTableId4 },
               ].filter((e) => e.type != null && e.id != null)
-                  .map((e) => <Tag>{e.type} / {e.id}</Tag>)
+                  .map((e) => {
+                    const tableType = mapToDatabaseTableType(e.type);
+                    if (tableType === DatabaseTableType.AGENTS && e.id != null) {
+                      const agent = agents.get(Number(e.id));
+                      return <Tag>{agent?.name || e.id}</Tag>;
+                    }
+                    return <Tag>{e.type} / {e.id}</Tag>;
+                  })
             }
           </Space>
       ),

@@ -90,6 +90,7 @@ const ChatPreview = () => {
 
 const MainPage = () => {
     const [scrolled, setScrolled] = useState(false);
+    const [isPortrait, setIsPortrait] = useState(window.innerHeight > window.innerWidth);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -99,6 +100,14 @@ const MainPage = () => {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
         }, []);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsPortrait(window.innerHeight > window.innerWidth);
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     type DevelopmentStatus = 'supported' | 'developing' | 'planned' | 'not-supported';
     interface PlatformMessageSupportItem {
@@ -151,7 +160,7 @@ const MainPage = () => {
         }
 
         const content = (
-            <span className={`px-2 py-1 ${config.className} rounded-full inline-flex items-center justify-center gap-1`}>
+            <span className={`px-2 py-1 ${config.className} rounded-full inline-flex ${isPortrait ? 'flex-col' : 'flex-row'} items-center justify-center gap-1`}>
             {config.icon}
                 {config.text}
         </span>
