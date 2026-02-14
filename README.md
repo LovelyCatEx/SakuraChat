@@ -65,7 +65,105 @@ SakuraChat 是一个现代化的 AI 聊天系统，致力于将强大的 AI 技�
 
 ## 0x03 部署指南
 
-正在编写中...
+### Docker
+
+docker-compose.yml
+
+```yml
+name: SakuraChat
+
+services:
+  mysql:
+    container_name: sakurachat-mysql
+    image: lovelycatv/sakurachat-mysql:v1.0.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
+    healthcheck:
+      test: "/usr/bin/mysql --user=root --password=123456 --execute \"SHOW DATABASES;\""
+      interval: 3s
+      timeout: 1s
+      retries: 5
+    restart: unless-stopped
+    ports:
+      - ${MYSQL_PORT}:3306
+    networks:
+      - sakurachat-network
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: sakurachat-phpmyadmin
+    depends_on:
+      - mysql
+    ports:
+      - 8088:80
+    environment:
+      - PMA_ARBITRARY=1
+    networks:
+      - sakurachat-network
+  backend:
+    container_name: sakurachat-backend
+    image: lovelycatv/sakurachat-backend:v1.0.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - mysql
+    ports:
+      - "${BACKEND_PORT}:8080"
+    environment:
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_PORT=${MYSQL_PORT}
+      - MYSQL_USERNAME=${MYSQL_USERNAME}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_TIMEZONE=${MYSQL_TIMEZONE}
+    restart: unless-stopped
+    networks:
+      - sakurachat-network
+  frontend:
+    container_name: sakurachat-frontend
+    image: lovelycatv/sakurachat-frontend:v1.0.0
+    build:
+      context: ./web-dashboard
+      dockerfile: Dockerfile
+    ports:
+      - "${FRONTEND_PORT}:80"
+    restart: unless-stopped
+    depends_on:
+      - backend
+    networks:
+      - sakurachat-network
+  napcat:
+    image: mlikiowa/napcat-docker:latest
+    container_name: sakurachat-napcat
+    environment:
+      - NAPCAT_UID=${NAPCAT_UID}
+      - NAPCAT_GID=${NAPCAT_GID}
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+      - "6099:6099"
+    restart: always
+    network_mode: bridge
+
+networks:
+  sakurachat-network:
+    driver: bridge
+```
+
+```dotenv
+MYSQL_HOST=mysql
+MYSQL_PORT=3306
+MYSQL_USERNAME=root
+MYSQL_PASSWORD=sakurachat
+MYSQL_DATABASE=sakurachat
+MYSQL_TIMEZONE=Asia/Shanghai
+
+FRONTEND_PORT=5174
+BACKEND_PORT=8080
+```
+
+详情请见：
+[https://lovelycatv.com/cv1146]()
 
 ## 0x04 构建指南
 
