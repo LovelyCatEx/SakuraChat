@@ -30,6 +30,8 @@ import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.util.Locale
 import kotlin.math.ceil
 
 class SakuraChatAgent(
@@ -173,6 +175,7 @@ class SakuraChatAgent(
                 ).run {
                     this.copy(
                         content = "[currentTime: ${dateFormatter.format(LocalDateTime.now())}]"
+                                + "[today is ${LocalDate.now().dayOfWeek.getDisplayName(TextStyle.FULL, Locale.US)}]"
                                 + "[today's holiday: ${DateTimeUtils.getSpecialDay(LocalDate.now())}]"
                                 + this.content
                     )
