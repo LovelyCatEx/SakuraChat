@@ -16,6 +16,7 @@ import com.lovelycatv.sakurachat.entity.aggregated.AggregatedAgentEntity
 import com.lovelycatv.sakurachat.service.AgentContextService
 import com.lovelycatv.sakurachat.service.IMChannelMessageService
 import com.lovelycatv.sakurachat.service.UserPointsService
+import com.lovelycatv.sakurachat.utils.DateTimeUtils
 import com.lovelycatv.sakurachat.utils.toJSONString
 import com.lovelycatv.vertex.ai.openai.ChatMessageRole
 import com.lovelycatv.vertex.ai.openai.VertexAIClient
@@ -25,6 +26,10 @@ import com.lovelycatv.vertex.ai.openai.response.ChatCompletionStreamChunkRespons
 import com.lovelycatv.vertex.log.logger
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.math.ceil
 
 class SakuraChatAgent(
@@ -34,6 +39,7 @@ class SakuraChatAgent(
     val imChannelMessageService: IMChannelMessageService,
 ) : AbstractSakuraChatAgent(agent) {
     private val logger = logger()
+    private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
     override fun onPrivateMessage(
         channel: SakuraChatMessageChannel,
@@ -164,7 +170,13 @@ class SakuraChatAgent(
                     // getContextForChatCompletions() has processed seder
                     // so the parameter here should be null
                     null
-                )
+                ).run {
+                    this.copy(
+                        content = "[currentTime: ${dateFormatter.format(LocalDateTime.now())}]"
+                                + "[today's holiday: ${DateTimeUtils.getSpecialDay(LocalDate.now())}]"
+                                + this.content
+                    )
+                }
             ),
             temperature = chatModelEntity.chatModel.getQualifiedTemperature(),
             // Disable model thinking mode

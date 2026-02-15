@@ -101,13 +101,13 @@ class ControllerLoggingInterceptor(
             null
         } ?: System.currentTimeMillis()
 
-        coroutineScope.launch {
-            val headers = objectMapper
-                .writerWithDefaultPrettyPrinter()
-                .withDefaultPrettyPrinter()
-                .writeValueAsString(response.headerNames.toList().associateWith { request.getHeader(it) })
-                .split("\n")
+        val headers = objectMapper
+            .writerWithDefaultPrettyPrinter()
+            .withDefaultPrettyPrinter()
+            .writeValueAsString(response.headerNames.toList().associateWith { request.getHeader(it) })
+            .split("\n")
 
+        coroutineScope.launch {
             logger.info("- [{}] ===========================================================", code)
             logger.info("- [{}] Request: {} {}", code, method, requestURI)
             logger.info("- [{}] Remote: {}", code, clientIp)

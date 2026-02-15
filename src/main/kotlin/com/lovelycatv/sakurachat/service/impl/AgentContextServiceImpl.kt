@@ -74,7 +74,7 @@ class AgentContextServiceImpl(
                 channelId,
                 PageRequest.of(
                     0,
-                    128,
+                    256,
                     Sort.Direction.DESC,
                     "createdTime"
                 )

@@ -56,6 +56,44 @@ export function DashboardPage() {
         },
     ];
 
+    interface UpdateLogItem {
+        version: string;
+        date: string;
+        color: string;
+        changes: string[];
+    }
+
+    const updateLogs: UpdateLogItem[] = [
+        {
+            version: 'v1.0.2',
+            date: '2026-02-16',
+            color: 'border-pink-400',
+            changes: [
+                '新增仪表盘更新日志',
+                '将上下文窗口从最近 128 条消息调整到 256 条消息',
+                '提示词嵌入当前地区的日期时间',
+                '提示词嵌入当天的节假日/节气'
+            ]
+        },
+        {
+            version: 'v1.0.1',
+            date: '2026-02-15',
+            color: 'border-purple-400',
+            changes: [
+                '修复手机端导航菜单被隐藏',
+                '调整管理页面样式'
+            ]
+        },
+        {
+            version: 'v1.0.0',
+            date: '2026-02-14',
+            color: 'border-indigo-400',
+            changes: [
+                'v1.0.0 公测'
+            ]
+        }
+    ];
+
     const handleLogout = () => {
         clearUserAuthentication();
         navigate('/auth/login');
@@ -109,6 +147,31 @@ export function DashboardPage() {
                         </Col>
                     ))}
                 </Row>
+            </div>
+
+            {/* Update Logs */}
+            <div className="mb-8">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">更新日志</h3>
+                <Card className="border-none shadow-sm rounded-[2rem] overflow-hidden">
+                    <div className="p-4 space-y-4">
+                        {updateLogs.map((log, index) => (
+                            <div key={index} className={`border-l-4 ${log.color} pl-4 py-2`}>
+                                <div className="flex justify-between items-center">
+                                    <h4 className="font-semibold text-gray-800">{log.version}</h4>
+                                    <span className="text-sm text-gray-500">{log.date}</span>
+                                </div>
+                                <ul className="mt-2 space-y-2 text-sm text-gray-600">
+                                    {log.changes.map((change, changeIndex) => (
+                                        <li key={changeIndex} className="flex items-start gap-2">
+                                            <span className={`${log.color.replace('border-', 'text-')} mt-1`}>•</span>
+                                            <span>{change}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                    </div>
+                </Card>
             </div>
 
             {/* Logout Modal */}
