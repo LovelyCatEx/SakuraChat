@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.lovelycatv.sakurachat</groupId>
     <artifactId>SakuraChat</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <version>1.0.2-SNAPSHOT</version>
     <name>sakura-chat</name>
     <description>SakuraChat</description>
     <url/>
