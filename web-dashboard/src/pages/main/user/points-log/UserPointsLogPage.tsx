@@ -1,15 +1,12 @@
-import { Button, Card, message, Modal, Input, Space, Table, Tag } from 'antd';
-import { ReloadOutlined, WalletOutlined, GiftOutlined } from '@ant-design/icons';
-import type { ColumnType } from 'antd/es/table';
-import { formatTimestamp } from '../../../../utils/datetime.utils.ts';
-import type { UserPointsLog } from '../../../../types/user-points-log.types.ts';
-import { useEffect, useState } from 'react';
-import { listUserPointsLogs } from '../../../../api/user-points-logs.api.ts';
-import { PointsChangesReason } from '../../../../types/enums/points-changes-reason.enum.ts';
-import { DatabaseTableType, mapToDatabaseTableType } from '../../../../types/enums/database-table-type.enum.ts';
-import { getMyPoints, redeemCdKey } from '../../../../api/user.api.ts';
-import { getAgentList } from '../../../../api/agent.api.ts';
-import type { Agent } from '../../../../types/agent.types.ts';
+import {Button, Card, Input, message, Modal, Space, Table, Tag} from 'antd';
+import {GiftOutlined, ReloadOutlined, WalletOutlined} from '@ant-design/icons';
+import type {ColumnType} from 'antd/es/table';
+import {formatTimestamp} from '../../../../utils/datetime.utils.ts';
+import type {UserPointsLog} from '../../../../types/user-points-log.types.ts';
+import {useEffect, useState} from 'react';
+import {listUserPointsLogs} from '../../../../api/user-points-logs.api.ts';
+import {PointsChangesReason} from '../../../../types/enums/points-changes-reason.enum.ts';
+import {getMyPoints, redeemCdKey} from '../../../../api/user.api.ts';
 
 export function UserPointsLogPage() {
   const [refreshing, setRefreshing] = useState(false);
@@ -20,7 +17,7 @@ export function UserPointsLogPage() {
   const [myPoints, setMyPoints] = useState<number>(0);
   const [cdKeyModalVisible, setCdKeyModalVisible] = useState(false);
   const [cdKeyInput, setCdKeyInput] = useState('');
-  const [agents, setAgents] = useState<Map<number, Agent>>(new Map());
+  // const [agents, setAgents] = useState<Map<number, Agent>>(new Map());
 
   function refreshData() {
     setRefreshing(true);
@@ -28,8 +25,9 @@ export function UserPointsLogPage() {
     Promise.all([
       listUserPointsLogs(currentPage, currentPageSize),
       getMyPoints(),
-      getAgentList({ page: 1, pageSize: 1000 }) // 获取足够多的智能体，避免分页问题
-    ]).then(([logsRes, pointsRes, agentsRes]) => {
+      //getAgentList({ page: 1, pageSize: 1000 }) // 获取足够多的智能体，避免分页问题
+    //]).then(([logsRes, pointsRes, agentsRes]) => {
+    ]).then(([logsRes, pointsRes]) => {
       if (logsRes.data) {
         setTotal(logsRes.data.total);
         setLogs(logsRes.data.records);
@@ -43,13 +41,13 @@ export function UserPointsLogPage() {
         void message.warning('查询积分余额失败');
       }
 
-      if (agentsRes.data) {
+      /*if (agentsRes.data) {
         const agentMap = new Map<number, Agent>();
         agentsRes.data.records.forEach(agent => {
           agentMap.set(Number(agent.id), agent);
         });
         setAgents(agentMap);
-      }
+      }*/
     }).catch(() => {
       void message.error('查询积分消耗记录失败');
     }).finally(() => {
@@ -125,11 +123,11 @@ export function UserPointsLogPage() {
                 { type: record.relatedTableType4, id: record.relatedTableId4 },
               ].filter((e) => e.type != null && e.id != null)
                   .map((e) => {
-                    const tableType = mapToDatabaseTableType(e.type);
+                    /*const tableType = mapToDatabaseTableType(e.type);
                     if (tableType === DatabaseTableType.AGENTS && e.id != null) {
                       const agent = agents.get(Number(e.id));
                       return <Tag>{agent?.name || e.id}</Tag>;
-                    }
+                    }*/
                     return <Tag>{e.type} / {e.id}</Tag>;
                   })
             }

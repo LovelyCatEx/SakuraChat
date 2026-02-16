@@ -221,7 +221,7 @@ class NapCatMessageDispatcher(
 
             bot.sendPrivateMsg(
                 userOICQId,
-                "Your OICQ account $userOICQId has not been registered in SakuraChat, please turn to https://sakurachat.lovelycatv.com and bind your OICQ Account. Your bind code is $code",
+                "Your OICQ account $userOICQId has not been registered in SakuraChat, please turn to https://sakurachat.lovelycatv.com and bind your OICQ Account. Your bind code is $code. If you have any problem, please add QQ Group: 1082610120",
                 true
             )
 
@@ -305,18 +305,20 @@ class NapCatMessageDispatcher(
         // 9. Send message through the message channel
         return if (event is PrivateMessageEvent) {
             messageChannel.sendPrivateMessage(
-                sender = messageChannel.getUserMember(relatedUser.id!!)
+                sender = messageChannel.getUserMember(relatedUser.id)
                     ?: throw IllegalArgumentException("Member user: ${relatedUser.id} is not in channel ${messageChannel.getChannelIdentifier()}"),
-                receiver = messageChannel.getAgentMember(agent.agent.id!!)
+                receiver = messageChannel.getAgentMember(agent.agent.id)
                     ?: throw IllegalArgumentException("Member agent: ${agent.agent.id} is not in channel ${messageChannel.getChannelIdentifier()}"),
                 message = messageToSend
             )
         } else {
-            messageChannel.sendGroupMessage(
-                sender = messageChannel.getUserMember(relatedUser.id!!)
-                    ?: throw IllegalArgumentException("Member user: ${relatedUser.id} is not in channel ${messageChannel.getChannelIdentifier()}"),
-                message = messageToSend
-            )
+            // messageChannel.sendGroupMessage(
+            //     sender = messageChannel.getUserMember(relatedUser.id!!)
+            //         ?: throw IllegalArgumentException("Member user: ${relatedUser.id} is not in channel ${messageChannel.getChannelIdentifier()}"),
+            //     message = messageToSend
+            // )
+            logger.info("Group message skipped, ${event.toJSONString()}")
+            true
         }
     }
 }
